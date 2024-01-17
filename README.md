@@ -1,6 +1,12 @@
 # bili_video_tunes
 
-BVideoTunes，是视频曲调解析器，主要工作是将B站的视频
+BVideoTunes，是视频曲调解析器，目标在于增强B站听视频功能，方便用户收听B站视频内容。
+
+## 关于项目
+
+- 此项目主要用作学习flutter项目开发
+- xxxxxx
+
 
 ## Getting Started
 
