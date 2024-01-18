@@ -1,13 +1,37 @@
+import 'dart:io';
+
 import 'package:bili_video_tunes/common/utils/screen_utils.dart';
 import 'package:bili_video_tunes/pages/main/bili_music/index.dart';
 import 'package:bili_video_tunes/pages/main/user_info/index.dart';
 import 'package:bili_video_tunes/pages/main/video_music/index.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:window_manager/window_manager.dart';
 
-void main() {
+void main() async {
+  if (!Platform.isAndroid && !Platform.isIOS && !kIsWeb) {
+    WidgetsFlutterBinding.ensureInitialized();
+    // 必须加上这一行。
+    await windowManager.ensureInitialized();
+
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(800, 600),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+
+
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
+
   //状态栏、导航栏沉浸
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -68,7 +92,7 @@ class NavInfo {
       {required this.title, required this.icon, required this.selectedIcon});
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WindowListener {
   // 控制器
   late PageController _pageController;
 
@@ -123,7 +147,62 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final windowsButtonStyle = ButtonStyle(
+
+      shape: MaterialStateProperty.all<OutlinedBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+      ),
+    );
+
     return Scaffold(
+      appBar:!Platform.isAndroid && !Platform.isIOS && !kIsWeb ? AppBar(
+        toolbarHeight: 32,
+        actions: [
+          IconButton(
+            constraints: const BoxConstraints(
+              maxHeight: 30,
+              maxWidth: 30
+            ),
+            padding: const EdgeInsets.all(6),
+            style: windowsButtonStyle,
+            iconSize: 15,
+            icon: const Icon(Icons.horizontal_rule),
+            onPressed: () {
+              windowManager.minimize();
+            },
+          ),
+          IconButton(
+            constraints: const BoxConstraints(
+                maxHeight: 30,
+                maxWidth: 30
+            ),
+            padding: const EdgeInsets.all(6),
+            style: windowsButtonStyle,
+            iconSize: 15,
+            icon: const Icon(Icons.crop_square_rounded),
+            onPressed: () {
+              windowManager.maximize();
+            },
+          ),
+          IconButton(
+            constraints: const BoxConstraints(
+                maxHeight: 30,
+                maxWidth: 30
+            ),
+            padding: const EdgeInsets.all(6),
+            style: windowsButtonStyle,
+            hoverColor: Colors.red,
+            iconSize: 15,
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              windowManager.close();
+            },
+          ),
+          const SizedBox(width: 5,)
+        ],
+      ) : null,
       body: Row(
         children: [
           Visibility(
@@ -154,7 +233,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ))
         ],
       ),
-      bottomNavigationBar: getWindowsWidth(this.context) < ScreenSize.Large
+      bottomNavigationBar: getWindowsWidth(this.context) <= ScreenSize.Normal
           ? NavigationBar(
               destinations: navigationItem,
               selectedIndex: _currentPage,
@@ -168,4 +247,6 @@ class _MyHomePageState extends State<MyHomePage> {
           : null,
     );
   }
+
+
 }

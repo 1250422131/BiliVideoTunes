@@ -1,3 +1,5 @@
+import 'package:bili_video_tunes/common/utils/extends.dart';
+import 'package:bili_video_tunes/common/utils/screen_utils.dart';
 import 'package:bili_video_tunes/common/weight/hots_tag_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/video_card_grid_view_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/video_music_card.dart';
@@ -94,6 +96,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
             setState(() {
               //更新当前选中项
               videoTabSelectIndex = index;
+              hotsTagSelectIndex = 0;
 
               //更新Tag列表
               initHostTagFuture = controller.loadHotsTage(
@@ -184,13 +187,35 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               } else {
                 return Obx(() => GridView.count(
                     // 定义列数
-                    crossAxisCount: 2,
+                    crossAxisCount: getWindowsWidth(context).let((it) {
+                      if (it > ScreenSize.ExtraLarge) {
+                        return 5;
+                      } else if (it > ScreenSize.Large) {
+                        return 4;
+                      } else if (it > ScreenSize.Normal) {
+                        return 3;
+                      } else if (it > ScreenSize.Small) {
+                        return 2;
+                      } else {
+                        return 1;
+                      }
+                    }),
                     // 定义列边距
                     crossAxisSpacing: 5,
                     // 定义行边距
                     mainAxisSpacing: 5,
                     // 定义内边距
-                    childAspectRatio: 1.05,
+                    childAspectRatio: getWindowsWidth(context).let((it) {
+                      if (it > ScreenSize.ExtraLarge) {
+                        return 1.3;
+                      } else if (it > ScreenSize.Large) {
+                        return 1.2;
+                      } else if (it > ScreenSize.Normal) {
+                        return 1.1;
+                      }  else {
+                        return 1.05;
+                      }
+                    }),
                     // 设置宽高比为1:1，取消默认固定高度
                     padding: const EdgeInsets.all(5),
                     // 子元素

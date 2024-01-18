@@ -9,4 +9,4 @@ class ScreenSize {
 }
 
 
-double getWindowsWidth(BuildContext context) => MediaQuery.of(context).size.shortestSide;
+double getWindowsWidth(BuildContext context) => MediaQuery.of(context).size.width;

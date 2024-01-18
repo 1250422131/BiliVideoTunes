@@ -1,5 +1,8 @@
 import 'package:bili_video_tunes/common/model/network/video_music/new_video_dynamic_info.dart';
+import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:flutter/material.dart';
+
+import '../utils/screen_utils.dart';
 
 class VideoMusicCard extends StatefulWidget {
   final BoxConstraints box;
@@ -31,21 +34,32 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  cacheWidth:
+              Row(
+                children: [
+                  Expanded(child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      cacheWidth:
                       (box.maxWidth * MediaQuery.of(context).devicePixelRatio)
                           .toInt(),
-                  cacheHeight:
+                      cacheHeight:
                       (box.maxHeight * MediaQuery.of(context).devicePixelRatio)
                           .toInt(),
-                  width: box.maxWidth,
-                  height: 100,
-                  filterQuality: FilterQuality.none,
-                  "${item.pic}",
-                  fit: BoxFit.cover, //设置图片的平铺模式
-                ),
+                      height:  getWindowsWidth(context).let((it) {
+                        if (it > ScreenSize.ExtraLarge) {
+                          return 140;
+                        } else if (it > ScreenSize.Large) {
+                          return 120;
+                        } else {
+                          return 100;
+                        }
+                      }),
+                      filterQuality: FilterQuality.none,
+                      "${item.pic}",
+                      fit: BoxFit.cover, //设置图片的平铺模式
+                    ),
+                  ))
+                ],
               ),
               Expanded(
                 child: Padding(
