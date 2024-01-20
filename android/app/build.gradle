@@ -64,4 +64,8 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    def exoplayer_version = "2.19.1"
+    implementation "com.google.android.exoplayer:exoplayer-dash:$exoplayer_version"
+
+}

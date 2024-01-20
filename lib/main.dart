@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bili_video_tunes/common/utils/screen_utils.dart';
+import 'package:bili_video_tunes/common/weight/music_player.dart';
 import 'package:bili_video_tunes/pages/main/bili_music/index.dart';
 import 'package:bili_video_tunes/pages/main/user_info/index.dart';
 import 'package:bili_video_tunes/pages/main/video_music/index.dart';
@@ -10,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
+
+import 'common/controller/audio_controller.dart';
 
 void main() async {
   if (!Platform.isAndroid && !Platform.isIOS && !kIsWeb) {
@@ -93,6 +96,7 @@ class NavInfo {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WindowListener {
+
   // 控制器
   late PageController _pageController;
 
@@ -162,8 +166,8 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         actions: [
           IconButton(
             constraints: const BoxConstraints(
-              maxHeight: 30,
-              maxWidth: 30
+                maxHeight: 30,
+                maxWidth: 30
             ),
             padding: const EdgeInsets.all(6),
             style: windowsButtonStyle,
@@ -199,7 +203,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
             onPressed: () {
               windowManager.close();
             },
-          ),
+                ),
           const SizedBox(width: 5,)
         ],
       ) : null,
@@ -218,32 +222,41 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
             ),
           ),
           Expanded(
-              child: PageView(
-            controller: _pageController,
-            // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
-            onPageChanged: (int index) {
-              setState(() {
-                _currentPage = index;
-              });
-            },
-            scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
-                ? Axis.vertical
-                : Axis.horizontal,
-            children: const [VideoMusicPage(), BiLiMusicPage(), UserInfoPage()],
+              child: Stack(
+            children: [
+              PageView(
+                controller: _pageController,
+                // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
+                onPageChanged: (int index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
+                scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
+                    ? Axis.vertical
+                    : Axis.horizontal,
+                children: const [
+                  VideoMusicPage(),
+                  BiLiMusicPage(),
+                  UserInfoPage()
+                ],
+              ),
+              MusicPlayer(),
+            ],
           ))
         ],
       ),
       bottomNavigationBar: getWindowsWidth(this.context) <= ScreenSize.Normal
           ? NavigationBar(
-              destinations: navigationItem,
-              selectedIndex: _currentPage,
-              onDestinationSelected: (int index) {
-                setState(() {
-                  _currentPage = index;
-                  _pageController.jumpToPage(index);
-                });
-              },
-            )
+        destinations: navigationItem,
+        selectedIndex: _currentPage,
+        onDestinationSelected: (int index) {
+          setState(() {
+            _currentPage = index;
+            _pageController.jumpToPage(index);
+          });
+        },
+      )
           : null,
     );
   }

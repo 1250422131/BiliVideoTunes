@@ -46,6 +46,12 @@ dependencies:
   # 动画
   lottie: ^3.0.0
 
+  # 音乐播放器
+  just_audio: ^0.9.36
+
+  # 数据持久化
+  sqflite: ^2.3.0
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -54,6 +60,7 @@ dependencies:
   shimmer: ^3.0.0
   # 窗口管理
   window_manager: ^0.3.7
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:

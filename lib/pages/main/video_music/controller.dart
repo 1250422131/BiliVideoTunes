@@ -33,6 +33,9 @@ class VideoMusicPageController extends GetxController {
   ];
 
   Future<void> loadHotsTage({required num rid, required num type}) async {
+
+
+
     final hostInfo = await VideoMusicApi.getHostInfo(rid: rid, type: type);
 
     hotsTags.clear();
