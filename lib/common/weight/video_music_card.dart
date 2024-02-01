@@ -59,7 +59,8 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                 description: item.desc ?? "",
                 coverImageUrl: item.pic ?? "",
                 type: AudioMediaType.video,
-              bvId: item.bvid
+              bvId: item.bvid,
+              totalDuration: item.duration ?? 0
             );
             audioController.addPlayerAudio(audioMediaItem);
           },

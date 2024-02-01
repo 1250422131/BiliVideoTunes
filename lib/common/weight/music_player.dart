@@ -1,4 +1,5 @@
 import 'package:bili_video_tunes/common/utils/extends.dart';
+import 'package:bili_video_tunes/common/weight/player_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,7 +18,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   @override
   void initState() {
     super.initState();
-    controller = Get.put(AudioController());
+    controller = Get.find<AudioController>();
   }
 
   @override
@@ -35,43 +36,70 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ClipRRect(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(5)),
-                            child: Obx(() => Image.network(
-                                  controller.playerIndex.value?.let((it) {
-                                        return controller.playerList
-                                            .elementAt(it)
-                                            .coverImageUrl;
-                                      }) ??
-                                      "https://picx.zhimg.com/70/v2-53504944558fe60816f2633fd7543f72_1440w.png",
-                                  width: 35,
-                                  height: 35,
-                                  fit: BoxFit.cover,
-                                )),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10),
-                            child: Obx(() =>
-                                Text(controller.playerIndex.value?.let((it) {
-                                      return controller.playerList
-                                          .elementAt(it)
-                                          .title;
-                                    }) ??
-                                    "暂无播放")),
-                          ),
-                          const Spacer(),
-                          const Padding(
-                            padding: EdgeInsets.only(right: 10),
-                            child: Icon(Icons.pause),
-                          ),
-                        ],
+                    child: InkWell(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            ClipRRect(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(5)),
+                              child: Obx(() => Hero(
+                                  tag: "cover",
+                                  child: Image.network(
+                                    controller.playerIndex.value?.let((it) {
+                                          return controller
+                                              .playerList[it].coverImageUrl;
+                                        }) ??
+                                        "https://picx.zhimg.com/70/v2-53504944558fe60816f2633fd7543f72_1440w.png",
+                                    width: 35,
+                                    height: 35,
+                                    fit: BoxFit.cover,
+                                  ))),
+                            ),
+                            Expanded(
+                                child: Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: Obx(() => Text(
+                                    controller.playerIndex.value?.let((it) {
+                                          return controller.playerList
+                                              .elementAt(it)
+                                              .title;
+                                        }) ??
+                                        "暂无播放",
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    softWrap: false,
+                                  )),
+                            )),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: Obx(() =>
+                                  controller.playerState.value.playing
+                                      ? IconButton(
+                                          onPressed: () {
+                                            controller.stop();
+                                          },
+                                          icon: const Icon(Icons.pause))
+                                      : IconButton(
+                                          onPressed: () {
+                                            controller.play();
+                                          },
+                                          icon: const Icon(
+                                              Icons.play_arrow_rounded))),
+                            ),
+                          ],
+                        ),
                       ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PlayerPage(),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

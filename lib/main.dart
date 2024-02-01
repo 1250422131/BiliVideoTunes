@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/utils/screen_utils.dart';
 import 'package:bili_video_tunes/common/weight/music_player.dart';
 import 'package:bili_video_tunes/pages/main/bili_music/index.dart';
@@ -100,6 +101,8 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   // 控制器
   late PageController _pageController;
 
+  late AudioController audioController;
+
   late List<NavInfo> _navList;
 
   late List<NavigationDestination> navigationItem;
@@ -111,6 +114,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   @override
   void initState() {
     super.initState();
+    audioController = Get.put(AudioController());
 
     _navList = [
       const NavInfo(
@@ -147,6 +151,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     ];
 
     _pageController = PageController();
+
   } //当前页面
 
   @override
@@ -241,7 +246,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                   UserInfoPage()
                 ],
               ),
-              MusicPlayer(),
+              Obx(() => audioController.playerIndex.value?.let((it) => const MusicPlayer()) ?? const Column()),
             ],
           ))
         ],
