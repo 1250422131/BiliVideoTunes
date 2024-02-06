@@ -155,6 +155,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                                         setState(() {
                                           final item =
                                               controller.hotsTags[index];
+
                                           if (isSelected) {
                                             hotsTagSelectIndex = index;
                                             videoPageNum = 0;
