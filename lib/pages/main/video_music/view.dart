@@ -5,6 +5,7 @@ import 'package:bili_video_tunes/common/weight/hots_tag_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/video_card_grid_view_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/video_music_card.dart';
 import 'package:bili_video_tunes/pages/main/video_music/index.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -29,6 +30,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
   //界面标签
   int hotsTagSelectIndex = 0;
   int videoTabSelectIndex = 0;
+  int videoPageNum = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +101,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               //更新当前选中项
               videoTabSelectIndex = index;
               hotsTagSelectIndex = 0;
+              videoPageNum = 0;
 
               //更新Tag列表
               initHostTagFuture = controller.loadHotsTage(
@@ -107,7 +110,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               //更新视频列表
               initVideoListFuture = controller.loadNewVideoDynamicInfo(
                   rid: controller.tabItems.elementAt(index).rid,
-                  pn: 1,
+                  pn: videoPageNum,
                   ps: 30,
                   isClear: true);
             });
@@ -145,30 +148,32 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                               index++)
                                 ChoiceChip(
                                   label: Text(
-                                      controller.hotsTags[index].tagName),
-                                  selected: index == hotsTagSelectIndex,
-                                  onSelected: (isSelected) {
-                                    setState(() {
-                                      final item =
-                                      controller.hotsTags[index];
-                                      if (isSelected) {
-                                        hotsTagSelectIndex = index;
-                                        initVideoListFuture = controller
-                                            .loadNewVideoDynamicInfo(
-                                            rid: controller.tabItems
-                                                .elementAt(
-                                                videoTabSelectIndex)
-                                                .rid,
-                                            pn: 1,
-                                            ps: 30,
-                                            tagId: item.tagId,
-                                            isClear: true);
-                                      }
-                                    });
-                                  },
-                                ),
-                            ],
-                          ));
+                                          controller.hotsTags[index].tagName ??
+                                              ""),
+                                      selected: index == hotsTagSelectIndex,
+                                      onSelected: (isSelected) {
+                                        setState(() {
+                                          final item =
+                                              controller.hotsTags[index];
+                                          if (isSelected) {
+                                            hotsTagSelectIndex = index;
+                                            videoPageNum = 0;
+                                            initVideoListFuture = controller
+                                                .loadNewVideoDynamicInfo(
+                                                    rid: controller.tabItems
+                                                        .elementAt(
+                                                            videoTabSelectIndex)
+                                                        .rid,
+                                                    pn: videoPageNum,
+                                                    ps: 30,
+                                                    tagId: item.tagId,
+                                                    isClear: true);
+                                          }
+                                        });
+                                      },
+                                    ),
+                                ],
+                              ));
                         }
                       },
                     ),
@@ -177,73 +182,82 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               ),
             ];
           },
-          body: FutureBuilder<void>(
-            future: initVideoListFuture,
-            builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                // 如果 future 尚未完成，显示加载指示器或其他占位符
-                return const VideoCardGridViewShimmer();
-              } else if (snapshot.hasError) {
-                // 如果 future 发生错误，显示错误信息
-                return Text('数据解析出错错误: ${snapshot.error}');
-              } else {
-                return Obx(() => CustomScrollView(
-                      slivers: [
-                        SliverGrid.count(
-                          crossAxisCount: getWindowsWidth(context).let((it) {
-                            if (it > ScreenSize.ExtraLarge) {
-                              return 5;
-                            } else if (it > ScreenSize.Large) {
-                              return 4;
-                            } else if (it > ScreenSize.Normal) {
-                              return 3;
-                            } else if (it > ScreenSize.Small) {
-                              return 2;
-                            } else {
-                              return 1;
-                            }
-                          }),
-                          crossAxisSpacing: 5,
-                          mainAxisSpacing: 5,
-                          childAspectRatio: getWindowsWidth(context).let((it) {
-                            if (it > ScreenSize.ExtraLarge) {
-                              return 1.3;
-                            } else if (it > ScreenSize.Large) {
-                              return 1.2;
-                            } else if (it > ScreenSize.Normal) {
-                              return 1.1;
-                            } else {
-                              return 1.05;
-                            }
-                          }),
-                          children: [
-                            for (var item in controller.videoMusicList)
-                              LayoutBuilder(
-                                builder: (context, box) {
-                                  //传递audioController是由于不希望Getx在每次循环都去Find
-                                  return VideoMusicCard(
-                                      item: item,
-                                      box: box,
-                                      audioController: audioController);
-                                },
-                              ),
-                          ],
+          body: Obx(() => controller.videoMusicList.isNotEmpty ? EasyRefresh(
+              onLoad: () async {
+                setState(() {
+                  controller.loadNewVideoDynamicInfo(
+                      rid: controller.tabItems
+                          .elementAt(videoTabSelectIndex)
+                          .rid,
+                      tagId: controller.hotsTags
+                          .elementAt(hotsTagSelectIndex)
+                          .tagId,
+                      pn: ++videoPageNum,
+                      ps: 30);
+                });
+                return controller.videoMusicPageInfo.value.let((it) {
+                  if (videoPageNum < (it.count / it.size * 1.0).ceil()) {
+                    return IndicatorResult.success;
+                  } else {
+                    IndicatorResult.noMore;
+                  }
+                });
+              },
+              child: CustomScrollView(
+                slivers: [
+                  SliverGrid.count(
+                    crossAxisCount: getWindowsWidth(context).let((it) {
+                      if (it > ScreenSize.ExtraLarge) {
+                        return 5;
+                      } else if (it > ScreenSize.Large) {
+                        return 4;
+                      } else if (it > ScreenSize.Normal) {
+                        return 3;
+                      } else if (it > ScreenSize.Small) {
+                        return 2;
+                      } else {
+                        return 1;
+                      }
+                    }),
+                    crossAxisSpacing: 5,
+                    mainAxisSpacing: 5,
+                    childAspectRatio: getWindowsWidth(context).let((it) {
+                      if (it > ScreenSize.ExtraLarge) {
+                        return 1.3;
+                      } else if (it > ScreenSize.Large) {
+                        return 1.2;
+                      } else if (it > ScreenSize.Normal) {
+                        return 1.1;
+                      } else {
+                        return 1.05;
+                      }
+                    }),
+                    children: [
+                      for (var item in controller.videoMusicList)
+                        LayoutBuilder(
+                          builder: (context, box) {
+                            //传递audioController是由于不希望Getx在每次循环都去Find
+                            return VideoMusicCard(
+                                item: item,
+                                box: box,
+                                audioController: audioController);
+                          },
                         ),
-                        SliverFixedExtentList(
-                          itemExtent: 70.0,
-                          delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int index) {
-                              //创建列表项
-                              return Container();
-                            },
-                            childCount: 1,
-                          ),
-                        ),
-                      ],
-                    ));
-              }
-            },
-          )),
+                    ],
+                  ),
+                  SliverFixedExtentList(
+                    itemExtent:
+                    audioController.playerIndex.value != null ? 70 : 0,
+                    delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                        //创建列表项
+                        return Container();
+                      },
+                      childCount: 1,
+                    ),
+                  ),
+                ],
+              )) : const VideoCardGridViewShimmer())),
     );
   }
 
@@ -259,7 +273,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
 
     //默认使用第一条
     initVideoListFuture = controller.loadNewVideoDynamicInfo(
-        rid: controller.tabItems.elementAt(0).rid, pn: 1, ps: 14);
+        rid: controller.tabItems.elementAt(0).rid, pn: videoPageNum, ps: 30);
 
     initHostTagFuture = controller.initHotsTag();
     super.initState();

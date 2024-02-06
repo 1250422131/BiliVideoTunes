@@ -237,6 +237,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                     _currentPage = index;
                   });
                 },
+                physics: const NeverScrollableScrollPhysics(),
                 scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
                     ? Axis.vertical
                     : Axis.horizontal,

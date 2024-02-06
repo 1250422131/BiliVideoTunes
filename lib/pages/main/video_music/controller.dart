@@ -1,5 +1,6 @@
 import 'package:bili_video_tunes/common/api/video_music_api.dart';
 import 'package:bili_video_tunes/common/model/network/video_music/new_video_dynamic_info.dart';
+import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:get/get.dart';
 
 class HostTagItemInfo {
@@ -19,9 +20,21 @@ class TabItemInfo {
   TabItemInfo(this.name, this.rid, this.type);
 }
 
+class VideoMusicPageInfo {
+  final int count;
+
+  final int num;
+  final int size;
+
+  VideoMusicPageInfo({this.count = 0, this.num = 0, this.size = 0});
+}
+
 class VideoMusicPageController extends GetxController {
-  final hotsTags = [].obs;
+  final hotsTags = <HostTagItemInfo>[].obs;
   final videoMusicList = [].obs;
+
+  // 音乐视频
+  final videoMusicPageInfo = VideoMusicPageInfo().obs;
 
   final List<TabItemInfo> tabItems = [
     TabItemInfo("原创", 28, 0),
@@ -73,8 +86,15 @@ class VideoMusicPageController extends GetxController {
           await VideoMusicApi.getNewVideoDynamicInfo(rid: rid, pn: pn, ps: ps);
     }
 
-    newVideoDynamic.data?.archives?.forEach((element) {
-      videoMusicList.add(element);
+    newVideoDynamic.data?.also((it) {
+      it.archives?.forEach((element) {
+        videoMusicList.add(element);
+      });
+
+      videoMusicPageInfo.value = VideoMusicPageInfo(
+          count: it.page?.count ?? 0,
+          num: it.page?.num ?? 0,
+          size: it.page?.size ?? 0);
     });
   }
 

@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:just_audio/just_audio.dart';
 
 import 'colorful_text_widget.dart';
 
@@ -22,10 +24,8 @@ class _PlayerPageState extends State<PlayerPage>
   late ThemeData myCustomTheme;
   late AnimationController playIconAnimationController;
 
-  bool shouldDisableBouncing = false;
-
   // 存储监听器的变量
-  late StreamSubscription<Duration> positionListener;
+  late StreamSubscription<PlayerState> playStateListener;
 
   @override
   void initState() {
@@ -38,15 +38,20 @@ class _PlayerPageState extends State<PlayerPage>
       ..drive(Tween(begin: 0, end: 1))
       ..duration = const Duration(milliseconds: 500);
 
-    if (!audioController.playerState.value.playing) {
-      playIconAnimationController.forward();
-    }
+    playStateListener = audioController.playerState.listen((state) {
+      if (!state.playing) {
+        playIconAnimationController.forward();
+      }else{
+        playIconAnimationController.reverse();
+      }
+    });
   }
 
   @override
   void dispose() {
     // 取消监听器
     super.dispose();
+    playStateListener.cancel();
   }
 
   void scrollToCurrentLine() {
@@ -112,7 +117,7 @@ class _PlayerPageState extends State<PlayerPage>
                 appBar: PreferredSize(
                     preferredSize: const Size(double.infinity, 56),
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 20),
+                      padding:  EdgeInsets.only(top: MediaQueryData.fromView(window).padding.top),
                       child: AppBar(
                         centerTitle: true, // 标题居中
                         title: const Text(
@@ -126,14 +131,22 @@ class _PlayerPageState extends State<PlayerPage>
                       child: ReorderableListView(
                           onReorder: (int oldIndex, int newIndex) {
                             setState(()  {
-
                               if (oldIndex < newIndex) {
                                 newIndex -= 1;
                               }
-                              final  item = audioController.playerList.removeAt(oldIndex);
+
+                              final item =
+                                  audioController.playerList.removeAt(oldIndex);
                               audioController.playerList.insert(newIndex, item);
-                              if(oldIndex == audioController.playerIndex.value){
+
+
+                              // 更新高亮索引
+                              if ((audioController.playerIndex.value ?? 0) == oldIndex) {
                                 audioController.playerIndex.value = newIndex;
+                              } else if (oldIndex < (audioController.playerIndex.value ?? 0) && newIndex >= (audioController.playerIndex.value ?? 0)) {
+                                audioController.playerIndex.value = (audioController.playerIndex.value ?? 0) - 1;
+                              } else if (oldIndex > (audioController.playerIndex.value ?? 0) && newIndex <= (audioController.playerIndex.value ?? 0)) {
+                                audioController.playerIndex.value = (audioController.playerIndex.value ?? 0)  +1;
                               }
 
                             });
@@ -164,8 +177,8 @@ class _PlayerPageState extends State<PlayerPage>
                                                 audioController
                                                     .playerList[index]
                                                     .coverImageUrl,
-                                                width: 35,
-                                                height: 35,
+                                                width: 50,
+                                                height: 50,
                                                 fit: BoxFit.cover,
                                               ),
                                             ),
@@ -177,60 +190,58 @@ class _PlayerPageState extends State<PlayerPage>
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Obx(() => Text(
+                                                Text(
+                                                  audioController
+                                                      .playerList[index].title,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                  softWrap: false,
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 15),
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Text(
                                                       audioController
-                                                          .playerList[index]
-                                                          .title,
+                                                              .playerList[index]
+                                                              .bvId ??
+                                                          "",
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                       maxLines: 1,
+                                                      style: const TextStyle(
+                                                          fontSize: 12),
                                                       softWrap: false,
-                                                    )),
-                                                Obx(() => Row(
-                                                      children: [
-                                                        Text(
-                                                          audioController
-                                                                  .playerList[
-                                                                      index]
-                                                                  .bvId ??
-                                                              "",
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          maxLines: 1,
-                                                          style:
-                                                              const TextStyle(
-                                                                  fontSize: 11),
-                                                          softWrap: false,
-                                                        ),
-                                                        const Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  left: 5,
-                                                                  right: 5),
-                                                          child: Text(
-                                                            "·",
-                                                            style: TextStyle(
-                                                                fontSize: 11),
-                                                          ),
-                                                        ),
-                                                        Expanded(
-                                                            child: Text(
-                                                          audioController
-                                                              .playerList[index]
-                                                              .totalDuration
-                                                              .formatSeconds(),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          maxLines: 1,
-                                                          style:
-                                                              const TextStyle(
-                                                                  fontSize: 11),
-                                                          softWrap: false,
-                                                          textAlign:
-                                                              TextAlign.start,
-                                                        ))
-                                                      ],
-                                                    )),
+                                                    ),
+                                                    const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          left: 5, right: 5),
+                                                      child: Text(
+                                                        "·",
+                                                        style: TextStyle(
+                                                            fontSize: 12),
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                        child: Text(
+                                                      audioController
+                                                          .playerList[index]
+                                                          .totalDuration
+                                                          .formatSeconds(),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 1,
+                                                      style: const TextStyle(
+                                                          fontSize: 11),
+                                                      softWrap: false,
+                                                      textAlign:
+                                                          TextAlign.start,
+                                                    ))
+                                                  ],
+                                                ),
                                               ],
                                             )),
                                             const SizedBox(
@@ -240,7 +251,9 @@ class _PlayerPageState extends State<PlayerPage>
                                         ),
                                       ),
                                     ),
-                                    onTap: () {},
+                                    onTap: () {
+                                      audioController.playAtIndex(index);
+                                    },
                                   ))),
                     )),
               ));
@@ -500,12 +513,9 @@ class _PlayerPageState extends State<PlayerPage>
                                             if (audioController
                                                 .playerState.value.playing) {
                                               audioController.pause();
-                                              playIconAnimationController
-                                                  .forward();
                                             } else {
                                               audioController.play();
-                                              playIconAnimationController
-                                                  .reverse();
+
                                             }
                                           },
                                         ),

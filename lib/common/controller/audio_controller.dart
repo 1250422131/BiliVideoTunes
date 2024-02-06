@@ -37,6 +37,11 @@ class AudioMediaItem {
       this.endTime,
       this.lyricList,
       this.totalDuration = 0});
+
+  @override
+  String toString() {
+    return 'AudioMediaItem{title: $title, description: $description, coverImageUrl: $coverImageUrl, type: $type, mediaUrl: $mediaUrl, bvId: $bvId, startTime: $startTime, endTime: $endTime, totalDuration: $totalDuration}';
+  }
 }
 
 /// 音乐播放器核心
@@ -324,7 +329,6 @@ class AudioController extends GetxController {
 
   Future<void> playAtIndex(int index) async {
     if (index < playerList.length && index >= 0) {
-      playerIndex.value = 0;
       await _analysisPlay(playerList[index], mPlayerIndex: index);
     }
   }

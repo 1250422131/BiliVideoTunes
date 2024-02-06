@@ -2,7 +2,6 @@ import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/model/network/video_music/new_video_dynamic_info.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../utils/screen_utils.dart';
 
@@ -53,16 +52,20 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
         ),
         clipBehavior: Clip.antiAlias, //<--- 裁剪行为
         child: InkWell(
-          onTap: () {
+          onTap: () async {
+            // 确定无重复的项目
             final audioMediaItem = AudioMediaItem(
                 title: item.title ?? "",
                 description: item.desc ?? "",
                 coverImageUrl: item.pic ?? "",
                 type: AudioMediaType.video,
-              bvId: item.bvid,
-              totalDuration: item.duration ?? 0
-            );
-            audioController.addPlayerAudio(audioMediaItem);
+                bvId: item.bvid,
+                totalDuration: item.duration ?? 0);
+
+            if (!audioController.playerList
+                .containsByToString(audioMediaItem)) {
+              await audioController.addPlayerAudio(audioMediaItem);
+            }
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
