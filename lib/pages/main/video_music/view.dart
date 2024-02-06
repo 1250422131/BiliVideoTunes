@@ -81,7 +81,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                     decoration: const ShapeDecoration(
                       image: DecorationImage(
                         image:
-                        NetworkImage("https://via.placeholder.com/28x28"),
+                        NetworkImage("https://i0.hdslb.com/bfs/face/member/noface.jpg@240w_240h"),
                         fit: BoxFit.contain,
                       ),
                       shape: OvalBorder(),
