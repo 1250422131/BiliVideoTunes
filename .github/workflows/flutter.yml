@@ -30,6 +30,14 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: "build/app/outputs/apk/debug/*.apk"
-        tag: ${{ github.ref }}
-        token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
+        tag_name: ${{ github.ref_name }}
+        files: |
+            milize-dynamic-${{ env.MILIZE_TARGET_OS }}-${{ env.MILIZE_TARGET_ARCH }}.tar.gz
+            milize-static-${{ env.MILIZE_TARGET_OS }}-${{ env.MILIZE_TARGET_ARCH }}.tar.gz
+        name: Release ${{ github.ref_name }}
+        body: Release of ${{ github.ref_name }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
