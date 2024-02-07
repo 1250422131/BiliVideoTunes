@@ -30,7 +30,6 @@ jobs:
       with:
         artifacts: "build/app/outputs/apk/debug/*.apk"
         prerelease: true
-        tag_name: ${{ github.ref }}
         repo-token: ${{ secrets.GITHUB_TOKEN }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
