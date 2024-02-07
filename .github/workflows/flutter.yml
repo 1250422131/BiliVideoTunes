@@ -31,5 +31,5 @@ jobs:
       with:
         artifacts: "build/app/outputs/apk/debug/*.apk"
         tag: ${{ github.ref }}
-        token: ${{ github.token }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
