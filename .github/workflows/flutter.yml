@@ -31,7 +31,7 @@ jobs:
       with:
         artifacts: "build/app/outputs/apk/debug/*.apk"
         prerelease: true
-        tag_name: ${{ github.ref_name }}
+        tag_name: ${{ github.ref }}
         files: |
             milize-dynamic-${{ env.MILIZE_TARGET_OS }}-${{ env.MILIZE_TARGET_ARCH }}.tar.gz
             milize-static-${{ env.MILIZE_TARGET_OS }}-${{ env.MILIZE_TARGET_ARCH }}.tar.gz
@@ -39,5 +39,3 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
