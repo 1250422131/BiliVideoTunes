@@ -35,8 +35,9 @@ jobs:
         files: |
             milize-dynamic-${{ env.MILIZE_TARGET_OS }}-${{ env.MILIZE_TARGET_ARCH }}.tar.gz
             milize-static-${{ env.MILIZE_TARGET_OS }}-${{ env.MILIZE_TARGET_ARCH }}.tar.gz
-        name: Release ${{ github.ref_name }}
-        body: Release of ${{ github.ref_name }}
+        tag: ${{ github.ref }}
+
+        
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
