@@ -1,5 +1,7 @@
 const String baseUrl = "https://api.bilibili.com/";
 
+const String passportBaseUrl = "https://passport.bilibili.com/";
+
 const String videoMusicHotsPath = "x/tag/hots";
 
 const String videoNewRankPath = "x/web-interface/newlist_rank";
@@ -14,6 +16,14 @@ const String getVideoDataPath = "x/web-interface/view";
 
 const String videoPlayerDataPath = "x/player/playurl";
 
+// 登录用户信息
+const String loginUserInfoPath = "x/web-interface/nav";
+
+// 获取登录QR码
+const String loginQrcodeGeneratePath = "x/passport-login/web/qrcode/generate";
+
+// 检查登录状态
+const String loginQrcodePollPath  = "x/passport-login/web/qrcode/poll";
 
 
 const String browserUserAgent =

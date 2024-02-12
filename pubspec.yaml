@@ -50,7 +50,10 @@ dependencies:
   just_audio: ^0.9.36
 
   # 数据持久化
-  sqflite: ^2.3.0
+  # nosql hive支持Web
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
 
   # 列表加载
   easy_refresh: ^3.3.4

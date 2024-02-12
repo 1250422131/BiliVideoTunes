@@ -2,6 +2,7 @@ import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/utils/screen_utils.dart';
 import 'package:bili_video_tunes/common/weight/hots_tag_shimmer.dart';
+import 'package:bili_video_tunes/common/weight/qr_login_dialog/index.dart';
 import 'package:bili_video_tunes/common/weight/video_card_grid_view_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/video_music_card.dart';
 import 'package:bili_video_tunes/pages/main/video_music/index.dart';
@@ -32,6 +33,14 @@ class _VideoMusicPageState extends State<VideoMusicPage>
   int videoTabSelectIndex = 0;
   int videoPageNum = 1;
 
+
+  Future<void> showLoginDialog()async {
+    return showDialog(context: context, builder: (context){
+      return const QrLoginDialog();
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -39,7 +48,9 @@ class _VideoMusicPageState extends State<VideoMusicPage>
       appBar: AppBar(
         toolbarHeight: 56,
         title: MaterialButton(
-          onPressed: () {},
+          onPressed: () async{
+            await showLoginDialog();
+          },
           color: Theme.of(context).colorScheme.surfaceVariant,
           height: 50,
           elevation: 0,
