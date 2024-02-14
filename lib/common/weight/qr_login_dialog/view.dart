@@ -26,13 +26,19 @@ class _QrLoginDialogState extends State<QrLoginDialog> {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text("登录验证"),
       content: Column(
         mainAxisSize: MainAxisSize.min, // 设置主轴尺寸为最小
         children: [
-          const Text("请使用B站客户端完成扫码"),
+          const Text("请使用客户端完成扫码"),
           Container(
             height: 10,
           ),
@@ -53,7 +59,7 @@ class _QrLoginDialogState extends State<QrLoginDialog> {
                   child: Image.network(
                       width: 150,
                       height: 150,
-                      "https://pan.misakamoe.com/qrcode/?url=${controller.loginQrcodeInfo.value?.data?.url ?? ""}"),
+                      "https://pan.misakamoe.com/qrcode/?url=${Uri.encodeComponent(controller.loginQrcodeInfo.value?.data?.url ?? "")}"),
                   onTap: ()  {
                     setState(() {
                       loginQrcodeFuture = controller.loadLoginQrcodeInfo();

@@ -7,18 +7,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import 'colorful_text_widget.dart';
 
 class PlayerPage extends StatefulWidget {
   const PlayerPage({super.key});
 
+
+
   @override
   State<StatefulWidget> createState() => _PlayerPageState();
 }
 
+
 class _PlayerPageState extends State<PlayerPage>
     with SingleTickerProviderStateMixin {
+
   late AudioController audioController;
   late ScrollController scrollController;
   late ThemeData myCustomTheme;
@@ -346,7 +351,7 @@ class _PlayerPageState extends State<PlayerPage>
                               const Text("暂无播放"),
                         )),
                     Visibility(
-                        visible: audioController.playerIndex.value != null,
+                        visible: true,
                         child: Align(
                           alignment: Alignment.center,
                           child: Column(

@@ -251,6 +251,8 @@ class AudioController extends GetxController {
   // 解析视频音乐
   Future<void> _analysisVideoMusicPlayer(AudioMediaItem audioMediaItem,
       {int? mPlayerIndex}) async {
+    // TODO 这部分代码需要进一步的异常检测，去除!部分。
+
     final videoInfo =
         await VideoApi.getVideoBaseInfo(bvid: audioMediaItem.bvId!);
 
@@ -259,24 +261,20 @@ class AudioController extends GetxController {
 
     await _updatePaletteGenerator(audioMediaItem.coverImageUrl);
 
-    final lyricList = [
-      LyricData(lyric: "人海里CPMMM", starTime: 1, endTime: 6),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 7, endTime: 13),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 15, endTime: 19),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 22, endTime: 26),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 28, endTime: 35),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 36, endTime: 42),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 43, endTime: 47),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 48, endTime: 50),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 54, endTime: 56),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 60, endTime: 65),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 66, endTime: 71),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 71, endTime: 76),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 78, endTime: 83),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 84, endTime: 89),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 90, endTime: 95),
-      LyricData(lyric: "人海里CadfadasdawPMMM", starTime: 96, endTime: 101),
-    ];
+    final morePlayerInfo = await VideoApi.getMorePlayerInfo(
+        bvid: audioMediaItem.bvId!, cid: videoInfo.data!.cid!);
+
+    final lyricList = <LyricData>[];
+
+    // 加载AI字幕，无则不加载
+    morePlayerInfo.data?.subtitle?.subtitles
+        ?.where((item) => item.aiStatus == 2)
+        .forEach((item) async {
+      final videoSubtitleInfo = await VideoApi.getVideoSubtitles(
+          uri: item.subtitleUrl!.replaceAll("//aisubtitle.hdslb.com", ""));
+      videoSubtitleInfo.body?.forEach((item) => lyricList.add(LyricData(
+          lyric: item.content!, starTime: item.from!, endTime: item.to!)));
+    });
 
     audioMediaItem.lyricList = lyricList;
 

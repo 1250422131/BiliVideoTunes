@@ -10,10 +10,21 @@ class LoginApiInterceptor implements Interceptor{
   }
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+  void onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
     // 替换BaseUrl
-    if(options.uri.path.contains("passport-login")){
+    print(options.path);
+
+    if (options.uri.path.contains("passport-login")) {
       options.baseUrl = passportBaseUrl;
+    } else if (options.uri.path == bliUrl) {
+      // 替换B站主站结课
+      options.baseUrl = bliUrl;
+      options.path = "";
+      options.responseType = ResponseType.bytes;
+    } else if (options.uri.path.contains("ai_subtitle/prod")) {
+      // 替换AI字幕网络请求
+      options.baseUrl = aiSubtitleUrl;
     }
 
     return handler.next(options);

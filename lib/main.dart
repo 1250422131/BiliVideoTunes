@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:bili_video_tunes/common/controller/user_controller.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
+import 'package:bili_video_tunes/common/utils/http_utils.dart';
 import 'package:bili_video_tunes/common/utils/screen_utils.dart';
 import 'package:bili_video_tunes/common/weight/music_player.dart';
+import 'package:bili_video_tunes/common/weight/player_page.dart';
 import 'package:bili_video_tunes/pages/main/bili_music/index.dart';
 import 'package:bili_video_tunes/pages/main/user_info/index.dart';
 import 'package:bili_video_tunes/pages/main/video_music/index.dart';
@@ -12,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'common/controller/audio_controller.dart';
@@ -28,8 +31,6 @@ void main() async {
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.hidden,
-
-
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
@@ -38,8 +39,8 @@ void main() async {
   }
 
   //状态栏、导航栏沉浸
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  // SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarIconBrightness: Brightness.dark,
     systemNavigationBarColor: Colors.transparent,
@@ -100,10 +101,11 @@ class NavInfo {
 class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   // 控制器
-  late PageController _pageController;
+  final PageController _pageController = PageController();
 
   late AudioController audioController;
 
+  late UserController userController;
 
   late List<NavInfo> _navList;
 
@@ -111,14 +113,19 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   late List<NavigationRailDestination> navRailItem;
 
+  final PanelController _panelController = PanelController();
+
+  double _panelPosition = 0;
+
   int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
     audioController = Get.put(AudioController());
-    Get.put(UserController());
+    userController = Get.put(UserController());
 
+    initData();
     _navList = [
       const NavInfo(
           title: "音频",
@@ -152,17 +159,18 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           label: Text(itemData.title),
         ),
     ];
+  }
 
-    _pageController = PageController();
-
-  } //当前页面
-
-
+  Future<void> initData() async {
+    // 初始化网络请求
+    await initCookieJar();
+    // 初始化用户信息
+    await userController.initLoginUserData();
+  }
 
   @override
   Widget build(BuildContext context) {
     final windowsButtonStyle = ButtonStyle(
-
       shape: MaterialStateProperty.all<OutlinedBorder>(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
@@ -252,23 +260,59 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                   UserInfoPage()
                 ],
               ),
-              Obx(() => audioController.playerIndex.value?.let((it) => const MusicPlayer()) ?? const Column()),
+              Obx(() =>
+                  audioController.playerIndex.value?.let((it) => SlidingUpPanel(
+                        controller: _panelController,
+                        onPanelSlide: (double position) {
+                          setState(() {
+                            _panelPosition = position;
+                          });
+                        },
+                        minHeight: 54,
+                        collapsed: SizedBox(
+                            child: MusicPlayer(
+                          panelController: _panelController,
+                        )),
+                        maxHeight: MediaQuery.of(context).size.height,
+                        panel: Container(
+                          height: MediaQuery.of(context).size.height,
+                          color: Colors.white,
+                          child: Opacity(
+                            opacity: _panelPosition,
+                            child: PlayerPage(),
+                          ),
+                        ),
+                      )) ??
+                  const Column()),
             ],
           ))
         ],
       ),
-      bottomNavigationBar: getWindowsWidth(this.context) <= ScreenSize.Normal
-          ? NavigationBar(
-        destinations: navigationItem,
-        selectedIndex: _currentPage,
-        onDestinationSelected: (int index) {
-          setState(() {
-            _currentPage = index;
-            _pageController.jumpToPage(index);
-          });
-        },
-      )
-          : null,
+      bottomNavigationBar: SizedBox(
+        height: (0.80 * (1 - _panelPosition) * 100),
+        child: Stack(
+          children: [
+            if (getWindowsWidth(this.context) <= ScreenSize.Normal)
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 0),
+                curve: Curves.easeInOut,
+                bottom: -(0.80 * (_panelPosition) * 100),
+                left: 0,
+                right: 0,
+                child: NavigationBar(
+                  destinations: navigationItem,
+                  selectedIndex: _currentPage,
+                  onDestinationSelected: (int index) {
+                    setState(() {
+                      _currentPage = index;
+                      _pageController.jumpToPage(index);
+                    });
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 

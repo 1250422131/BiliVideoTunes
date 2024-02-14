@@ -1,4 +1,5 @@
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
+import 'package:bili_video_tunes/common/controller/user_controller.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/utils/screen_utils.dart';
 import 'package:bili_video_tunes/common/weight/hots_tag_shimmer.dart';
@@ -23,6 +24,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
   late VideoMusicPageController controller;
   late TabController tabController;
   late AudioController audioController;
+  late UserController userController;
 
   //不可变Future->防止UI多次刷新造成
   late Future<void> initVideoListFuture;
@@ -32,7 +34,6 @@ class _VideoMusicPageState extends State<VideoMusicPage>
   int hotsTagSelectIndex = 0;
   int videoTabSelectIndex = 0;
   int videoPageNum = 1;
-
 
   Future<void> showLoginDialog()async {
     return showDialog(context: context, builder: (context){
@@ -48,9 +49,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
       appBar: AppBar(
         toolbarHeight: 56,
         title: MaterialButton(
-          onPressed: () async{
-            await showLoginDialog();
-          },
+          onPressed: () {},
           color: Theme.of(context).colorScheme.surfaceVariant,
           height: 50,
           elevation: 0,
@@ -83,23 +82,31 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               const SizedBox(
                 width: 16,
               ),
-              GestureDetector(
-                onTap: () {},
-                child: ClipOval(
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: const ShapeDecoration(
-                      image: DecorationImage(
-                        image:
-                        NetworkImage("https://i0.hdslb.com/bfs/face/member/noface.jpg@240w_240h"),
-                        fit: BoxFit.contain,
+              Obx(() => InkWell(
+                    child: GestureDetector(
+                      onTap: () {},
+                      child: ClipOval(
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: ShapeDecoration(
+                            image: DecorationImage(
+                              image: NetworkImage(userController
+                                      .loginUserData.value?.face ??
+                                  "https://i0.hdslb.com/bfs/face/member/noface.jpg@240w_240h"),
+                              fit: BoxFit.contain,
+                            ),
+                            shape: const OvalBorder(),
+                          ),
+                        ),
                       ),
-                      shape: OvalBorder(),
                     ),
-                  ),
-                ),
-              ),
+                    onTap: () {
+                      if (userController.loginUserData.value == null) {
+                        showLoginDialog();
+                      }
+                    },
+                  )),
             ],
           ),
         ),
@@ -194,7 +201,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               ),
             ];
           },
-          body: Obx(() => controller.videoMusicList.isNotEmpty ? EasyRefresh(
+          body: Padding(padding: const EdgeInsets.only(left: 8,right: 8),child: Obx(() => controller.videoMusicList.isNotEmpty ? EasyRefresh(
               onLoad: () async {
                 setState(() {
                   controller.loadNewVideoDynamicInfo(
@@ -269,19 +276,19 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                     ),
                   ),
                 ],
-              )) : const VideoCardGridViewShimmer())),
+              ))
+              : const VideoCardGridViewShimmer())),),
     );
   }
+
 
   @override
   void initState() {
     controller = Get.put(VideoMusicPageController());
     audioController = Get.find<AudioController>();
-
+    userController = Get.find<UserController>();
     tabController = TabController(
         length: controller.tabItems.length, vsync: this, initialIndex: 0);
-
-    //初始化
 
     //默认使用第一条
     initVideoListFuture = controller.loadNewVideoDynamicInfo(

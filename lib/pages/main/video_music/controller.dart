@@ -131,4 +131,6 @@ class VideoMusicPageController extends GetxController {
   Future<void> initVideoList() async {
     await loadVideoList(cateId: 28, page: 1, pageSize: 30, isClear: true);
   }
+
+
 }

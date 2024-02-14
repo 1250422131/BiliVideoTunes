@@ -16,6 +16,9 @@ const String getVideoDataPath = "x/web-interface/view";
 
 const String videoPlayerDataPath = "x/player/playurl";
 
+// 视频更多信息
+const String morePlayerIntoPath = "x/player/wbi/v2";
+
 // 登录用户信息
 const String loginUserInfoPath = "x/web-interface/nav";
 
@@ -23,8 +26,7 @@ const String loginUserInfoPath = "x/web-interface/nav";
 const String loginQrcodeGeneratePath = "x/passport-login/web/qrcode/generate";
 
 // 检查登录状态
-const String loginQrcodePollPath  = "x/passport-login/web/qrcode/poll";
-
+const String loginQrcodePollPath = "x/passport-login/web/qrcode/poll";
 
 const String browserUserAgent =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.76";
@@ -32,5 +34,7 @@ const String browserUserAgent =
 const String userAgent = "User-Agent";
 
 const String bliUrl = "https://www.bilibili.com";
+
+const String aiSubtitleUrl = "https://aisubtitle.hdslb.com";
 
 const String referer = "Referer";
