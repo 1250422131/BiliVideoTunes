@@ -9,7 +9,7 @@ class UserController extends GetxController {
 
   Future<void> initLoginUserData() async {
     // 获取webi
-    await dioClient.get(bliUrl);
+    dioClient.get(bliUrl);
     final result = await UserInfoApi.getLoginUserInfo();
     if (result.code == 0) {
       loginUserData.value = result.data;

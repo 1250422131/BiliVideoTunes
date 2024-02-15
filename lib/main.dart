@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bili_video_tunes/common/controller/user_controller.dart';
+import 'package:bili_video_tunes/common/handler/bili_audio_handler.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/utils/http_utils.dart';
 import 'package:bili_video_tunes/common/utils/screen_utils.dart';
@@ -9,6 +10,8 @@ import 'package:bili_video_tunes/common/weight/player_page.dart';
 import 'package:bili_video_tunes/pages/main/bili_music/index.dart';
 import 'package:bili_video_tunes/pages/main/user_info/index.dart';
 import 'package:bili_video_tunes/pages/main/video_music/index.dart';
+import 'package:bili_video_tunes/services/bili_audio_service.dart';
+import 'package:bili_video_tunes/services/service_locator.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +50,11 @@ void main() async {
     systemNavigationBarDividerColor: Colors.transparent,
     statusBarColor: Colors.transparent,
   ));
+
+  // 全局支持音乐播放器和对应控制器
+  Get.put(BiliAudioService());
+  Get.put<BiliAudioHandler>(await initAudioService());
+  Get.put(AudioController());
 
   runApp(const MyApp());
 }
@@ -105,6 +113,10 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   late AudioController audioController;
 
+  late BiliAudioService _biliAudioService;
+
+  late BiliAudioHandler _biliAudioHandler;
+
   late UserController userController;
 
   late List<NavInfo> _navList;
@@ -122,8 +134,10 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   @override
   void initState() {
     super.initState();
-    audioController = Get.put(AudioController());
+    _biliAudioService = Get.find<BiliAudioService>();
+    audioController = Get.find<AudioController>();
     userController = Get.put(UserController());
+    _biliAudioHandler = Get.find<BiliAudioHandler>();
 
     initData();
     _navList = [
@@ -225,68 +239,78 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           const SizedBox(width: 5,)
         ],
       ) : null,
-      body: Row(
-        children: [
-          Visibility(
-            maintainState: true,
-            visible: getWindowsWidth(context) > ScreenSize.Normal,
-            child: NavigationRail(
-              destinations: navRailItem,
-              selectedIndex: _currentPage,
-              onDestinationSelected: (int index) {
-                _currentPage = index;
-                _pageController.jumpToPage(index);
-              },
-            ),
-          ),
-          Expanded(
-              child: Stack(
-            children: [
-              PageView(
-                controller: _pageController,
-                // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
-                onPageChanged: (int index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
+
+      body: PopScope(
+        onPopInvoked: (bool didPop) {
+          if(_panelController.isPanelOpen){
+            _panelController.close();
+          }
+        },
+        canPop: _panelController.isAttached ? _panelController.isPanelClosed : false,
+        child: Row(
+          children: [
+            Visibility(
+              maintainState: true,
+              visible: getWindowsWidth(context) > ScreenSize.Normal,
+              child: NavigationRail(
+                destinations: navRailItem,
+                selectedIndex: _currentPage,
+                onDestinationSelected: (int index) {
+                  _currentPage = index;
+                  _pageController.jumpToPage(index);
                 },
-                physics: const NeverScrollableScrollPhysics(),
-                scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
-                    ? Axis.vertical
-                    : Axis.horizontal,
-                children: const [
-                  VideoMusicPage(),
-                  BiLiMusicPage(),
-                  UserInfoPage()
-                ],
               ),
-              Obx(() =>
-                  audioController.playerIndex.value?.let((it) => SlidingUpPanel(
-                        controller: _panelController,
-                        onPanelSlide: (double position) {
-                          setState(() {
-                            _panelPosition = position;
-                          });
-                        },
-                        minHeight: 54,
-                        collapsed: SizedBox(
-                            child: MusicPlayer(
-                          panelController: _panelController,
-                        )),
-                        maxHeight: MediaQuery.of(context).size.height,
-                        panel: Container(
-                          height: MediaQuery.of(context).size.height,
-                          color: Colors.white,
-                          child: Opacity(
-                            opacity: _panelPosition,
-                            child: PlayerPage(),
-                          ),
+            ),
+            Expanded(
+                child: Stack(
+                  children: [
+                    PageView(
+                      controller: _pageController,
+                      // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
+                      onPageChanged: (int index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                      physics: const NeverScrollableScrollPhysics(),
+                      scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
+                          ? Axis.vertical
+                          : Axis.horizontal,
+                      children: const [
+                        VideoMusicPage(),
+                        BiLiMusicPage(),
+                        UserInfoPage()
+                      ],
+                    ),
+                    Obx(() =>
+                    _biliAudioService.playerIndex.value
+                        ?.let((it) => SlidingUpPanel(
+                      controller: _panelController,
+                      onPanelSlide: (double position) {
+                        setState(() {
+                          _panelPosition = position;
+                        });
+                      },
+                      minHeight: 54,
+                      collapsed: SizedBox(
+                          child: MusicPlayer(
+                            panelController: _panelController,
+                          )),
+                      maxHeight: MediaQuery.of(context).size.height,
+                      panel: Container(
+                        height: MediaQuery.of(context).size.height,
+                        color: Colors.white,
+                        child: Opacity(
+                          opacity: _panelPosition,
+                          child: PlayerPage(),
                         ),
-                      )) ??
-                  const Column()),
-            ],
-          ))
-        ],
+                      ),
+                    )) ??
+                        const Column()),
+                  ],
+                ))
+          ],
+        ),
       ),
       bottomNavigationBar: SizedBox(
         height: (0.80 * (1 - _panelPosition) * 100),
@@ -316,5 +340,9 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     );
   }
 
-
+  @override
+  void dispose() {
+    _biliAudioHandler.stop();
+    super.dispose();
+  }
 }

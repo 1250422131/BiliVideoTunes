@@ -7,6 +7,7 @@ import 'package:bili_video_tunes/common/weight/qr_login_dialog/index.dart';
 import 'package:bili_video_tunes/common/weight/video_card_grid_view_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/video_music_card.dart';
 import 'package:bili_video_tunes/pages/main/video_music/index.dart';
+import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,6 +26,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
   late TabController tabController;
   late AudioController audioController;
   late UserController userController;
+  final BiliAudioService _biliAudioService = Get.find();
 
   //不可变Future->防止UI多次刷新造成
   late Future<void> initVideoListFuture;
@@ -84,7 +86,11 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               ),
               Obx(() => InkWell(
                     child: GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        if (userController.loginUserData.value == null) {
+                          showLoginDialog();
+                        }
+                      },
                       child: ClipOval(
                         child: Container(
                           width: 32,
@@ -257,24 +263,28 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                           builder: (context, box) {
                             //传递audioController是由于不希望Getx在每次循环都去Find
                             return VideoMusicCard(
-                                item: item,
-                                box: box,
-                                audioController: audioController);
-                          },
+                                    item: item,
+                                    box: box,
+                                    audioController: audioController,
+                                    biliAudioService: _biliAudioService,
+                                  );
+                                },
                         ),
                     ],
                   ),
                   SliverFixedExtentList(
                     itemExtent:
-                    audioController.playerIndex.value != null ? 70 : 0,
-                    delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                        //创建列表项
-                        return Container();
-                      },
-                      childCount: 1,
-                    ),
-                  ),
+                              _biliAudioService.playerIndex.value != null
+                                  ? 70
+                                  : 0,
+                          delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                              //创建列表项
+                              return Container();
+                            },
+                            childCount: 1,
+                          ),
+                        ),
                 ],
               ))
               : const VideoCardGridViewShimmer())),),

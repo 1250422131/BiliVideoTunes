@@ -38,10 +38,6 @@ class _QrLoginDialogState extends State<QrLoginDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min, // 设置主轴尺寸为最小
         children: [
-          const Text("请使用客户端完成扫码"),
-          Container(
-            height: 10,
-          ),
           FutureBuilder(
             future: loginQrcodeFuture,
             builder: (context, snapshot) {
@@ -56,10 +52,19 @@ class _QrLoginDialogState extends State<QrLoginDialog> {
                 return Text('Error: ${snapshot.error}');
               } else {
                 return InkWell(
-                  child: Image.network(
-                      width: 150,
-                      height: 150,
-                      "https://pan.misakamoe.com/qrcode/?url=${Uri.encodeComponent(controller.loginQrcodeInfo.value?.data?.url ?? "")}"),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Image.network(
+                            width: 150,
+                            height: 150,
+                            "https://pan.misakamoe.com/qrcode/?url=${Uri.encodeComponent(controller.loginQrcodeInfo.value?.data?.url ?? "")}"),
+                      ),
+                    ),
+                  ),
                   onTap: ()  {
                     setState(() {
                       loginQrcodeFuture = controller.loadLoginQrcodeInfo();
@@ -68,7 +73,9 @@ class _QrLoginDialogState extends State<QrLoginDialog> {
                 );
               }
             },
-          )
+          ),
+          const SizedBox(height: 10,),
+          const Text('请使用 "B站" 客户端扫码'),
         ],
       ),
       actions: [

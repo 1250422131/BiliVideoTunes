@@ -1,5 +1,6 @@
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/weight/player_page.dart';
+import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -18,6 +19,7 @@ class MusicPlayer extends StatefulWidget {
 class _MusicPlayerState extends State<MusicPlayer> {
   late AudioController controller;
   late PanelController _panelController;
+  final BiliAudioService _biliAudioService = Get.find();
 
   @override
   void initState() {
@@ -56,8 +58,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                 child: Obx(() => Hero(
                                     tag: "cover",
                                     child: Image.network(
-                                      controller.playerIndex.value?.let((it) {
-                                        return controller
+                                      _biliAudioService.playerIndex.value?.let((it) {
+                                        return _biliAudioService
                                             .playerList[it].coverImageUrl;
                                       }) ??
                                           "https://picx.zhimg.com/70/v2-53504944558fe60816f2633fd7543f72_1440w.png",
@@ -70,8 +72,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                   child: Padding(
                                     padding: const EdgeInsets.only(left: 10),
                                     child: Obx(() => Text(
-                                      controller.playerIndex.value?.let((it) {
-                                        return controller.playerList
+                                      _biliAudioService.playerIndex.value?.let((it) {
+                                        return _biliAudioService.playerList
                                             .elementAt(it)
                                             .title;
                                       }) ??
@@ -84,10 +86,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
                               Padding(
                                 padding: const EdgeInsets.only(right: 10),
                                 child: Obx(() =>
-                                controller.playerState.value.playing
+                                _biliAudioService.playerState.value.playing
                                     ? IconButton(
                                     onPressed: () {
-                                      controller.stop();
+                                      controller.pause();
                                     },
                                     icon: const Icon(Icons.pause))
                                     : IconButton(
@@ -118,9 +120,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
           ),
           Obx(
                 () => LinearProgressIndicator(
-              value: controller.totalDuration.value != null
-                  ? (controller.currentPosition.value.inSeconds /
-                  controller.totalDuration.value!.inSeconds)
+              value: _biliAudioService.totalDuration.value != null
+                  ? (_biliAudioService.currentPosition.value.inSeconds /
+                  _biliAudioService.totalDuration.value!.inSeconds)
                   : 0,
             ),
           )

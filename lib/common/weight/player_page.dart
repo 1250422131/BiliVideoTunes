@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
+import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -25,9 +26,10 @@ class _PlayerPageState extends State<PlayerPage>
     with SingleTickerProviderStateMixin {
 
   late AudioController audioController;
-  late ScrollController scrollController;
+  final ScrollController scrollController = ScrollController();
   late ThemeData myCustomTheme;
   late AnimationController playIconAnimationController;
+  final BiliAudioService _biliAudioService = Get.find();
 
   // 存储监听器的变量
   late StreamSubscription<PlayerState> playStateListener;
@@ -37,13 +39,12 @@ class _PlayerPageState extends State<PlayerPage>
     super.initState();
 
     audioController = Get.find<AudioController>();
-    scrollController = ScrollController();
 
     playIconAnimationController = AnimationController(vsync: this)
       ..drive(Tween(begin: 0, end: 1))
-      ..duration = const Duration(milliseconds: 500);
+      ..duration = const Duration(milliseconds: 300);
 
-    playStateListener = audioController.playerState.listen((state) {
+    playStateListener = _biliAudioService.playerState.listen((state) {
       if (!state.playing) {
         playIconAnimationController.forward();
       }else{
@@ -66,13 +67,13 @@ class _PlayerPageState extends State<PlayerPage>
     bool isAtTop = scrollController.position.pixels <=
         scrollController.position.minScrollExtent;
 
-    if (audioController.lyricLineIndex.value > 3 &&
+    if (_biliAudioService.lyricLineIndex.value > 3 &&
         (!isAtBottom) &&
         scrollController.hasClients) {
       late double lineHeight = 70;
 
       final double offset =
-          (audioController.lyricLineIndex.value - 3) * lineHeight;
+          (_biliAudioService.lyricLineIndex.value - 3) * lineHeight;
 
       scrollController.animateTo(
         offset,
@@ -83,8 +84,8 @@ class _PlayerPageState extends State<PlayerPage>
   }
 
   void updateCurrentLine(int currentTime) {
-    audioController.playerIndex.value?.also((it) {
-      final audioItem = audioController.playerList[it];
+    _biliAudioService.playerIndex.value?.also((it) {
+      final audioItem = _biliAudioService.playerList[it];
       final lyricLength = audioItem.lyricList?.length ?? 0;
 
       // 这里已经判断了 lyricList 绝对的存在
@@ -93,14 +94,14 @@ class _PlayerPageState extends State<PlayerPage>
           if (currentTime >= audioItem.lyricList!.elementAt(i).starTime &&
               currentTime < audioItem.lyricList!.elementAt(i + 1).starTime) {
             setState(() {
-              audioController.lyricLineIndex.value = i;
+              _biliAudioService.lyricLineIndex.value = i;
             });
             scrollToCurrentLine();
             break;
           }
         } else {
           setState(() {
-            audioController.lyricLineIndex.value = i;
+            _biliAudioService.lyricLineIndex.value = i;
           });
           scrollToCurrentLine();
         }
@@ -141,29 +142,29 @@ class _PlayerPageState extends State<PlayerPage>
                               }
 
                               final item =
-                                  audioController.playerList.removeAt(oldIndex);
-                              audioController.playerList.insert(newIndex, item);
+                              _biliAudioService.playerList.removeAt(oldIndex);
+                              _biliAudioService.playerList.insert(newIndex, item);
 
 
                               // 更新高亮索引
-                              if ((audioController.playerIndex.value ?? 0) == oldIndex) {
-                                audioController.playerIndex.value = newIndex;
-                              } else if (oldIndex < (audioController.playerIndex.value ?? 0) && newIndex >= (audioController.playerIndex.value ?? 0)) {
-                                audioController.playerIndex.value = (audioController.playerIndex.value ?? 0) - 1;
-                              } else if (oldIndex > (audioController.playerIndex.value ?? 0) && newIndex <= (audioController.playerIndex.value ?? 0)) {
-                                audioController.playerIndex.value = (audioController.playerIndex.value ?? 0)  +1;
+                              if ((_biliAudioService.playerIndex.value ?? 0) == oldIndex) {
+                                _biliAudioService.playerIndex.value = newIndex;
+                              } else if (oldIndex < (_biliAudioService.playerIndex.value ?? 0) && newIndex >= (_biliAudioService.playerIndex.value ?? 0)) {
+                                _biliAudioService.playerIndex.value = (_biliAudioService.playerIndex.value ?? 0) - 1;
+                              } else if (oldIndex > (_biliAudioService.playerIndex.value ?? 0) && newIndex <= (_biliAudioService.playerIndex.value ?? 0)) {
+                                _biliAudioService.playerIndex.value = (_biliAudioService.playerIndex.value ?? 0)  +1;
                               }
 
                             });
                           },
                           children: List.generate(
-                              audioController.playerList.length,
+                              _biliAudioService.playerList.length,
                               (index) => InkWell(
                                     key: Key('$index'),
                                     child: Container(
                                       color: myCustomTheme.primaryColor
                                           .withOpacity(index ==
-                                                  (audioController
+                                                  (_biliAudioService
                                                           .playerIndex.value ??
                                                       0)
                                               ? 0.2
@@ -179,7 +180,7 @@ class _PlayerPageState extends State<PlayerPage>
                                                   const BorderRadius.all(
                                                       Radius.circular(5)),
                                               child: Image.network(
-                                                audioController
+                                                _biliAudioService
                                                     .playerList[index]
                                                     .coverImageUrl,
                                                 width: 50,
@@ -196,7 +197,7 @@ class _PlayerPageState extends State<PlayerPage>
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  audioController
+                                                  _biliAudioService
                                                       .playerList[index].title,
                                                   overflow:
                                                       TextOverflow.ellipsis,
@@ -210,7 +211,7 @@ class _PlayerPageState extends State<PlayerPage>
                                                 Row(
                                                   children: [
                                                     Text(
-                                                      audioController
+                                                      _biliAudioService
                                                               .playerList[index]
                                                               .bvId ??
                                                           "",
@@ -232,7 +233,7 @@ class _PlayerPageState extends State<PlayerPage>
                                                     ),
                                                     Expanded(
                                                         child: Text(
-                                                      audioController
+                                                          _biliAudioService
                                                           .playerList[index]
                                                           .totalDuration
                                                           .formatSeconds(),
@@ -274,8 +275,8 @@ class _PlayerPageState extends State<PlayerPage>
     return Obx(() => Theme(
         data: ThemeData.from(
           colorScheme: isDarkMode
-              ? audioController.audioDarkColorScheme.value
-              : audioController.audioLightColorScheme.value,
+              ? _biliAudioService.audioDarkColorScheme.value
+              : _biliAudioService.audioLightColorScheme.value,
         ).let((it) {
           myCustomTheme = it;
           return it;
@@ -291,8 +292,8 @@ class _PlayerPageState extends State<PlayerPage>
         ),
         child: Scaffold(
           appBar: AppBar(
-            title: audioController.playerIndex.value?.let((it) {
-                  return Text(audioController.playerList.elementAt(it).title);
+            title: _biliAudioService.playerIndex.value?.let((it) {
+                  return Text(_biliAudioService.playerList.elementAt(it).title);
                 }) ??
                 const Text("暂无播放"),
             backgroundColor:
@@ -311,9 +312,9 @@ class _PlayerPageState extends State<PlayerPage>
                         visible: false,
                         child: Align(
                           alignment: Alignment.center,
-                          child: audioController.playerIndex.value?.let((it) {
+                          child: _biliAudioService.playerIndex.value?.let((it) {
                                 final lyricList =
-                                    audioController.playerList[it].lyricList;
+                                    _biliAudioService.playerList[it].lyricList;
                                 if (lyricList != null) {
                                   return ListView.builder(
                                     controller: scrollController,
@@ -337,7 +338,7 @@ class _PlayerPageState extends State<PlayerPage>
                                                               .starTime)
                                                       .toInt()),
                                               shouldStartAnimation:
-                                                  audioController.lyricLineIndex
+                                              _biliAudioService.lyricLineIndex
                                                           .value ==
                                                       index));
                                     },
@@ -363,9 +364,9 @@ class _PlayerPageState extends State<PlayerPage>
                                   child: ClipRRect(
                                     borderRadius: const BorderRadius.all(
                                         Radius.circular(10)),
-                                    child: audioController.playerIndex.value
+                                    child: _biliAudioService.playerIndex.value
                                             ?.let((it) => Image.network(
-                                                  audioController.playerList[it]
+                                      _biliAudioService.playerList[it]
                                                       .coverImageUrl,
                                                   width: 300,
                                                   height: 300,
@@ -376,14 +377,14 @@ class _PlayerPageState extends State<PlayerPage>
                                           height: 300,
                                           color: myCustomTheme.primaryColor,
                                         ),
-                                  )),
-                              const SizedBox(height: 40),
+                                  )), // 封面
+                              const SizedBox(height: 40), // 间距
                               Padding(
                                 padding:
                                     const EdgeInsets.only(left: 50, right: 50),
-                                child: audioController.playerIndex.value
+                                child: _biliAudioService.playerIndex.value
                                         ?.let((it) => Text(
-                                              audioController
+                                  _biliAudioService
                                                   .playerList[it].title,
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
@@ -396,15 +397,15 @@ class _PlayerPageState extends State<PlayerPage>
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 20)),
-                              ),
+                              ), // 视频名称
                               const SizedBox(height: 5),
-                              audioController.playerIndex.value?.let((it) {
+                              _biliAudioService.playerIndex.value?.let((it) {
                                     final playerItem =
-                                        audioController.playerList[it];
-                                    if (playerItem.lyricList != null) {
+                                    _biliAudioService.playerList[it];
+                                    if (playerItem.lyricList != null && playerItem.lyricList!.isNotEmpty) {
                                       //上面已经判断过了
                                       return Text(playerItem
-                                          .lyricList![audioController
+                                          .lyricList![_biliAudioService
                                               .lyricLineIndex.value]
                                           .lyric);
                                     } else {
@@ -440,11 +441,11 @@ class _PlayerPageState extends State<PlayerPage>
                                                           1), // 取消触摸时滑块外的圆形覆盖
                                             ),
                                             child: Slider(
-                                              max: audioController.totalDuration
+                                              max: _biliAudioService.totalDuration
                                                       .value?.inSeconds
                                                       .toDouble() ??
                                                   0,
-                                              value: audioController
+                                              value: _biliAudioService
                                                   .currentPosition
                                                   .value
                                                   .inSeconds
@@ -457,7 +458,7 @@ class _PlayerPageState extends State<PlayerPage>
                                           ),
                                         ))
                                       ],
-                                    ),
+                                    ), // 播放进度指示器
                                     Padding(
                                       padding: const EdgeInsets.only(
                                           left: 20, right: 20),
@@ -466,14 +467,14 @@ class _PlayerPageState extends State<PlayerPage>
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            audioController
+                                            _biliAudioService
                                                 .currentPosition.value.inSeconds
                                                 .formatSeconds(),
                                             style:
                                                 const TextStyle(fontSize: 10),
                                           ),
                                           Text(
-                                              audioController.totalDuration
+                                              _biliAudioService.totalDuration
                                                       .value?.inSeconds
                                                       .formatSeconds() ??
                                                   "0:00",
@@ -515,12 +516,11 @@ class _PlayerPageState extends State<PlayerPage>
                                             color: Colors.white,
                                           ),
                                           onPressed: () {
-                                            if (audioController
+                                            if (_biliAudioService
                                                 .playerState.value.playing) {
                                               audioController.pause();
                                             } else {
                                               audioController.play();
-
                                             }
                                           },
                                         ),

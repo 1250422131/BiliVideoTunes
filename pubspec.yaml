@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0-Guitar-Alpha-4+1
+version: 1.0.0-Guitar-Alpha-5+1
 
 environment:
   sdk: '>=3.2.4 <4.0.0'
@@ -49,6 +49,8 @@ dependencies:
 
   # 音乐播放器
   just_audio: ^0.9.36
+  # 音乐服务
+  audio_service: ^0.18.12
 
   # 数据持久化
   # nosql hive支持Web
@@ -61,8 +63,12 @@ dependencies:
   # 文件路径系统
   path_provider: ^2.1.2
 
-  #
+  # 底部对话框
   sliding_up_panel: ^2.0.0+1
+
+  # 通知
+  flutter_local_notifications: ^16.3.2
+
 
   # 列表加载
   easy_refresh: ^3.3.4

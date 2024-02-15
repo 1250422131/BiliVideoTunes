@@ -63,7 +63,7 @@ class QrLoginDialogController extends GetxController {
 
   Future<void> callSetLoginUserData() async {
     final result = await UserInfoApi.getLoginUserInfo();
-    await dioClient.get(bliUrl);
+    dioClient.get(bliUrl);
     if(result.code == 0){
       userController.loginUserData.value = result.data;
     }

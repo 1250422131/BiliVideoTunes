@@ -1,5 +1,8 @@
 
 
+import 'package:audio_service/audio_service.dart';
+import 'package:bili_video_tunes/common/controller/audio_controller.dart';
+
 extension AlsoExtension<T> on T {
   T also(void Function(T) block) {
     block(this);
@@ -27,6 +30,19 @@ extension ListExtension<T> on List<T>{
 }
 
 
+extension AudioMediaItemExtension on AudioMediaItem{
+
+  MediaItem toMediaItem(){
+    return  MediaItem(
+      id: bvId!,
+      title: title,
+      displayTitle: title,
+      displaySubtitle: bvId,
+      displayDescription: description,
+      artUri:Uri.parse(coverImageUrl),
+    );
+  }
+}
 
 extension TimeFormatSeconds on int{
   String formatSeconds(){

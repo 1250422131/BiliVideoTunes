@@ -1,7 +1,9 @@
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/model/network/video_music/new_video_dynamic_info.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
+import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 import '../utils/screen_utils.dart';
 
@@ -12,20 +14,33 @@ class VideoMusicCard extends StatefulWidget {
 
   final AudioController audioController;
 
-  const VideoMusicCard({super.key, required this.box, required this.item, required this.audioController});
+  final BiliAudioService biliAudioService;
+
+
+  const VideoMusicCard({Key? key, required this.box, required this.item, required this.audioController, required this.biliAudioService}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _VideoMusicCardState(box, item,audioController);
+  State<StatefulWidget> createState() => _VideoMusicCardState();
 }
 
 class _VideoMusicCardState extends State<VideoMusicCard> {
-  final BoxConstraints box;
 
-  final Archives item;
+  late BoxConstraints _box;
 
-  final AudioController audioController;
+  late Archives _item;
 
-  _VideoMusicCardState(this.box, this.item, this.audioController);
+  late AudioController _audioController;
+
+  late BiliAudioService _biliAudioService;
+
+  @override
+  void initState() {
+    super.initState();
+    _box = widget.box;
+    _item = widget.item;
+    _audioController = widget.audioController;
+    _biliAudioService = widget.biliAudioService;
+  }
 
   String formatSeconds(int seconds) {
     int hours = seconds ~/ 3600;
@@ -55,16 +70,16 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
           onTap: () async {
             // 确定无重复的项目
             final audioMediaItem = AudioMediaItem(
-                title: item.title ?? "",
-                description: item.desc ?? "",
-                coverImageUrl: item.pic ?? "",
+                title: _item.title ?? "",
+                description: _item.desc ?? "",
+                coverImageUrl: _item.pic ?? "",
                 type: AudioMediaType.video,
-                bvId: item.bvid,
-                totalDuration: item.duration ?? 0);
+                bvId: _item.bvid,
+                totalDuration: _item.duration ?? 0);
 
-            if (!audioController.playerList
+            if (!_biliAudioService.playerList
                 .containsByToString(audioMediaItem)) {
-              await audioController.addPlayerAudio(audioMediaItem);
+              await _audioController.addPlayerAudio(audioMediaItem);
             }
           },
           child: Column(
@@ -78,10 +93,10 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                           child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Image.network(
-                          cacheWidth: (box.maxWidth *
+                          cacheWidth: (_box.maxWidth *
                                   MediaQuery.of(context).devicePixelRatio)
                               .toInt(),
-                          cacheHeight: (box.maxHeight *
+                          cacheHeight: (_box.maxHeight *
                                   MediaQuery.of(context).devicePixelRatio)
                               .toInt(),
                           height: getWindowsWidth(context).let((it) {
@@ -94,7 +109,7 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                             }
                           }),
                           filterQuality: FilterQuality.none,
-                          "${item.pic}",
+                          "${_item.pic}",
                           fit: BoxFit.cover, //设置图片的平铺模式
                         ),
                       )),
@@ -104,7 +119,7 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                       right: 4,
                       bottom: 4,
                       child: Text(
-                        formatSeconds(item.duration ?? 0),
+                        formatSeconds(_item.duration ?? 0),
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -124,13 +139,13 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item.title ?? "解析错误",
+                        _item.title ?? "解析错误",
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const Spacer(),
                       Text(
-                        item.owner?.name ?? "解析错误",
+                        _item.owner?.name ?? "解析错误",
                         style: TextStyle(
                             fontSize: 12, color: Theme.of(context).hintColor),
                       ),
