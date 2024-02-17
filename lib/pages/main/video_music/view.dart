@@ -2,9 +2,10 @@ import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/controller/user_controller.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/utils/screen_utils.dart';
+import 'package:bili_video_tunes/common/weight/common_error.dart';
 import 'package:bili_video_tunes/common/weight/hots_tag_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/qr_login_dialog/index.dart';
-import 'package:bili_video_tunes/common/weight/video_card_grid_view_shimmer.dart';
+import 'package:bili_video_tunes/common/weight/shimmer/video_card_grid_view_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/video_music_card.dart';
 import 'package:bili_video_tunes/pages/main/video_music/index.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
@@ -22,31 +23,33 @@ class VideoMusicPage extends StatefulWidget {
 class _VideoMusicPageState extends State<VideoMusicPage>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   //
-  late VideoMusicPageController controller;
-  late TabController tabController;
-  late AudioController audioController;
-  late UserController userController;
+  late VideoMusicPageController _controller;
+  late TabController _tabController;
+  late AudioController _audioController;
+  late UserController _userController;
   final BiliAudioService _biliAudioService = Get.find();
 
   //不可变Future->防止UI多次刷新造成
-  late Future<void> initVideoListFuture;
-  late Future<void> initHostTagFuture;
+  late Future<void> _initVideoListFuture;
+  late Future<void> _initHostTagFuture;
 
   //界面标签
   int hotsTagSelectIndex = 0;
   int videoTabSelectIndex = 0;
   int videoPageNum = 1;
 
-  Future<void> showLoginDialog()async {
-    return showDialog(context: context, builder: (context){
-      return const QrLoginDialog();
-    });
+  Future<void> showLoginDialog() async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return const QrLoginDialog();
+        });
   }
-
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 56,
@@ -87,7 +90,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               Obx(() => InkWell(
                     child: GestureDetector(
                       onTap: () {
-                        if (userController.loginUserData.value == null) {
+                        if (_userController.loginUserData.value == null) {
                           showLoginDialog();
                         }
                       },
@@ -97,7 +100,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                           height: 32,
                           decoration: ShapeDecoration(
                             image: DecorationImage(
-                              image: NetworkImage(userController
+                              image: NetworkImage(_userController
                                       .loginUserData.value?.face ??
                                   "https://i0.hdslb.com/bfs/face/member/noface.jpg@240w_240h"),
                               fit: BoxFit.contain,
@@ -108,7 +111,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                       ),
                     ),
                     onTap: () {
-                      if (userController.loginUserData.value == null) {
+                      if (_userController.loginUserData.value == null) {
                         showLoginDialog();
                       }
                     },
@@ -118,24 +121,24 @@ class _VideoMusicPageState extends State<VideoMusicPage>
         ),
         centerTitle: true,
         bottom: TabBar(
-          tabs: controller.tabItems.map((e) => Tab(text: e.name)).toList(),
-          controller: tabController,
+          tabs: _controller.tabItems.map((e) => Tab(text: e.name)).toList(),
+          controller: _tabController,
           onTap: (int index) {
             setState(() {
               //更新当前选中项
               videoTabSelectIndex = index;
               hotsTagSelectIndex = 0;
-              videoPageNum = 0;
+              videoPageNum = 1;
 
               //更新Tag列表
-              initHostTagFuture = controller.loadHotsTage(
-                  rid: controller.tabItems.elementAt(index).rid, type: 0);
+              _initHostTagFuture = _controller.loadHotsTage(
+                  rid: _controller.tabItems.elementAt(index).rid, type: 0);
 
               //更新视频列表
-              initVideoListFuture = controller.loadNewVideoDynamicInfo(
-                  rid: controller.tabItems.elementAt(index).rid,
+              _initVideoListFuture = _controller.loadNewVideoDynamicInfo(
+                  rid: _controller.tabItems.elementAt(index).rid,
                   pn: videoPageNum,
-                  ps: 30,
+                  ps: 14,
                   isClear: true);
             });
           },
@@ -152,159 +155,228 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                     const EdgeInsets.only(left: 10, right: 10, top: 10),
                     scrollDirection: Axis.horizontal,
                     child: FutureBuilder<void>(
-                      future: initHostTagFuture,
-                      builder:
-                          (BuildContext context, AsyncSnapshot<void> snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          // 当Future还未完成时，显示加载中的UI
-                          return const HotsTagShimmerWrap(
-                              mockNum: 5, spacing: 10);
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
-                          // 当Future成功完成时，显示数据
-                          return Obx(() => Wrap(
-                            spacing: 10,
-                            children: [
-                              for (var index = 0;
-                              index < controller.hotsTags.length;
-                              index++)
-                                ChoiceChip(
-                                  label: Text(
-                                          controller.hotsTags[index].tagName ??
-                                              ""),
-                                      selected: index == hotsTagSelectIndex,
-                                      onSelected: (isSelected) {
-                                        setState(() {
-                                          final item =
-                                              controller.hotsTags[index];
-
-                                          if (isSelected) {
-                                            hotsTagSelectIndex = index;
-                                            videoPageNum = 0;
-                                            initVideoListFuture = controller
-                                                .loadNewVideoDynamicInfo(
-                                                    rid: controller.tabItems
-                                                        .elementAt(
-                                                            videoTabSelectIndex)
-                                                        .rid,
-                                                    pn: videoPageNum,
-                                                    ps: 30,
-                                                    tagId: item.tagId,
-                                                    isClear: true);
-                                          }
-                                        });
-                                      },
+                    future: _initHostTagFuture,
+                    builder:
+                        (BuildContext context, AsyncSnapshot<void> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        // 当Future还未完成时，显示加载中的UI
+                        return const HotsTagShimmerWrap(
+                            mockNum: 5, spacing: 10);
+                      } else if (snapshot.hasError) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            color: Theme.of(context).colorScheme.errorContainer,
+                            width: MediaQuery.of(context).size.width - 20,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 16, right: 8),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.signal_wifi_bad_outlined,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onErrorContainer,
+                                      ),
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+                                      const Text("网络异常或加载失败")
+                                    ],
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _initHostTagFuture =
+                                            _controller.initHotsTag();
+                                      });
+                                    },
+                                    child: Text(
+                                      "重试",
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onErrorContainer),
                                     ),
+                                  )
                                 ],
-                              ));
-                        }
-                      },
-                    ),
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        // 当Future成功完成时，显示数据
+                        return Obx(() => Wrap(
+                              spacing: 10,
+                              children: [
+                                for (var index = 0;
+                                    index < _controller.hotsTags.length;
+                                    index++)
+                                  ChoiceChip(
+                                    label: Text(
+                                        _controller.hotsTags[index].tagName ??
+                                            ""),
+                                    selected: index == hotsTagSelectIndex,
+                                    onSelected: (isSelected) {
+                                      setState(() {
+                                        final item =
+                                            _controller.hotsTags[index];
+
+                                        if (isSelected) {
+                                          hotsTagSelectIndex = index;
+                                          videoPageNum = 1;
+                                          _initVideoListFuture = _controller
+                                              .loadNewVideoDynamicInfo(
+                                                  rid: _controller.tabItems
+                                                      .elementAt(
+                                                          videoTabSelectIndex)
+                                                      .rid,
+                                                  pn: videoPageNum,
+                                                  ps: 14,
+                                                  tagId: item.tagId,
+                                                  isClear: true);
+                                        }
+                                      });
+                                    },
+                                  ),
+                              ],
+                            ));
+                      }
+                    },
                   ),
                 ),
               ),
-            ];
-          },
-          body: Padding(padding: const EdgeInsets.only(left: 8,right: 8),child: Obx(() => controller.videoMusicList.isNotEmpty ? EasyRefresh(
-              onLoad: () async {
-                setState(() {
-                  controller.loadNewVideoDynamicInfo(
-                      rid: controller.tabItems
-                          .elementAt(videoTabSelectIndex)
-                          .rid,
-                      tagId: controller.hotsTags
-                          .elementAt(hotsTagSelectIndex)
-                          .tagId,
-                      pn: ++videoPageNum,
-                      ps: 30);
-                });
-                return controller.videoMusicPageInfo.value.let((it) {
-                  if (videoPageNum < (it.count / it.size * 1.0).ceil()) {
-                    return IndicatorResult.success;
-                  } else {
-                    IndicatorResult.noMore;
-                  }
-                });
-              },
-              child: CustomScrollView(
-                slivers: [
-                  SliverGrid.count(
-                    crossAxisCount: getWindowsWidth(context).let((it) {
-                      if (it > ScreenSize.ExtraLarge) {
-                        return 5;
-                      } else if (it > ScreenSize.Large) {
-                        return 4;
-                      } else if (it > ScreenSize.Normal) {
-                        return 3;
-                      } else if (it > ScreenSize.Small) {
-                        return 2;
-                      } else {
-                        return 1;
-                      }
-                    }),
-                    crossAxisSpacing: 5,
-                    mainAxisSpacing: 5,
-                    childAspectRatio: getWindowsWidth(context).let((it) {
-                      if (it > ScreenSize.ExtraLarge) {
-                        return 1.3;
-                      } else if (it > ScreenSize.Large) {
-                        return 1.2;
-                      } else if (it > ScreenSize.Normal) {
-                        return 1.1;
-                      } else {
-                        return 1.05;
-                      }
-                    }),
-                    children: [
-                      for (var item in controller.videoMusicList)
-                        LayoutBuilder(
-                          builder: (context, box) {
-                            //传递audioController是由于不希望Getx在每次循环都去Find
-                            return VideoMusicCard(
-                                    item: item,
-                                    box: box,
-                                    audioController: audioController,
-                                    biliAudioService: _biliAudioService,
-                                  );
-                                },
-                        ),
-                    ],
-                  ),
-                  SliverFixedExtentList(
-                    itemExtent:
-                              _biliAudioService.playerIndex.value != null
-                                  ? 70
-                                  : 0,
-                          delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int index) {
-                              //创建列表项
-                              return Container();
-                            },
-                            childCount: 1,
+            ),
+          ];
+        },
+        body: Padding(
+            padding: const EdgeInsets.only(left: 8, right: 8),
+            child: FutureBuilder<void>(
+              future: _initVideoListFuture,
+              builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const VideoCardGridViewShimmer();
+                } else if (snapshot.hasError) {
+                  return CommonError(
+                      tip: "网络异常或数据异常",
+                      iconData: Icons.cloud_off_rounded,
+                      retryTip: "重试",
+                      retry: () {
+                        setState(() {
+                          _initVideoListFuture =
+                              _controller.loadNewVideoDynamicInfo(
+                                  rid: _controller.tabItems.elementAt(0).rid,
+                                  pn: videoPageNum,
+                                  ps: 14,
+                                  isClear: true);
+                        });
+                      });
+                } else {
+                  return Obx(() => EasyRefresh(
+                      onLoad: () async {
+                        await _controller.loadNewVideoDynamicInfo(
+                            rid: _controller.tabItems
+                                .elementAt(videoTabSelectIndex)
+                                .rid,
+                            tagId: _controller.hotsTags
+                                .elementAt(hotsTagSelectIndex)
+                                .tagId,
+                            pn: ++videoPageNum,
+                            ps: 14);
+                        return _controller.videoMusicPageInfo.value.let((it) {
+                          if (videoPageNum <
+                              (it.count / it.size * 1.0).ceil()) {
+                            return IndicatorResult.success;
+                          } else {
+                            IndicatorResult.noMore;
+                          }
+                        });
+                      },
+                      child: CustomScrollView(
+                        slivers: [
+                          SliverGrid.count(
+                            crossAxisCount: getWindowsWidth(context).let((it) {
+                              if (it > ScreenSize.ExtraLarge) {
+                                return 5;
+                              } else if (it > ScreenSize.Large) {
+                                return 4;
+                              } else if (it > ScreenSize.Normal) {
+                                return 3;
+                              } else if (it > ScreenSize.Small) {
+                                return 2;
+                              } else {
+                                return 1;
+                              }
+                            }),
+                            crossAxisSpacing: 5,
+                            mainAxisSpacing: 5,
+                            childAspectRatio:
+                                getWindowsWidth(context).let((it) {
+                              if (it > ScreenSize.ExtraLarge) {
+                                return 1.3;
+                              } else if (it > ScreenSize.Large) {
+                                return 1.2;
+                              } else if (it > ScreenSize.Normal) {
+                                return 1.1;
+                              } else {
+                                return 1.05;
+                              }
+                            }),
+                            children: [
+                              for (var item in _controller.videoMusicList)
+                                LayoutBuilder(
+                                  builder: (context, box) {
+                                    //传递audioController是由于不希望Getx在每次循环都去Find
+                                    return VideoMusicCard(
+                                      item: item,
+                                      box: box,
+                                      audioController: _audioController,
+                                      biliAudioService: _biliAudioService,
+                                    );
+                                  },
+                                ),
+                            ],
                           ),
-                        ),
-                ],
-              ))
-              : const VideoCardGridViewShimmer())),),
+                          SliverFixedExtentList(
+                            itemExtent:
+                                _biliAudioService.playerIndex.value != null
+                                    ? 70
+                                    : 0,
+                            delegate: SliverChildBuilderDelegate(
+                              (BuildContext context, int index) {
+                                //创建列表项
+                                return Container();
+                              },
+                              childCount: 1,
+                            ),
+                          ),
+                        ],
+                      )));
+                }
+              },
+            )),
+      ),
     );
   }
 
 
   @override
   void initState() {
-    controller = Get.put(VideoMusicPageController());
-    audioController = Get.find<AudioController>();
-    userController = Get.find<UserController>();
-    tabController = TabController(
-        length: controller.tabItems.length, vsync: this, initialIndex: 0);
+    _controller = Get.put(VideoMusicPageController());
+    _audioController = Get.find<AudioController>();
+    _userController = Get.find<UserController>();
+    _tabController = TabController(
+        length: _controller.tabItems.length, vsync: this, initialIndex: 0);
 
     //默认使用第一条
-    initVideoListFuture = controller.loadNewVideoDynamicInfo(
-        rid: controller.tabItems.elementAt(0).rid, pn: videoPageNum, ps: 30);
+    _initVideoListFuture = _controller.initNewVideoList();
 
-    initHostTagFuture = controller.initHotsTag();
+    _initHostTagFuture = _controller.initHotsTag();
     super.initState();
   }
 

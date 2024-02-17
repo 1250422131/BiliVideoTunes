@@ -132,5 +132,10 @@ class VideoMusicPageController extends GetxController {
     await loadVideoList(cateId: 28, page: 1, pageSize: 30, isClear: true);
   }
 
+  Future<void> initNewVideoList() async{
+    await loadNewVideoDynamicInfo(
+        rid: tabItems.elementAt(0).rid, pn: 1, ps: 14);
+  }
+
 
 }

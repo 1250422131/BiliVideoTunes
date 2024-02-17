@@ -1,5 +1,7 @@
+import 'package:bili_video_tunes/common/api/user_info_api.dart';
 import 'package:bili_video_tunes/common/handler/bili_audio_handler.dart';
 import 'package:bili_video_tunes/common/model/local/lyric_data.dart';
+import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:get/get.dart';
 
 enum AudioMediaType { video, audio, cache, local, url }
@@ -13,8 +15,8 @@ class AudioMediaItem {
   String? bvId;
 
   //设置音频开始和结束时间
-  num? startTime;
-  num? endTime;
+  int? startTime;
+  int? endTime;
 
   // 歌词模块
   List<LyricData>? lyricList;
@@ -28,7 +30,7 @@ class AudioMediaItem {
       required this.type,
       this.mediaUrl,
       this.bvId,
-      this.startTime,
+      this.startTime = 0,
       this.endTime,
       this.lyricList,
       this.totalDuration = 0});
@@ -43,6 +45,33 @@ class AudioMediaItem {
 /// 本质上是对just_audio的再封装
 class AudioController extends GetxController {
   final BiliAudioHandler _biliAudioHandler = Get.find<BiliAudioHandler>();
+  final BiliAudioService _biliAudioService = Get.find<BiliAudioService>();
+
+  Future<void> loadPlayerHistoryList() async {
+    final playerHistoryList = await UserInfoApi.getPlayerHistoryInfo();
+    // 获取成功
+    if (playerHistoryList.code == 0) {
+      final mList = <AudioMediaItem>[];
+      for (var item in playerHistoryList.data!.list!) {
+        mList.add(AudioMediaItem(
+            title: item.title ?? "",
+            description: item.history?.part ?? "",
+            coverImageUrl: item.cover ?? "",
+            type: AudioMediaType.video,
+            bvId: item.history?.bvid,
+          startTime: item.progress?.toInt()
+        ));
+      }
+      _biliAudioService.playerList.addAll(mList);
+
+      // 播放最前面的
+      await playAtIndex(0);
+      await pause();
+      await seek(playerHistoryList.data!.list!.elementAt(0).progress!.toInt());
+
+
+    }
+  }
 
   Future<void> addPlayerAudio(AudioMediaItem audioMediaItem) async {
     await _biliAudioHandler.addPlayerAudio(audioMediaItem);

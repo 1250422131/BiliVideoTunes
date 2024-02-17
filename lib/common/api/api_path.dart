@@ -22,6 +22,15 @@ const String morePlayerIntoPath = "x/player/wbi/v2";
 // 登录用户信息
 const String loginUserInfoPath = "x/web-interface/nav";
 
+// 播放历史
+const String playerHistoryPath = "x/web-interface/history/cursor";
+
+// 播放日志上报
+const String historyReportPath = "x/v2/history/report";
+
+// 播放心跳
+const String playerHeartbeatPath = "x/click-interface/web/heartbeat";
+
 // 获取登录QR码
 const String loginQrcodeGeneratePath = "x/passport-login/web/qrcode/generate";
 

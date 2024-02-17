@@ -13,8 +13,6 @@ class LoginApiInterceptor implements Interceptor{
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
     // 替换BaseUrl
-    print(options.path);
-
     if (options.uri.path.contains("passport-login")) {
       options.baseUrl = passportBaseUrl;
     } else if (options.uri.path == bliUrl) {

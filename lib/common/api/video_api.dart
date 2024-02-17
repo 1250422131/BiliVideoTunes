@@ -4,6 +4,7 @@ import 'package:bili_video_tunes/common/model/network/video/video_base_info.dart
 import 'package:bili_video_tunes/common/model/network/video/video_player_dash_info.dart';
 import 'package:bili_video_tunes/common/model/network/video/video_subtitle_info.dart';
 import 'package:bili_video_tunes/common/utils/http_utils.dart';
+import 'package:dio/dio.dart';
 
 class VideoApi {
 
@@ -52,5 +53,40 @@ class VideoApi {
       {required String uri}) async {
     final result = await dioClient.get(uri);
     return VideoSubtitleInfo.fromJson(result.data);
+  }
+
+  // 心跳上报
+  static Future<void> postPlayerHeartbeat(
+      {num? aid,
+      String? bvid,
+      num? cid,
+      num? epid,
+      num? sid,
+      num? mid,
+      int? playedTime,
+      int? realtime,
+      int? startTs,
+      int? type,
+      int? subType,
+      int? playType,
+      String? csrf}) async {
+    csrf = csrf ?? await findCookieValueByName("bili_jct");
+    FormData formData = FormData.fromMap({
+      "aid": aid,
+      "bvid": bvid,
+      "cid": cid,
+      "epid": epid,
+      "sid": sid,
+      "mid": mid,
+      "played_time": playedTime,
+      "realtime": realtime,
+      "start_ts": startTs,
+      "type": type,
+      "sub_type": subType,
+      "play_type": playType,
+      "csrf": csrf
+    });
+    final result = await dioClient.post(playerHeartbeatPath, data: formData);
+    print(result.data);
   }
 }
