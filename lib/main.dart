@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:bili_video_tunes/common/controller/user_controller.dart';
 import 'package:bili_video_tunes/common/handler/bili_audio_handler.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
@@ -52,6 +53,7 @@ void main() async {
   ));
 
   // 全局支持音乐播放器和对应控制器
+  Get.put(UserController());
   Get.put(BiliAudioService());
   Get.put<BiliAudioHandler>(await initAudioService());
   Get.put(AudioController());
@@ -111,13 +113,13 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   // 控制器
   final PageController _pageController = PageController();
 
-  late AudioController audioController;
+  late AudioController _audioController;
 
   late BiliAudioService _biliAudioService;
 
   late BiliAudioHandler _biliAudioHandler;
 
-  late UserController userController;
+  late UserController _userController;
 
   late List<NavInfo> _navList;
 
@@ -135,9 +137,10 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   void initState() {
     super.initState();
     _biliAudioService = Get.find<BiliAudioService>();
-    audioController = Get.find<AudioController>();
-    userController = Get.put(UserController());
+    _audioController = Get.find<AudioController>();
+    _userController = Get.find<UserController>();
     _biliAudioHandler = Get.find<BiliAudioHandler>();
+
 
     initData();
     _navList = [
@@ -179,7 +182,15 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     // 初始化网络请求
     await initCookieJar();
     // 初始化用户信息
-    await userController.initLoginUserData();
+    await _userController.initLoginUserData();
+    // 音乐服务 -> 主动规避耳机电话等
+    final session = await AudioSession.instance;
+    await session.configure(const AudioSessionConfiguration.music());
+    // Activate the audio session before playing audio.
+    await session.setActive(true);
+
+    await _audioController.loadPlayerHistoryList();
+
   }
 
   @override
@@ -302,7 +313,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                         color: Colors.white,
                         child: Opacity(
                           opacity: _panelPosition,
-                          child: PlayerPage(),
+                          child: const PlayerPage(),
                         ),
                       ),
                     )) ??

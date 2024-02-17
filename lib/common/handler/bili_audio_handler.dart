@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:bili_video_tunes/common/api/api_path.dart';
 import 'package:bili_video_tunes/common/api/video_api.dart';
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
+import 'package:bili_video_tunes/common/controller/user_controller.dart';
 import 'package:bili_video_tunes/common/model/local/lyric_data.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
@@ -19,6 +20,7 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
   );
 
   final BiliAudioService _biliAudioService = Get.find<BiliAudioService>();
+  final UserController _userController = Get.find();
 
   // 播放任务列表
   late RxList<AudioMediaItem> _playerList;
@@ -88,11 +90,15 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
   @override
   Future<void> play() async {
     await _audioPlayer.play();
+    // 发布播放心跳
+    postPlayerHeartbeat();
   }
 
   @override
   Future<void> pause() async {
     await _audioPlayer.pause();
+    // 发布播放心跳
+    postPlayerHeartbeat(playType: 2);
   }
 
   @override
@@ -168,8 +174,21 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
   // 监听播放进度变化
   void listenPlayerPosition() {
     _audioPlayer.positionStream.listen((position) {
+      // 发布播放心跳
+      if (position.inSeconds != _currentPosition.value.inSeconds) {
+        _playerIndex.value?.also((it) {
+          if (position.inSeconds % 15 == 0) {
+            // 发布播放心跳
+            postPlayerHeartbeat(
+                playType: position.inSeconds == _totalDuration.value?.inSeconds
+                    ? 2
+                    : 0);
+          }
+        });
+      }
+      // 更新进度
       _currentPosition.value = position;
-      //更新歌词进度
+      // 更新歌词进度
       updateCurrentLine(position.inSeconds);
     });
   }
@@ -232,6 +251,8 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
   void playNext() {
     _playerIndex.value?.also((it) {
       if (it < _playerList.length - 1) {
+        // 心跳推送
+        postPlayerHeartbeat(playType: 2);
         it = it + 1;
         _analysisPlay(_playerList[it], mPlayerIndex: it);
       }
@@ -242,6 +263,8 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
   void playPrevious() {
     _playerIndex.value?.also((it) {
       if (it > 0) {
+        // 心跳推送
+        postPlayerHeartbeat(playType: 2);
         // 这不会导致playerIndex.value改变
         it = it - 1;
         _analysisPlay(_playerList[it], mPlayerIndex: it);
@@ -308,7 +331,7 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
     if (url != null) {
       await _audioPlayer
           .setUrl(url, headers: {userAgent: browserUserAgent, referer: bliUrl});
-      await _audioPlayer.play();
+      _audioPlayer.play();
     }
   }
 
@@ -359,4 +382,20 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
       ));
     });
   }
+
+  Future<void> postPlayerHeartbeat({ int? playType}) async {
+    _playerIndex.value?.also((it) {
+      final playerData = _playerList.elementAt(it);
+      // 必须是BV视频才能这样做
+      if (playerData.bvId != null) {
+        VideoApi.postPlayerHeartbeat(
+            bvid: playerData.bvId,
+            startTs: playerData.startTime,
+            playedTime: _currentPosition.value.inSeconds,
+            playType: playType);
+      }
+    });
+  }
+
 }
+

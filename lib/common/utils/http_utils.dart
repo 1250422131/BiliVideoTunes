@@ -31,3 +31,9 @@ Future<void> initCookieJar() async {
 
   _cookieJar = mCookieJar;
 }
+
+
+Future<String?> findCookieValueByName(String name) async{
+  final cookies = await _cookieJar.loadForRequest(Uri.parse(bliUrl));
+  return cookies.where((element) => element.name == name).firstOrNull?.value;
+}
