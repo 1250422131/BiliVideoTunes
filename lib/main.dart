@@ -302,7 +302,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                           _panelPosition = position;
                         });
                       },
-                      minHeight: 54,
+                      minHeight: 50,
                       collapsed: SizedBox(
                           child: MusicPlayer(
                             panelController: _panelController,

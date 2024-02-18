@@ -26,12 +26,12 @@ class _UserInfoPageState extends State<UserInfoPage>
 
   @override
   void initState() {
+    _initMyUserPageDataFuture = initMyUserPageData();
     initMyUserPageData();
     super.initState();
   }
 
   Future<void> initMyUserPageData() async {
-    _initMyUserPageDataFuture = initMyUserPageData();
     await _controller.initMeUserData();
     await _controller.initPlayerHistory();
   }
@@ -68,7 +68,7 @@ class _UserInfoPageState extends State<UserInfoPage>
                     retryTip: "重试",
                     retry: () {
                       setState(() {
-                        initMyUserPageData();
+                        _initMyUserPageDataFuture = initMyUserPageData();
                       });
                     });
               } else {
@@ -267,10 +267,11 @@ class _UserInfoPageState extends State<UserInfoPage>
                         tip: "未登录",
                         iconData: Icons.cloud_off_rounded,
                         retryTip: "登录",
-                        retry: () {
-                          setState(() async{
-                           await showLoginDialog();
-                           initMyUserPageData();
+                        retry: () async{
+                          await showLoginDialog();
+                          setState(() {
+                            _initMyUserPageDataFuture = initMyUserPageData();
+                            _audioController.loadPlayerHistoryList();
                           });
                         });
               }

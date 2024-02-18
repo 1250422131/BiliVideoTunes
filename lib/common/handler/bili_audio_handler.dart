@@ -316,21 +316,24 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
         } else {
           newPlayIndex++;
         }
+        // 否则在下一曲插入
         _playerIndex.value = newPlayIndex;
+        _playerList.insert(newPlayIndex, audioMediaItem);
+        queue.value.insert(newPlayIndex, audioMediaItem.toMediaItem());
       }
 
       await _player(videoPlayerInfo.data?.dash?.audio
           ?.elementAt(0)
           .backupUrl
-          ?.elementAt(0));
+          ?.elementAt(0),audioMediaItem.startTime?.toInt());
     }
   }
 
   // 播放音乐
-  Future<void> _player(String? url) async {
+  Future<void> _player(String? url,int? initialPosition) async {
     if (url != null) {
       await _audioPlayer
-          .setUrl(url, headers: {userAgent: browserUserAgent, referer: bliUrl});
+          .setUrl(url, headers: {userAgent: browserUserAgent, referer: bliUrl},initialPosition: Duration(seconds: initialPosition ?? 0));
       _audioPlayer.play();
     }
   }

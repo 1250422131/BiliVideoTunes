@@ -1,6 +1,7 @@
 import 'package:bili_video_tunes/common/api/user_info_api.dart';
 import 'package:bili_video_tunes/common/handler/bili_audio_handler.dart';
 import 'package:bili_video_tunes/common/model/local/lyric_data.dart';
+import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:get/get.dart';
 
@@ -52,24 +53,31 @@ class AudioController extends GetxController {
     // 获取成功
     if (playerHistoryList.code == 0) {
       final mList = <AudioMediaItem>[];
-      for (var item in playerHistoryList.data!.list!) {
-        mList.add(AudioMediaItem(
+
+      playerHistoryList.data!.list!.asMap().forEach((index, item) {
+
+        final playerData = AudioMediaItem(
             title: item.title ?? "",
             description: item.history?.part ?? "",
             coverImageUrl: item.cover ?? "",
             type: AudioMediaType.video,
             bvId: item.history?.bvid,
-          startTime: item.progress?.toInt()
-        ));
-      }
+            startTime: index != 0 ?  item.progress?.toInt() : 0 // 只有第一首保留播放进度！
+        );
+
+
+        mList.add(playerData);
+        _biliAudioHandler.addQueueItem(playerData.toMediaItem());
+
+      });
+
+
       _biliAudioService.playerList.addAll(mList);
+
 
       // 播放最前面的
       await playAtIndex(0);
       await pause();
-      await seek(playerHistoryList.data!.list!.elementAt(0).progress!.toInt());
-
-
     }
   }
 
