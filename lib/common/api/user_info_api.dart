@@ -10,8 +10,14 @@ class UserInfoApi {
     return LoginUserInfo.fromJson(loginUserInfo.data);
   }
 
-  static Future<PlayerHistoryInfo> getPlayerHistoryInfo() async{
-    final playerHistoryInfo = await dioClient.get(playerHistoryPath);
+  static Future<PlayerHistoryInfo> getPlayerHistoryInfo(
+      {int? max, int? viewAt, String? business = "archive"}) async {
+    final playerHistoryInfo =
+        await dioClient.get(playerHistoryPath, queryParameters: {
+      "max": max,
+      "view_at": viewAt,
+      "business": business,
+    });
     return PlayerHistoryInfo.fromJson(playerHistoryInfo.data);
   }
 }
