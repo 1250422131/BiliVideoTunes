@@ -2,9 +2,11 @@ import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/weight/common_error.dart';
 import 'package:bili_video_tunes/common/weight/player_history_card.dart';
 import 'package:bili_video_tunes/common/weight/shimmer/user_page_shimmer.dart';
+import 'package:bili_video_tunes/common/weight/song_sheet_card.dart';
 import 'package:bili_video_tunes/pages/main/user_info/controller.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../common/weight/qr_login_dialog/view.dart';
@@ -23,17 +25,23 @@ class _UserInfoPageState extends State<UserInfoPage>
   final AudioController _audioController = Get.find();
   final BiliAudioService _biliAudioService = Get.find();
   late Future<void> _initMyUserPageDataFuture;
+  late Future<void> _initUserVideoFolder;
+  final _methodChannel = const MethodChannel('openAppChannel');
+
 
   @override
   void initState() {
     _initMyUserPageDataFuture = initMyUserPageData();
-    initMyUserPageData();
+    // initMyUserPageData();
+
+
     super.initState();
   }
 
   Future<void> initMyUserPageData() async {
     await _controller.initMeUserData();
     await _controller.initPlayerHistory();
+    await _controller.initUserVideoFolder();
   }
 
   @override
@@ -183,9 +191,15 @@ class _UserInfoPageState extends State<UserInfoPage>
                                             const SizedBox(
                                               width: 2,
                                             ),
-                                            const Text(
-                                              "B站首页",
-                                              style: TextStyle(fontSize: 12),
+                                             InkWell(
+                                                onTap: () async{
+                                                  var map = {'name':'哔哩哔哩','package':'tv.danmaku.bili','path':'bilibili://qrscan'};
+                                                   await _methodChannel.invokeMethod('openAppChannel',map);
+                                                },
+                                                 child: const Text(
+                                                   "B站首页",
+                                                   style: TextStyle(fontSize: 12),
+                                                 )
                                             ),
                                           ],
                                         )
@@ -257,6 +271,139 @@ class _UserInfoPageState extends State<UserInfoPage>
                                         ),
                                     ],
                                   ),
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.playlist_play_rounded,
+                                        ),
+                                        SizedBox(
+                                          width: 4,
+                                        ),
+                                        Text("我的歌单")
+                                      ],
+                                    ),
+                                    TextButton(
+                                        onPressed: () {},
+                                        child: const Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Text("更多"),
+                                            Icon(Icons.navigate_next_rounded),
+                                          ],
+                                        )),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                        child: Padding(
+                                      padding: const EdgeInsets.only(left: 7),
+                                      child: FilledButton.tonal(
+                                          onPressed: () {},
+                                          child: const Padding(
+                                            padding: EdgeInsets.only(
+                                                top: 10, bottom: 10),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.add_outlined),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Text(
+                                                  "新建我的歌单",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )
+                                              ],
+                                            ),
+                                          )),
+                                    )),
+                                    Expanded(
+                                        child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 7, right: 7),
+                                      child: FilledButton.tonal(
+                                        style: ButtonStyle(
+                                          backgroundColor: MaterialStateProperty
+                                              .resolveWith<Color?>(
+                                                  (Set<MaterialState> states) {
+                                            if (states.contains(
+                                                MaterialState.pressed)) {
+                                              // 当按钮被按下时的背景颜色
+                                              return Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withOpacity(0.2);
+                                            } else {
+                                              // 默认状态下的背景颜色
+                                              return Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withOpacity(0.1);
+                                            }
+                                          }),
+                                        ),
+                                        onPressed: () {},
+                                        child: const Padding(
+                                          padding: EdgeInsets.only(
+                                              top: 10, bottom: 10),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.edit_outlined),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              Text(
+                                                "编辑我的歌单",
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    )),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 15),
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Wrap(
+                                      spacing: 20,
+                                      children: List.generate(
+                                          _controller
+                                              .favorites.length,
+                                          (index) => SongSheetCard(
+                                                id: _controller
+                                                        .favorites[index].id ??
+                                                    0,
+                                                title: _controller
+                                                        .favorites[index]
+                                                        .title ??
+                                                    "",
+                                                cover: _controller
+                                                        .favorites[index]
+                                                        .cover ??
+                                                    "",
+                                              )),
+                                    ),
+                                  ),
                                 )
                               ],
                             ),
@@ -267,7 +414,7 @@ class _UserInfoPageState extends State<UserInfoPage>
                         tip: "未登录",
                         iconData: Icons.cloud_off_rounded,
                         retryTip: "登录",
-                        retry: () async{
+                        retry: () async {
                           await showLoginDialog();
                           setState(() {
                             _initMyUserPageDataFuture = initMyUserPageData();

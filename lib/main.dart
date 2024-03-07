@@ -189,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     // Activate the audio session before playing audio.
     await session.setActive(true);
 
-    await _audioController.loadPlayerHistoryList();
+    // await _audioController.loadPlayerHistoryList();
 
   }
 

@@ -3,6 +3,8 @@ import 'package:bili_video_tunes/common/model/network/user/login_user_info.dart'
 import 'package:bili_video_tunes/common/model/network/user/player_history_info.dart';
 import 'package:bili_video_tunes/common/utils/http_utils.dart';
 
+import '../model/network/user/user_created_folder_info.dart';
+
 class UserInfoApi {
   // 获取登录用户信息
   static Future<LoginUserInfo> getLoginUserInfo() async {
@@ -19,5 +21,19 @@ class UserInfoApi {
       "business": business,
     });
     return PlayerHistoryInfo.fromJson(playerHistoryInfo.data);
+  }
+
+  static Future<UserCreatedFolderInfo> getUserCreatedFolderInfo({
+    required num mid,
+    int pn = 1,
+    int ps = 10,
+  }) async {
+    final userCreatedFolderInfo =
+        await dioClient.get(userCreateFolderListPath, queryParameters: {
+      "up_mid": mid,
+      "pn": pn,
+      "ps": ps,
+    });
+    return UserCreatedFolderInfo.fromJson(userCreatedFolderInfo.data);
   }
 }

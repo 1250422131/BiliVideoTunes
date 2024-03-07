@@ -93,12 +93,12 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                           child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Image.network(
-                          cacheWidth: (_box.maxWidth *
-                                  MediaQuery.of(context).devicePixelRatio)
-                              .toInt(),
-                          cacheHeight: (_box.maxHeight *
-                                  MediaQuery.of(context).devicePixelRatio)
-                              .toInt(),
+                          // cacheWidth: (_box.maxWidth *
+                          //         MediaQuery.of(context).devicePixelRatio)
+                          //     .toInt(),
+                          // cacheHeight: (_box.maxHeight *
+                          //         MediaQuery.of(context).devicePixelRatio)
+                          //     .toInt(),
                           height: getWindowsWidth(context).let((it) {
                             if (it > ScreenSize.ExtraLarge) {
                               return 140;
