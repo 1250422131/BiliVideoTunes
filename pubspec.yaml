@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0-Guitar-Alpha-63+1
 
 environment:
-  sdk: '>=3.2.4 <4.0.0'
+  sdk: '>=3.3.0 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -59,8 +59,8 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 
-#  # 二维码
-#  qr_flutter: ^4.1.0
+  #  # 二维码
+  #  qr_flutter: ^4.1.0
 
   # 文件路径系统
   path_provider: ^2.1.2
@@ -106,8 +106,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/images/app/bili_load.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

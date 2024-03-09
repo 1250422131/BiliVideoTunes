@@ -90,8 +90,6 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
   @override
   Future<void> play() async {
     await _audioPlayer.play();
-    // 发布播放心跳
-    postPlayerHeartbeat();
   }
 
   @override
@@ -174,7 +172,6 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
   // 监听播放进度变化
   void listenPlayerPosition() {
     _audioPlayer.positionStream.listen((position) {
-      // 发布播放心跳
       if (position.inSeconds != _currentPosition.value.inSeconds) {
         _playerIndex.value?.also((it) {
           if (position.inSeconds % 15 == 0) {

@@ -1,6 +1,7 @@
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/model/network/video_music/new_video_dynamic_info.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
+import 'package:bili_video_tunes/common/weight/video_cover_image.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -16,15 +17,19 @@ class VideoMusicCard extends StatefulWidget {
 
   final BiliAudioService biliAudioService;
 
-
-  const VideoMusicCard({Key? key, required this.box, required this.item, required this.audioController, required this.biliAudioService}) : super(key: key);
+  const VideoMusicCard(
+      {Key? key,
+      required this.box,
+      required this.item,
+      required this.audioController,
+      required this.biliAudioService})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _VideoMusicCardState();
 }
 
 class _VideoMusicCardState extends State<VideoMusicCard> {
-
   late BoxConstraints _box;
 
   late Archives _item;
@@ -57,7 +62,6 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
       return '$minutesStr:$secondsStr';
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -92,14 +96,10 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                       Expanded(
                           child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          // cacheWidth: (_box.maxWidth *
-                          //         MediaQuery.of(context).devicePixelRatio)
-                          //     .toInt(),
-                          // cacheHeight: (_box.maxHeight *
-                          //         MediaQuery.of(context).devicePixelRatio)
-                          //     .toInt(),
-                          height: getWindowsWidth(context).let((it) {
+                        child: LayoutBuilder(
+                            builder: (BuildContext context, constraints) {
+                          final imageHeight =
+                              getWindowsWidth(context).let((it) {
                             if (it > ScreenSize.ExtraLarge) {
                               return 140;
                             } else if (it > ScreenSize.Large) {
@@ -107,11 +107,18 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                             } else {
                               return 100;
                             }
-                          }),
-                          filterQuality: FilterQuality.none,
-                          "${_item.pic}",
-                          fit: BoxFit.cover, //设置图片的平铺模式
-                        ),
+                          }).toDouble();
+                          return VideoCoverImage(
+                            // cacheWidth: (_box.maxWidth *
+                            //         MediaQuery.of(context).devicePixelRatio)
+                            //     .toInt(),
+                            // cacheHeight: (_box.maxHeight *
+                            //         MediaQuery.of(context).devicePixelRatio)
+                            //     .toInt(),
+                            coverUrl: "${_item.pic}",
+                            height: imageHeight,
+                          );
+                        }),
                       )),
                     ],
                   ),
