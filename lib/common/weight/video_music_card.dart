@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 
 import '../utils/screen_utils.dart';
+import 'badge.dart';
 
 class VideoMusicCard extends StatefulWidget {
   final BoxConstraints box;
@@ -122,21 +123,14 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                       )),
                     ],
                   ),
-                  Positioned(
-                      right: 4,
-                      bottom: 4,
-                      child: Text(
-                        formatSeconds(_item.duration ?? 0),
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            shadows: [
-                              BoxShadow(
-                                  color: Colors.black87,
-                                  blurRadius: 10,
-                                  spreadRadius: 10)
-                            ]),
-                      ))
+                  if ((_item.duration ?? 0) > 0)
+                    PBadge(
+                      bottom: 6,
+                      right: 7,
+                      size: 'small',
+                      type: 'gray',
+                      text:formatSeconds(_item.duration ?? 0),
+                    )
                 ],
               ),
               Expanded(
@@ -151,11 +145,30 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const Spacer(),
-                      Text(
-                        _item.owner?.name ?? "解析错误",
-                        style: TextStyle(
-                            fontSize: 12, color: Theme.of(context).hintColor),
-                      ),
+                      Row(
+                        children: [
+                          if (_item.rcmdReason != '') ...[
+                            PBadge(
+                              text: _item.rcmdReason,
+                              stack: 'normal',
+                              size: 'small',
+                              type: 'color',
+                            )
+                          ],
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              _item.owner?.name ?? "解析错误",
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize:
+                                Theme.of(context).textTheme.labelMedium!.fontSize,
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                 ),

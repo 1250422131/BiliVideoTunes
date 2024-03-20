@@ -10,7 +10,8 @@ import '../controller/audio_controller.dart';
 class MusicPlayer extends StatefulWidget {
   final PanelController panelController;
 
-  const MusicPlayer({Key? key, required this.panelController}) : super(key: key);
+  const MusicPlayer({Key? key, required this.panelController})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _MusicPlayerState();
@@ -48,20 +49,22 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       ),
                       child: InkWell(
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 8,right: 8,top: 0.8,bottom: 0.8),
+                          padding: const EdgeInsets.only(
+                              left: 8, right: 8, top: 0.8, bottom: 0.8),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               ClipRRect(
                                 borderRadius:
-                                const BorderRadius.all(Radius.circular(5)),
+                                    const BorderRadius.all(Radius.circular(5)),
                                 child: Obx(() => Hero(
                                     tag: "cover",
                                     child: Image.network(
-                                      _biliAudioService.playerIndex.value?.let((it) {
-                                        return _biliAudioService
-                                            .playerList[it].coverImageUrl;
-                                      }) ??
+                                      _biliAudioService.playerIndex.value
+                                              ?.let((it) {
+                                            return _biliAudioService
+                                                .playerList[it].coverImageUrl;
+                                          }) ??
                                           "https://picx.zhimg.com/70/v2-53504944558fe60816f2633fd7543f72_1440w.png",
                                       width: 35,
                                       height: 35,
@@ -70,34 +73,35 @@ class _MusicPlayerState extends State<MusicPlayer> {
                               ),
                               Expanded(
                                   child: Padding(
-                                    padding: const EdgeInsets.only(left: 10),
-                                    child: Obx(() => Text(
-                                      _biliAudioService.playerIndex.value?.let((it) {
-                                        return _biliAudioService.playerList
-                                            .elementAt(it)
-                                            .title;
-                                      }) ??
+                                padding: const EdgeInsets.only(left: 10),
+                                child: Obx(() => Text(
+                                      _biliAudioService.playerIndex.value
+                                              ?.let((it) {
+                                            return _biliAudioService.playerList
+                                                .elementAt(it)
+                                                .title;
+                                          }) ??
                                           "暂无播放",
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                       softWrap: false,
                                     )),
-                                  )),
+                              )),
                               Padding(
                                 padding: const EdgeInsets.only(right: 10),
                                 child: Obx(() =>
-                                _biliAudioService.playerState.value.playing
-                                    ? IconButton(
-                                    onPressed: () {
-                                      controller.pause();
-                                    },
-                                    icon: const Icon(Icons.pause))
-                                    : IconButton(
-                                    onPressed: () {
-                                      controller.play();
-                                    },
-                                    icon: const Icon(
-                                        Icons.play_arrow_rounded))),
+                                    _biliAudioService.playerState.value.playing
+                                        ? IconButton(
+                                            onPressed: () {
+                                              controller.pause();
+                                            },
+                                            icon: const Icon(Icons.pause))
+                                        : IconButton(
+                                            onPressed: () {
+                                              controller.play();
+                                            },
+                                            icon: const Icon(
+                                                Icons.play_arrow_rounded))),
                               ),
                             ],
                           ),
@@ -119,10 +123,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
             ),
           ),
           Obx(
-                () => LinearProgressIndicator(
+            () => LinearProgressIndicator(
               value: _biliAudioService.totalDuration.value != null
                   ? (_biliAudioService.currentPosition.value.inSeconds /
-                  _biliAudioService.totalDuration.value!.inSeconds)
+                      _biliAudioService.totalDuration.value!.inSeconds)
                   : 0,
             ),
           )

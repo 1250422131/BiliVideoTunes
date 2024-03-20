@@ -18,10 +18,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:isar/isar.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'common/controller/audio_controller.dart';
+import 'common/di/database_model.dart';
 
 void main() async {
   if (!Platform.isAndroid && !Platform.isIOS && !kIsWeb) {
@@ -54,12 +56,16 @@ void main() async {
 
   // 全局支持音乐播放器和对应控制器
   Get.put(UserController());
+  Get.put<Isar>(await initDatabase());
   Get.put(BiliAudioService());
   Get.put<BiliAudioHandler>(await initAudioService());
   Get.put(AudioController());
 
+
   runApp(const MyApp());
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -76,6 +82,7 @@ class MyApp extends StatelessWidget {
     return DynamicColorBuilder(builder: (lightColorScheme, darkColorScheme) {
       return GetMaterialApp(
         title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: lightColorScheme ?? _defaultLightColorScheme,
           useMaterial3: true,
@@ -189,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     // Activate the audio session before playing audio.
     await session.setActive(true);
 
-    // await _audioController.loadPlayerHistoryList();
+    await _audioController.loadPlayerHistoryList();
 
   }
 

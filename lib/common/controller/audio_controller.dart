@@ -1,9 +1,11 @@
 import 'package:bili_video_tunes/common/api/user_info_api.dart';
 import 'package:bili_video_tunes/common/handler/bili_audio_handler.dart';
+import 'package:bili_video_tunes/common/model/local/isar/video_audio_player_task.dart';
 import 'package:bili_video_tunes/common/model/local/lyric_data.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:get/get.dart';
+import 'package:isar/isar.dart';
 
 enum AudioMediaType { video, audio, cache, local, url }
 
@@ -47,42 +49,55 @@ class AudioMediaItem {
 class AudioController extends GetxController {
   final BiliAudioHandler _biliAudioHandler = Get.find<BiliAudioHandler>();
   final BiliAudioService _biliAudioService = Get.find<BiliAudioService>();
+  final Isar _isar = Get.find();
 
   Future<void> loadPlayerHistoryList() async {
-    final playerHistoryList = await UserInfoApi.getPlayerHistoryInfo();
-    // 获取成功
-    if (playerHistoryList.code == 0) {
-      final mList = <AudioMediaItem>[];
+    // final playerHistoryList = await UserInfoApi.getPlayerHistoryInfo();
+    // // 获取成功
+    // if (playerHistoryList.code == 0) {
+    //   final mList = <AudioMediaItem>[];
+    //
+    //   playerHistoryList.data!.list!.asMap().forEach((index, item) {
+    //
+    //     final playerData = AudioMediaItem(
+    //         title: item.title ?? "",
+    //         description: item.history?.part ?? "",
+    //         coverImageUrl: item.cover ?? "",
+    //         type: AudioMediaType.video,
+    //         bvId: item.history?.bvid,
+    //         startTime: index != 0 ?  item.progress?.toInt() : 0 // 只有第一首保留播放进度！
+    //     );
+    //
+    //
+    //     mList.add(playerData);
+    //     _biliAudioHandler.addQueueItem(playerData.toMediaItem());
+    //
+    //   });
+    //
+    //
+    //   _biliAudioService.playerList.addAll(mList);
+    //
+    //
+    //   // 播放最前面的
+    //   await playAtIndex(0);
+    //   await pause();
+    // }
 
-      playerHistoryList.data!.list!.asMap().forEach((index, item) {
-
-        final playerData = AudioMediaItem(
-            title: item.title ?? "",
-            description: item.history?.part ?? "",
-            coverImageUrl: item.cover ?? "",
-            type: AudioMediaType.video,
-            bvId: item.history?.bvid,
-            startTime: index != 0 ?  item.progress?.toInt() : 0 // 只有第一首保留播放进度！
-        );
-
-
-        mList.add(playerData);
-        _biliAudioHandler.addQueueItem(playerData.toMediaItem());
-
-      });
-
-
-      _biliAudioService.playerList.addAll(mList);
-
-
-      // 播放最前面的
+    final mList = await _isar.videoAudioPlayerTasks.where().findAll();
+    for (var element in mList) {
+      _biliAudioHandler.addQueueItem(element.toAudioMediaItem().toMediaItem());
+      _biliAudioService.playerList.add(element.toAudioMediaItem());
+    }
       await playAtIndex(0);
       await pause();
-    }
   }
 
   Future<void> addPlayerAudio(AudioMediaItem audioMediaItem) async {
     await _biliAudioHandler.addPlayerAudio(audioMediaItem);
+    await _isar.writeTxn(() async {
+      await _isar.videoAudioPlayerTasks
+          .put(audioMediaItem.toVideoAudioPlayerTask());
+    });
   }
 
   void updateCurrentLine(int currentTime) {

@@ -418,7 +418,6 @@ class _UserInfoPageState extends State<UserInfoPage>
                           await showLoginDialog();
                           setState(() {
                             _initMyUserPageDataFuture = initMyUserPageData();
-                            _audioController.loadPlayerHistoryList();
                           });
                         });
               }

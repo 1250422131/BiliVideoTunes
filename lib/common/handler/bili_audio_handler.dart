@@ -3,11 +3,13 @@ import 'package:bili_video_tunes/common/api/api_path.dart';
 import 'package:bili_video_tunes/common/api/video_api.dart';
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/controller/user_controller.dart';
+import 'package:bili_video_tunes/common/model/local/isar/video_audio_player_task.dart';
 import 'package:bili_video_tunes/common/model/local/lyric_data.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:isar/isar.dart';
 import 'package:just_audio/just_audio.dart';
 
 /// 务必注意 BiliAudioHandler 本身是不接管解析业务的，当由各个Controller完成。
@@ -15,6 +17,8 @@ import 'package:just_audio/just_audio.dart';
 /// TODO 待分离解析逻辑
 class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
     SeekHandler{
+
+
   final AudioPlayer _audioPlayer = AudioPlayer(
     useProxyForRequestHeaders: false, // 关闭代理，否则需要允许明文
   );
@@ -95,8 +99,8 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
   @override
   Future<void> pause() async {
     await _audioPlayer.pause();
-    // 发布播放心跳
-    postPlayerHeartbeat(playType: 2);
+    // // 发布播放心跳
+    // postPlayerHeartbeat(playType: 2);
   }
 
   @override

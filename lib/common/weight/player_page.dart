@@ -126,6 +126,7 @@ class _PlayerPageState extends State<PlayerPage>
                     "播放列表",
                     textAlign: TextAlign.center,
                   ),
+                  toolbarHeight: 56+MediaQuery.of(context).padding.top,
                 ),
                 body: Obx(() =>  ReorderableListView(
                     onReorder: (int oldIndex, int newIndex) {
@@ -137,7 +138,6 @@ class _PlayerPageState extends State<PlayerPage>
                         final item =
                         _biliAudioService.playerList.removeAt(oldIndex);
                         _biliAudioService.playerList.insert(newIndex, item);
-
 
                         // 更新高亮索引
                         if ((_biliAudioService.playerIndex.value ?? 0) == oldIndex) {
