@@ -69,3 +69,5 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer-dash:$exoplayer_version"
 
 }
+
+apply plugin: 'com.google.gms.google-services'

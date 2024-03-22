@@ -3,22 +3,17 @@ import 'package:bili_video_tunes/common/api/api_path.dart';
 import 'package:bili_video_tunes/common/api/video_api.dart';
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/controller/user_controller.dart';
-import 'package:bili_video_tunes/common/model/local/isar/video_audio_player_task.dart';
 import 'package:bili_video_tunes/common/model/local/lyric_data.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
 import 'package:just_audio/just_audio.dart';
 
 /// 务必注意 BiliAudioHandler 本身是不接管解析业务的，当由各个Controller完成。
 /// 目前这样只是为了快速实现功能
 /// TODO 待分离解析逻辑
-class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
-    SeekHandler{
-
-
+class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   final AudioPlayer _audioPlayer = AudioPlayer(
     useProxyForRequestHeaders: false, // 关闭代理，否则需要允许明文
   );
@@ -72,10 +67,13 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
     listenPlayerDuration();
     listenPlayerLoopModel();
     // 打开通知
-    _notifyAudioHandlerAboutPlaybackEvents();
-    _listenForDurationChanges();
+    
+    if (GetPlatform.isMobile) {
+      // 移动端才具有这个功能
+      _notifyAudioHandlerAboutPlaybackEvents();
+      _listenForDurationChanges();
+    }
   }
-
 
   void _listenForDurationChanges() {
     _audioPlayer.durationStream.listen((duration) {
@@ -323,18 +321,21 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
         queue.value.insert(newPlayIndex, audioMediaItem.toMediaItem());
       }
 
-      await _player(videoPlayerInfo.data?.dash?.audio
-          ?.elementAt(0)
-          .backupUrl
-          ?.elementAt(0),audioMediaItem.startTime?.toInt());
+      await _player(
+          videoPlayerInfo.data?.dash?.audio
+              ?.elementAt(0)
+              .backupUrl
+              ?.elementAt(0),
+          audioMediaItem.startTime?.toInt());
     }
   }
 
   // 播放音乐
-  Future<void> _player(String? url,int? initialPosition) async {
+  Future<void> _player(String? url, int? initialPosition) async {
     if (url != null) {
-      await _audioPlayer
-          .setUrl(url, headers: {userAgent: browserUserAgent, referer: bliUrl},initialPosition: Duration(seconds: initialPosition ?? 0));
+      await _audioPlayer.setUrl(url,
+          headers: {userAgent: browserUserAgent, referer: bliUrl},
+          initialPosition: Duration(seconds: initialPosition ?? 0));
       _audioPlayer.play();
     }
   }
@@ -357,7 +358,7 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
   }
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
-    _audioPlayer.playbackEventStream.listen((PlaybackEvent event) async{
+    _audioPlayer.playbackEventStream.listen((PlaybackEvent event) async {
       final playing = _audioPlayer.playing;
 
       playbackState.add(playbackState.value.copyWith(
@@ -387,7 +388,7 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
     });
   }
 
-  Future<void> postPlayerHeartbeat({ int? playType}) async {
+  Future<void> postPlayerHeartbeat({int? playType}) async {
     _playerIndex.value?.also((it) {
       final playerData = _playerList.elementAt(it);
       // 必须是BV视频才能这样做
@@ -400,6 +401,4 @@ class BiliAudioHandler extends BaseAudioHandler  with QueueHandler,
       }
     });
   }
-
 }
-

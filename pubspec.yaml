@@ -84,6 +84,8 @@ dependencies:
   # 窗口管理
   window_manager: ^0.3.7
   path: ^1.8.3
+  firebase_core: ^2.27.1
+  firebase_analytics: ^10.8.10
 
 
 dev_dependencies:

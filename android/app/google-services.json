@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1095515545580",
+    "project_id": "bilivideotunes",
+    "storage_bucket": "bilivideotunes.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1095515545580:android:dc9144987f5d765b472ac9",
+        "android_client_info": {
+          "package_name": "com.imcys.bilivideotunes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZ4wo9fGJPU77cBH2w8k2jh9C05OXSEyc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

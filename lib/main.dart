@@ -14,6 +14,8 @@ import 'package:bili_video_tunes/pages/main/video_music/index.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:bili_video_tunes/services/service_locator.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +26,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'common/controller/audio_controller.dart';
 import 'common/di/database_model.dart';
+import 'firebase_options.dart';
 
 void main() async {
   if (!Platform.isAndroid && !Platform.isIOS && !kIsWeb) {
@@ -58,14 +61,22 @@ void main() async {
   Get.put(UserController());
   Get.put<Isar>(await initDatabase());
   Get.put(BiliAudioService());
-  Get.put<BiliAudioHandler>(await initAudioService());
+
+  if (GetPlatform.isMobile) {
+    // 移动端服务
+    Get.put<BiliAudioHandler>(await initAudioService());
+  }
+
   Get.put(AudioController());
 
+  if (!GetPlatform.isWindows && !GetPlatform.isLinux) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
 
   runApp(const MyApp());
 }
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -75,6 +86,11 @@ class MyApp extends StatelessWidget {
 
   static final _defaultDarkColorScheme = ColorScheme.fromSeed(
       seedColor: Colors.deepPurple, brightness: Brightness.dark);
+
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
+  static FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: analytics);
 
   // This widget is the root of your application.
   @override
@@ -87,20 +103,32 @@ class MyApp extends StatelessWidget {
           colorScheme: lightColorScheme ?? _defaultLightColorScheme,
           useMaterial3: true,
         ),
+        // navigatorObservers: [observer],
         darkTheme: ThemeData(
           colorScheme: darkColorScheme ?? _defaultDarkColorScheme,
           useMaterial3: true,
         ),
-        home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        home: MyHomePage(
+          title: 'Flutter Demo Home Page',
+          analytics: analytics,
+          observer: observer,
+        ),
       );
     });
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({
+    Key? key,
+    required this.title,
+    required this.analytics,
+    required this.observer,
+  }) : super(key: key);
 
   final String title;
+  final FirebaseAnalytics analytics;
+  final FirebaseAnalyticsObserver observer;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -116,7 +144,6 @@ class NavInfo {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WindowListener {
-
   // 控制器
   final PageController _pageController = PageController();
 
@@ -147,7 +174,6 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     _audioController = Get.find<AudioController>();
     _userController = Get.find<UserController>();
     _biliAudioHandler = Get.find<BiliAudioHandler>();
-
 
     initData();
     _navList = [
@@ -190,81 +216,38 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     await initCookieJar();
     // 初始化用户信息
     await _userController.initLoginUserData();
-    // 音乐服务 -> 主动规避耳机电话等
-    final session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration.music());
-    // Activate the audio session before playing audio.
-    await session.setActive(true);
+
+    // 只在移动端生效
+    if (GetPlatform.isMobile) {
+      // 音乐服务 -> 主动规避耳机电话等
+      final session = await AudioSession.instance;
+      await session.configure(const AudioSessionConfiguration.music());
+      // Activate the audio session before playing audio.
+      await session.setActive(true);
+    }
 
     await _audioController.loadPlayerHistoryList();
 
+    // 上报日志
+    await widget.analytics.logAppOpen();
   }
 
   @override
   Widget build(BuildContext context) {
-    final windowsButtonStyle = ButtonStyle(
-      shape: MaterialStateProperty.all<OutlinedBorder>(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
-        ),
-      ),
-    );
 
     return Scaffold(
-      appBar:!Platform.isAndroid && !Platform.isIOS && !kIsWeb ? AppBar(
-        toolbarHeight: 32,
-        actions: [
-          IconButton(
-            constraints: const BoxConstraints(
-                maxHeight: 30,
-                maxWidth: 30
-            ),
-            padding: const EdgeInsets.all(6),
-            style: windowsButtonStyle,
-            iconSize: 15,
-            icon: const Icon(Icons.horizontal_rule),
-            onPressed: () {
-              windowManager.minimize();
-            },
-          ),
-          IconButton(
-            constraints: const BoxConstraints(
-                maxHeight: 30,
-                maxWidth: 30
-            ),
-            padding: const EdgeInsets.all(6),
-            style: windowsButtonStyle,
-            iconSize: 15,
-            icon: const Icon(Icons.crop_square_rounded),
-            onPressed: () {
-              windowManager.maximize();
-            },
-          ),
-          IconButton(
-            constraints: const BoxConstraints(
-                maxHeight: 30,
-                maxWidth: 30
-            ),
-            padding: const EdgeInsets.all(6),
-            style: windowsButtonStyle,
-            hoverColor: Colors.red,
-            iconSize: 15,
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              windowManager.close();
-            },
-                ),
-          const SizedBox(width: 5,)
-        ],
-      ) : null,
-
+      appBar: !Platform.isAndroid && !Platform.isIOS && !kIsWeb
+          ? buildMainAppBar()
+          : null,
       body: PopScope(
         onPopInvoked: (bool didPop) {
-          if(_panelController.isPanelOpen){
+          if (_panelController.isPanelOpen) {
             _panelController.close();
           }
         },
-        canPop: _panelController.isAttached ? _panelController.isPanelClosed : false,
+        canPop: _panelController.isAttached
+            ? _panelController.isPanelClosed
+            : false,
         child: Row(
           children: [
             Visibility(
@@ -281,80 +264,139 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
             ),
             Expanded(
                 child: Stack(
-                  children: [
-                    PageView(
-                      controller: _pageController,
-                      // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
-                      onPageChanged: (int index) {
-                        setState(() {
-                          _currentPage = index;
-                        });
-                      },
-                      physics: const NeverScrollableScrollPhysics(),
-                      scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
-                          ? Axis.vertical
-                          : Axis.horizontal,
-                      children: const [
-                        VideoMusicPage(),
-                        BiLiMusicPage(),
-                        UserInfoPage()
-                      ],
-                    ),
-                    Obx(() =>
-                    _biliAudioService.playerIndex.value
-                        ?.let((it) => SlidingUpPanel(
-                      controller: _panelController,
-                      onPanelSlide: (double position) {
-                        setState(() {
-                          _panelPosition = position;
-                        });
-                      },
-                      minHeight: 50,
-                      collapsed: SizedBox(
-                          child: MusicPlayer(
-                            panelController: _panelController,
-                          )),
-                      maxHeight: MediaQuery.of(context).size.height,
-                      panel: Container(
-                        height: MediaQuery.of(context).size.height,
-                        color: Colors.white,
-                        child: Opacity(
-                          opacity: _panelPosition,
-                          child: const PlayerPage(),
-                        ),
-                      ),
-                    )) ??
-                        const Column()),
-                  ],
-                ))
-          ],
-        ),
-      ),
-      bottomNavigationBar: SizedBox(
-        height: (0.80 * (1 - _panelPosition) * 100),
-        child: Stack(
-          children: [
-            if (getWindowsWidth(this.context) <= ScreenSize.Normal)
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 0),
-                curve: Curves.easeInOut,
-                bottom: -(0.80 * (_panelPosition) * 100),
-                left: 0,
-                right: 0,
-                child: NavigationBar(
-                  destinations: navigationItem,
-                  selectedIndex: _currentPage,
-                  onDestinationSelected: (int index) {
+              children: [
+                PageView(
+                  controller: _pageController,
+                  // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
+                  onPageChanged: (int index) {
                     setState(() {
                       _currentPage = index;
-                      _pageController.jumpToPage(index);
                     });
                   },
+                  physics: const NeverScrollableScrollPhysics(),
+                  scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
+                      ? Axis.vertical
+                      : Axis.horizontal,
+                  children: const [
+                    VideoMusicPage(),
+                    BiLiMusicPage(),
+                    UserInfoPage()
+                  ],
                 ),
-              ),
+                Obx(() =>
+                    _biliAudioService.playerIndex.value
+                        ?.let((it) => SlidingUpPanel(
+                              controller: _panelController,
+                              onPanelSlide: (double position) {
+                                setState(() {
+                                  _panelPosition = position;
+                                });
+                              },
+                              minHeight: 50,
+                              collapsed: SizedBox(
+                                  child: MusicPlayer(
+                                panelController: _panelController,
+                              )),
+                              maxHeight: MediaQuery.of(context).size.height,
+                              panel: Container(
+                                height: MediaQuery.of(context).size.height,
+                                color: Colors.white,
+                                child: Opacity(
+                                  opacity: _panelPosition,
+                                  child: const PlayerPage(),
+                                ),
+                              ),
+                            )) ??
+                    const Column()),
+              ],
+            ))
           ],
         ),
       ),
+      bottomNavigationBar: buildMainAppBottomNavigationBar(),
+    );
+  }
+
+
+  Widget buildMainAppBottomNavigationBar(){
+    return SizedBox(
+      height: (0.80 * (1 - _panelPosition) * 100),
+      child: Stack(
+        children: [
+          if (getWindowsWidth(this.context) <= ScreenSize.Normal)
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 0),
+              curve: Curves.easeInOut,
+              bottom: -(0.80 * (_panelPosition) * 100),
+              left: 0,
+              right: 0,
+              child: NavigationBar(
+                destinations: navigationItem,
+                selectedIndex: _currentPage,
+                onDestinationSelected: (int index) {
+                  setState(() {
+                    _currentPage = index;
+                    _pageController.jumpToPage(index);
+                  });
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  PreferredSizeWidget buildMainAppBar(){
+
+    final windowsButtonStyle = ButtonStyle(
+      shape: MaterialStateProperty.all<OutlinedBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+      ),
+    );
+
+    return AppBar(
+      toolbarHeight: 32,
+      actions: [
+        IconButton(
+          constraints:
+          const BoxConstraints(maxHeight: 30, maxWidth: 30),
+          padding: const EdgeInsets.all(6),
+          style: windowsButtonStyle,
+          iconSize: 15,
+          icon: const Icon(Icons.horizontal_rule),
+          onPressed: () {
+            windowManager.minimize();
+          },
+        ),
+        IconButton(
+          constraints:
+          const BoxConstraints(maxHeight: 30, maxWidth: 30),
+          padding: const EdgeInsets.all(6),
+          style: windowsButtonStyle,
+          iconSize: 15,
+          icon: const Icon(Icons.crop_square_rounded),
+          onPressed: () {
+            windowManager.maximize();
+          },
+        ),
+        IconButton(
+          constraints:
+          const BoxConstraints(maxHeight: 30, maxWidth: 30),
+          padding: const EdgeInsets.all(6),
+          style: windowsButtonStyle,
+          hoverColor: Colors.red,
+          iconSize: 15,
+          icon: const Icon(Icons.close),
+          onPressed: () {
+            windowManager.close();
+          },
+        ),
+        const SizedBox(
+          width: 5,
+        )
+      ],
     );
   }
 

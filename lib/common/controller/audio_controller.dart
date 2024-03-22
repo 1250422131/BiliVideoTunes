@@ -1,4 +1,3 @@
-import 'package:bili_video_tunes/common/api/user_info_api.dart';
 import 'package:bili_video_tunes/common/handler/bili_audio_handler.dart';
 import 'package:bili_video_tunes/common/model/local/isar/video_audio_player_task.dart';
 import 'package:bili_video_tunes/common/model/local/lyric_data.dart';
