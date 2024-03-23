@@ -10,7 +10,7 @@ class UserInfoApi {
   static Future<LoginUserInfo> getLoginUserInfo() async {
     final loginUserInfo = await dioClient.get(loginUserInfoPath);
     return LoginUserInfo.fromJson(loginUserInfo.data);
-  }
+}
 
   static Future<PlayerHistoryInfo> getPlayerHistoryInfo(
       {int? max, int? viewAt, String? business = "archive"}) async {

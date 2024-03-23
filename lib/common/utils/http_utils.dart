@@ -5,6 +5,7 @@ import 'package:bili_video_tunes/common/api/interceptor/login_api_interceptor.da
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 final Dio dioClient = Dio(BaseOptions(
@@ -27,9 +28,12 @@ Future<void> initCookieJar() async {
     ignoreExpires: true,
   );
 
-  dioClient.interceptors.add(CookieManager(mCookieJar));
+  // WEB需要移除，Web交由浏览器自行管理Cookie
+  if(kIsWeb){
+    dioClient.interceptors.add(CookieManager(mCookieJar));
+    _cookieJar = mCookieJar;
+  }
 
-  _cookieJar = mCookieJar;
 }
 
 
