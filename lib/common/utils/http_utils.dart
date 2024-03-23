@@ -29,7 +29,7 @@ Future<void> initCookieJar() async {
   );
 
   // WEB需要移除，Web交由浏览器自行管理Cookie
-  if(kIsWeb){
+  if(!kIsWeb){
     dioClient.interceptors.add(CookieManager(mCookieJar));
     _cookieJar = mCookieJar;
   }

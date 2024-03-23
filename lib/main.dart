@@ -29,7 +29,7 @@ import 'common/di/database_model.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  if (!Platform.isAndroid && !Platform.isIOS && !kIsWeb) {
+  if (!GetPlatform.isMobile && !kIsWeb) {
     WidgetsFlutterBinding.ensureInitialized();
     // 必须加上这一行。
     await windowManager.ensureInitialized();
@@ -57,19 +57,19 @@ void main() async {
     statusBarColor: Colors.transparent,
   ));
 
-  // 全局支持音乐播放器和对应控制器
+  // 用户信息
   Get.put(UserController());
+  // Isar数据库
   Get.put<Isar>(await initDatabase());
+  // BiliAudioService 记录了目前播放器的进度，播放曲目等信息
   Get.put(BiliAudioService());
-
-  if (GetPlatform.isMobile) {
-    // 移动端服务
-    Get.put<BiliAudioHandler>(await initAudioService());
-  }
-
+  // BiliAudioHandler封装了对Just_Audio的操作
+  Get.put<BiliAudioHandler>(await initAudioService());
+  // AudioController是对BiliAudioHandler的封装
   Get.put(AudioController());
 
-  if (!GetPlatform.isWindows && !GetPlatform.isLinux) {
+  if (!GetPlatform.isDesktop) {
+    // 这个是谷歌的数据分析，目前不支持桌面
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
@@ -82,7 +82,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   static final _defaultLightColorScheme =
-      ColorScheme.fromSeed(seedColor: Colors.deepPurple);
+  ColorScheme.fromSeed(seedColor: Colors.deepPurple);
 
   static final _defaultDarkColorScheme = ColorScheme.fromSeed(
       seedColor: Colors.deepPurple, brightness: Brightness.dark);
@@ -90,7 +90,7 @@ class MyApp extends StatelessWidget {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
   static FirebaseAnalyticsObserver observer =
-      FirebaseAnalyticsObserver(analytics: analytics);
+  FirebaseAnalyticsObserver(analytics: analytics);
 
   // This widget is the root of your application.
   @override
@@ -229,7 +229,9 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     await _audioController.loadPlayerHistoryList();
 
     // 上报日志
-    await widget.analytics.logAppOpen();
+    if (GetPlatform.isMobile) {
+      await widget.analytics.logAppOpen();
+    }
   }
 
   @override
@@ -237,7 +239,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
     return Scaffold(
       appBar: !Platform.isAndroid && !Platform.isIOS && !kIsWeb
-          ? buildMainAppBar()
+          ? buildMainAppBar() //
           : null,
       body: PopScope(
         onPopInvoked: (bool didPop) {
@@ -264,52 +266,52 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
             ),
             Expanded(
                 child: Stack(
-              children: [
-                PageView(
-                  controller: _pageController,
-                  // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
-                  onPageChanged: (int index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
-                  physics: const NeverScrollableScrollPhysics(),
-                  scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
-                      ? Axis.vertical
-                      : Axis.horizontal,
-                  children: const [
-                    VideoMusicPage(),
-                    BiLiMusicPage(),
-                    UserInfoPage()
-                  ],
-                ),
-                Obx(() =>
+                  children: [
+                    PageView(
+                      controller: _pageController,
+                      // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
+                      onPageChanged: (int index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                      physics: const NeverScrollableScrollPhysics(),
+                      scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
+                          ? Axis.vertical
+                          : Axis.horizontal,
+                      children: const [
+                        VideoMusicPage(),
+                        BiLiMusicPage(),
+                        UserInfoPage()
+                      ],
+                    ),
+                    Obx(() =>
                     _biliAudioService.playerIndex.value
                         ?.let((it) => SlidingUpPanel(
-                              controller: _panelController,
-                              onPanelSlide: (double position) {
-                                setState(() {
-                                  _panelPosition = position;
-                                });
-                              },
-                              minHeight: 50,
-                              collapsed: SizedBox(
-                                  child: MusicPlayer(
-                                panelController: _panelController,
-                              )),
-                              maxHeight: MediaQuery.of(context).size.height,
-                              panel: Container(
-                                height: MediaQuery.of(context).size.height,
-                                color: Colors.white,
-                                child: Opacity(
-                                  opacity: _panelPosition,
-                                  child: const PlayerPage(),
-                                ),
-                              ),
-                            )) ??
-                    const Column()),
-              ],
-            ))
+                      controller: _panelController,
+                      onPanelSlide: (double position) {
+                        setState(() {
+                          _panelPosition = position;
+                        });
+                      },
+                      minHeight: 50,
+                      collapsed: SizedBox(
+                          child: MusicPlayer(
+                            panelController: _panelController,
+                          )),
+                      maxHeight: MediaQuery.of(context).size.height,
+                      panel: Container(
+                        height: MediaQuery.of(context).size.height,
+                        color: Colors.white,
+                        child: Opacity(
+                          opacity: _panelPosition,
+                          child: const PlayerPage(),
+                        ),
+                      ),
+                    )) ??
+                        const Column()),
+                  ],
+                ))
           ],
         ),
       ),
@@ -320,10 +322,12 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   Widget buildMainAppBottomNavigationBar(){
     return SizedBox(
+      // _panelPosition 是底部对话框的高度变化
       height: (0.80 * (1 - _panelPosition) * 100),
       child: Stack(
         children: [
-          if (getWindowsWidth(this.context) <= ScreenSize.Normal)
+          if (getWindowsWidth(context) <= ScreenSize.Normal)
+          // AnimatedPositioned 当底部对话框出现时，NavigationBar需要缓慢下降
             AnimatedPositioned(
               duration: const Duration(milliseconds: 0),
               curve: Curves.easeInOut,
@@ -346,6 +350,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     );
   }
 
+  // 这个Appbar是给桌面平台准备的，目前还没有实现完整
   PreferredSizeWidget buildMainAppBar(){
 
     final windowsButtonStyle = ButtonStyle(
