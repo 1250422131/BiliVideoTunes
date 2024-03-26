@@ -3,6 +3,7 @@ import 'package:bili_video_tunes/common/model/network/user/player_history_info.d
 import 'package:bili_video_tunes/common/model/network/video_music/new_video_dynamic_info.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 
@@ -92,12 +93,24 @@ class _PlayerHistoryCardState extends State<PlayerHistoryCard> {
                       Expanded(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: Image.network(
-
+                            child: CachedNetworkImage(
                               height: 80,
                               filterQuality: FilterQuality.none,
-                              "${_item.cover}",
+                              imageUrl: "${_item.cover}",
                               fit: BoxFit.cover, //设置图片的平铺模式
+                              placeholder: (context, url) {
+                                return Expanded(child: Container(
+                                  color: Colors.grey.shade400,
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: Image.asset(
+                                      "assets/images/app/bili_load.png",
+                                      width: 50,
+                                      height: 50,
+                                    ),
+                                  ),
+                                ));
+                              },
                             ),
                           )),
                     ],
