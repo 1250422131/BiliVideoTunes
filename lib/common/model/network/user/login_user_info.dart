@@ -1162,10 +1162,16 @@ class LevelInfo {
   }
 
   LevelInfo.fromJson(dynamic json) {
+
     _currentLevel = json['current_level'];
     _currentMin = json['current_min'];
     _currentExp = json['current_exp'];
-    _nextExp = json['next_exp'];
+
+    if(json['next_exp'] is int){
+      _nextExp = (json['next_exp']).toString();
+    }else if(json['current_level'] is String){
+      _nextExp = json['next_exp'];
+    }
   }
 
   num? _currentLevel;

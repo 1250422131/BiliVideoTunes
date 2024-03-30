@@ -14,7 +14,7 @@ import 'package:just_audio/just_audio.dart';
 /// 目前这样只是为了快速实现功能
 /// TODO 待分离解析逻辑
 class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
-  final AudioPlayer _audioPlayer = AudioPlayer(
+  AudioPlayer _audioPlayer = AudioPlayer(
     useProxyForRequestHeaders: false, // 关闭代理，否则需要允许明文
   );
 
@@ -103,7 +103,7 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> stop() async {
-    await _audioPlayer.dispose();
+    await _audioPlayer.stop();
     return super.stop();
   }
 
@@ -117,6 +117,18 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     if (index < _playerList.length && index >= 0) {
       await _analysisPlay(_playerList[index], mPlayerIndex: index);
     }
+  }
+
+  Future<void> deletePlayerAudioByIndex(int index)  async{
+    if(index == _biliAudioService.playerIndex.value){
+      _playerIndex.value = null;
+      stop();
+
+
+    }
+
+    queue.value.removeAt(index);
+    _playerList.removeAt(index);
   }
 
   // 监听播放状态变化
@@ -307,6 +319,7 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         _playerIndex.value = mPlayerIndex;
       } else {
         int newPlayIndex = _playerIndex.value ?? 0;
+
         if (newPlayIndex >= _playerList.length - 1) {
           //在末尾添加
           _playerList.add(audioMediaItem);
@@ -314,13 +327,13 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
           newPlayIndex = _playerList.length - 1;
         } else {
           newPlayIndex++;
+          // 否则在下一曲插入
+          _playerList.insert(newPlayIndex, audioMediaItem);
+          queue.value.insert(newPlayIndex, audioMediaItem.toMediaItem());
         }
-        // 否则在下一曲插入
         _playerIndex.value = newPlayIndex;
-        _playerList.insert(newPlayIndex, audioMediaItem);
-        queue.value.insert(newPlayIndex, audioMediaItem.toMediaItem());
-      }
 
+      }
       await _player(
           videoPlayerInfo.data?.dash?.audio
               ?.elementAt(0)

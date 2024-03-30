@@ -1,10 +1,12 @@
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
+import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/weight/common_error.dart';
 import 'package:bili_video_tunes/common/weight/player_history_card.dart';
 import 'package:bili_video_tunes/common/weight/shimmer/user_page_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/song_sheet_card.dart';
 import 'package:bili_video_tunes/pages/main/user_info/controller.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -28,12 +30,10 @@ class _UserInfoPageState extends State<UserInfoPage>
   late Future<void> _initUserVideoFolder;
   final _methodChannel = const MethodChannel('openAppChannel');
 
-
   @override
   void initState() {
     _initMyUserPageDataFuture = initMyUserPageData();
     // initMyUserPageData();
-
 
     super.initState();
   }
@@ -111,11 +111,16 @@ class _UserInfoPageState extends State<UserInfoPage>
                                                     ),
                                                   ),
                                                 ),
-                                                Image.network(_controller
-                                                    .myUserData
-                                                    .value!
-                                                    .pendant!
-                                                    .image!),
+                                                _controller.myUserData.value!
+                                                    .pendant!.image!
+                                                    .let((it) {
+                                                  if (it != "") {
+                                                    return CachedNetworkImage(
+                                                        imageUrl: it);
+                                                  } else {
+                                                    return const SizedBox();
+                                                  }
+                                                }),
                                               ],
                                             ),
                                           )
@@ -191,16 +196,24 @@ class _UserInfoPageState extends State<UserInfoPage>
                                             const SizedBox(
                                               width: 2,
                                             ),
-                                             InkWell(
-                                                onTap: () async{
-                                                  var map = {'name':'哔哩哔哩','package':'tv.danmaku.bili','path':'bilibili://qrscan'};
-                                                   await _methodChannel.invokeMethod('openAppChannel',map);
+                                            InkWell(
+                                                onTap: () async {
+                                                  var map = {
+                                                    'name': '哔哩哔哩',
+                                                    'package':
+                                                        'tv.danmaku.bili',
+                                                    'path': 'bilibili://qrscan'
+                                                  };
+                                                  await _methodChannel
+                                                      .invokeMethod(
+                                                          'openAppChannel',
+                                                          map);
                                                 },
-                                                 child: const Text(
-                                                   "B站首页",
-                                                   style: TextStyle(fontSize: 12),
-                                                 )
-                                            ),
+                                                child: const Text(
+                                                  "B站首页",
+                                                  style:
+                                                      TextStyle(fontSize: 12),
+                                                )),
                                           ],
                                         )
                                       ],
@@ -387,8 +400,7 @@ class _UserInfoPageState extends State<UserInfoPage>
                                     child: Wrap(
                                       spacing: 20,
                                       children: List.generate(
-                                          _controller
-                                              .favorites.length,
+                                          _controller.favorites.length,
                                           (index) => SongSheetCard(
                                                 id: _controller
                                                         .favorites[index].id ??

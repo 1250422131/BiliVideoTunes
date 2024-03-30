@@ -87,8 +87,8 @@ class AudioController extends GetxController {
       _biliAudioHandler.addQueueItem(element.toAudioMediaItem().toMediaItem());
       _biliAudioService.playerList.add(element.toAudioMediaItem());
     }
-      await playAtIndex(0);
-      await pause();
+    await playAtIndex(0);
+    await pause();
   }
 
   Future<void> addPlayerAudio(AudioMediaItem audioMediaItem) async {
@@ -96,6 +96,18 @@ class AudioController extends GetxController {
     await _isar.writeTxn(() async {
       await _isar.videoAudioPlayerTasks
           .put(audioMediaItem.toVideoAudioPlayerTask());
+    });
+  }
+
+  Future<void> deletePlayerAudioByIndex(int index) async {
+    final item = _biliAudioService.playerList.elementAt(index);
+    await _isar.writeTxn(() async {
+      await _isar.videoAudioPlayerTasks
+          .filter()
+          .bvIdEqualTo(item.bvId)
+          .deleteAll();
+      // 确保它被正确的删除了
+      _biliAudioHandler.deletePlayerAudioByIndex(index);
     });
   }
 

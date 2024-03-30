@@ -15,40 +15,36 @@ import 'colorful_text_widget.dart';
 class PlayerPage extends StatefulWidget {
   const PlayerPage({super.key});
 
-
-
   @override
   State<StatefulWidget> createState() => _PlayerPageState();
 }
 
-
 class _PlayerPageState extends State<PlayerPage>
     with SingleTickerProviderStateMixin {
-
-  late AudioController audioController;
-  final ScrollController scrollController = ScrollController();
-  late ThemeData myCustomTheme;
-  late AnimationController playIconAnimationController;
+  late AudioController _audioController;
+  final ScrollController _scrollController = ScrollController();
+  late ThemeData _myCustomTheme;
+  late AnimationController _playIconAnimationController;
   final BiliAudioService _biliAudioService = Get.find();
 
   // 存储监听器的变量
-  late StreamSubscription<PlayerState> playStateListener;
+  late StreamSubscription<PlayerState> _playStateListener;
 
   @override
   void initState() {
     super.initState();
 
-    audioController = Get.find<AudioController>();
+    _audioController = Get.find<AudioController>();
 
-    playIconAnimationController = AnimationController(vsync: this)
+    _playIconAnimationController = AnimationController(vsync: this)
       ..drive(Tween(begin: 0, end: 1))
       ..duration = const Duration(milliseconds: 300);
 
-    playStateListener = _biliAudioService.playerState.listen((state) {
+    _playStateListener = _biliAudioService.playerState.listen((state) {
       if (!state.playing) {
-        playIconAnimationController.forward();
-      }else{
-        playIconAnimationController.reverse();
+        _playIconAnimationController.forward();
+      } else {
+        _playIconAnimationController.reverse();
       }
     });
   }
@@ -57,25 +53,25 @@ class _PlayerPageState extends State<PlayerPage>
   void dispose() {
     // 取消监听器
     super.dispose();
-    playStateListener.cancel();
+    _playStateListener.cancel();
   }
 
   void scrollToCurrentLine() {
-    bool isAtBottom = scrollController.position.pixels >=
-        scrollController.position.maxScrollExtent;
+    bool isAtBottom = _scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent;
 
-    bool isAtTop = scrollController.position.pixels <=
-        scrollController.position.minScrollExtent;
+    bool isAtTop = _scrollController.position.pixels <=
+        _scrollController.position.minScrollExtent;
 
     if (_biliAudioService.lyricLineIndex.value > 3 &&
         (!isAtBottom) &&
-        scrollController.hasClients) {
+        _scrollController.hasClients) {
       late double lineHeight = 70;
 
       final double offset =
           (_biliAudioService.lyricLineIndex.value - 3) * lineHeight;
 
-      scrollController.animateTo(
+      _scrollController.animateTo(
         offset,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -109,6 +105,18 @@ class _PlayerPageState extends State<PlayerPage>
     });
   }
 
+  // AppBar
+  PreferredSizeWidget buildBottomSheetAppBar() => AppBar(
+        centerTitle: true, // 标题居中
+        title: const Text(
+          "播放列表",
+          textAlign: TextAlign.center,
+        ),
+        toolbarHeight: 56 + MediaQuery.of(context).padding.top,
+      );
+
+
+
   // 等待单独抽离
   Future<void> _showModalBottomSheet() {
     return showModalBottomSheet(
@@ -118,142 +126,130 @@ class _PlayerPageState extends State<PlayerPage>
         isDismissible: true,
         builder: (BuildContext buildContext) {
           return Theme(
-              data: myCustomTheme,
+              data: _myCustomTheme,
               child: Scaffold(
-                appBar:AppBar(
-                  centerTitle: true, // 标题居中
-                  title: const Text(
-                    "播放列表",
-                    textAlign: TextAlign.center,
-                  ),
-                  toolbarHeight: 56+MediaQuery.of(context).padding.top,
-                ),
-                body: Obx(() =>  ReorderableListView(
+                appBar: buildBottomSheetAppBar(),
+                body: Obx(() => ReorderableListView(
                     onReorder: (int oldIndex, int newIndex) {
-                      setState(()  {
+                      setState(() {
                         if (oldIndex < newIndex) {
                           newIndex -= 1;
                         }
 
                         final item =
-                        _biliAudioService.playerList.removeAt(oldIndex);
+                            _biliAudioService.playerList.removeAt(oldIndex);
                         _biliAudioService.playerList.insert(newIndex, item);
 
                         // 更新高亮索引
-                        if ((_biliAudioService.playerIndex.value ?? 0) == oldIndex) {
+                        if ((_biliAudioService.playerIndex.value ?? 0) ==
+                            oldIndex) {
                           _biliAudioService.playerIndex.value = newIndex;
-                        } else if (oldIndex < (_biliAudioService.playerIndex.value ?? 0) && newIndex >= (_biliAudioService.playerIndex.value ?? 0)) {
-                          _biliAudioService.playerIndex.value = (_biliAudioService.playerIndex.value ?? 0) - 1;
-                        } else if (oldIndex > (_biliAudioService.playerIndex.value ?? 0) && newIndex <= (_biliAudioService.playerIndex.value ?? 0)) {
-                          _biliAudioService.playerIndex.value = (_biliAudioService.playerIndex.value ?? 0)  +1;
+                        } else if (oldIndex <
+                                (_biliAudioService.playerIndex.value ?? 0) &&
+                            newIndex >=
+                                (_biliAudioService.playerIndex.value ?? 0)) {
+                          _biliAudioService.playerIndex.value =
+                              (_biliAudioService.playerIndex.value ?? 0) - 1;
+                        } else if (oldIndex >
+                                (_biliAudioService.playerIndex.value ?? 0) &&
+                            newIndex <=
+                                (_biliAudioService.playerIndex.value ?? 0)) {
+                          _biliAudioService.playerIndex.value =
+                              (_biliAudioService.playerIndex.value ?? 0) + 1;
                         }
-
                       });
+
+
                     },
                     children: List.generate(
                         _biliAudioService.playerList.length,
-                            (index) => InkWell(
-                          key: Key('$index'),
-                          child: Container(
-                            color: myCustomTheme.primaryColor
-                                .withOpacity(index ==
-                                (_biliAudioService
-                                    .playerIndex.value ??
-                                    0)
-                                ? 0.2
-                                : 0.05),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Row(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.center,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius:
-                                    const BorderRadius.all(
-                                        Radius.circular(5)),
-                                    child: Image.network(
-                                      _biliAudioService
-                                          .playerList[index]
-                                          .coverImageUrl,
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                  Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            _biliAudioService
-                                                .playerList[index].title,
-                                            overflow:
-                                            TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                            softWrap: false,
-                                            style: const TextStyle(
-                                                fontWeight:
-                                                FontWeight.bold,
-                                                fontSize: 15),
-                                          ),
-                                          Row(
+                            (index) => Dismissible(
+                            key: Key(_biliAudioService.playerList.elementAt(index).title),
+                            onDismissed: (direction) {
+                              setState(() {
+                                _audioController.deletePlayerAudioByIndex(index);
+                                // Then show a snackbar.
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(content: Text('$index dismissed')));
+                              });
+                            },
+                            background: Container(color: Colors.red),
+                            child: InkWell(
+                              child: Container(
+                                color: _myCustomTheme.primaryColor.withOpacity(
+                                    index == (_biliAudioService.playerIndex.value ?? 0)
+                                        ? 0.2
+                                        : 0.05),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                        child: Image.network(
+                                          _biliAudioService.playerList[index].coverImageUrl,
+                                          width: 50,
+                                          height: 50,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 20,
+                                      ),
+                                      Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                _biliAudioService
-                                                    .playerList[index]
-                                                    .bvId ??
-                                                    "",
-                                                overflow:
-                                                TextOverflow.ellipsis,
+                                                _biliAudioService.playerList[index].title,
+                                                overflow: TextOverflow.ellipsis,
                                                 maxLines: 1,
-                                                style: const TextStyle(
-                                                    fontSize: 12),
                                                 softWrap: false,
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold, fontSize: 15),
                                               ),
-                                              const Padding(
-                                                padding: EdgeInsets.only(
-                                                    left: 5, right: 5),
-                                                child: Text(
-                                                  "·",
-                                                  style: TextStyle(
-                                                      fontSize: 12),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                  child: Text(
-                                                    _biliAudioService
-                                                        .playerList[index]
-                                                        .totalDuration
-                                                        .formatSeconds(),
-                                                    overflow:
-                                                    TextOverflow.ellipsis,
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    _biliAudioService.playerList[index].bvId ?? "",
+                                                    overflow: TextOverflow.ellipsis,
                                                     maxLines: 1,
-                                                    style: const TextStyle(
-                                                        fontSize: 11),
+                                                    style: const TextStyle(fontSize: 12),
                                                     softWrap: false,
-                                                    textAlign:
-                                                    TextAlign.start,
-                                                  ))
+                                                  ),
+                                                  const Padding(
+                                                    padding: EdgeInsets.only(left: 5, right: 5),
+                                                    child: Text(
+                                                      "·",
+                                                      style: TextStyle(fontSize: 12),
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                      child: Text(
+                                                        _biliAudioService.playerList[index].totalDuration
+                                                            .formatSeconds(),
+                                                        overflow: TextOverflow.ellipsis,
+                                                        maxLines: 1,
+                                                        style: const TextStyle(fontSize: 11),
+                                                        softWrap: false,
+                                                        textAlign: TextAlign.start,
+                                                      ))
+                                                ],
+                                              ),
                                             ],
-                                          ),
-                                        ],
-                                      )),
-                                  const SizedBox(
-                                    width: 20,
+                                          )),
+                                      const SizedBox(
+                                        width: 20,
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                          onTap: () {
-                            audioController.playAtIndex(index);
-                          },
-                        )))),
+                              onTap: () {
+                                _audioController.playAtIndex(index);
+                              },
+                            ))))),
               ));
         });
   }
@@ -270,7 +266,7 @@ class _PlayerPageState extends State<PlayerPage>
               ? _biliAudioService.audioDarkColorScheme.value
               : _biliAudioService.audioLightColorScheme.value,
         ).let((it) {
-          myCustomTheme = it;
+          _myCustomTheme = it;
           return it;
         }).copyWith(
           appBarTheme: const AppBarTheme(
@@ -289,13 +285,13 @@ class _PlayerPageState extends State<PlayerPage>
                 }) ??
                 const Text("暂无播放"),
             backgroundColor:
-                myCustomTheme.colorScheme.primary.withOpacity(0.08),
+                _myCustomTheme.colorScheme.primary.withOpacity(0.08),
             scrolledUnderElevation: 0,
           ),
           body: ConstrainedBox(
             constraints: const BoxConstraints.expand(),
             child: Container(
-              color: myCustomTheme.colorScheme.primary.withOpacity(0.08),
+              color: _myCustomTheme.colorScheme.primary.withOpacity(0.08),
               child: Obx(
                 () => Stack(
                   alignment: Alignment.center,
@@ -309,7 +305,7 @@ class _PlayerPageState extends State<PlayerPage>
                                     _biliAudioService.playerList[it].lyricList;
                                 if (lyricList != null) {
                                   return ListView.builder(
-                                    controller: scrollController,
+                                    controller: _scrollController,
                                     itemCount: lyricList.length,
                                     itemExtent: 70,
                                     //强制高度为50.0
@@ -330,7 +326,8 @@ class _PlayerPageState extends State<PlayerPage>
                                                               .starTime)
                                                       .toInt()),
                                               shouldStartAnimation:
-                                              _biliAudioService.lyricLineIndex
+                                                  _biliAudioService
+                                                          .lyricLineIndex
                                                           .value ==
                                                       index));
                                     },
@@ -358,7 +355,8 @@ class _PlayerPageState extends State<PlayerPage>
                                         Radius.circular(10)),
                                     child: _biliAudioService.playerIndex.value
                                             ?.let((it) => Image.network(
-                                      _biliAudioService.playerList[it]
+                                                  _biliAudioService
+                                                      .playerList[it]
                                                       .coverImageUrl,
                                                   width: 300,
                                                   height: 300,
@@ -367,7 +365,7 @@ class _PlayerPageState extends State<PlayerPage>
                                         Container(
                                           width: 300,
                                           height: 300,
-                                          color: myCustomTheme.primaryColor,
+                                          color: _myCustomTheme.primaryColor,
                                         ),
                                   )), // 封面
                               const SizedBox(height: 40), // 间距
@@ -376,7 +374,7 @@ class _PlayerPageState extends State<PlayerPage>
                                     const EdgeInsets.only(left: 50, right: 50),
                                 child: _biliAudioService.playerIndex.value
                                         ?.let((it) => Text(
-                                  _biliAudioService
+                                              _biliAudioService
                                                   .playerList[it].title,
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
@@ -393,8 +391,9 @@ class _PlayerPageState extends State<PlayerPage>
                               const SizedBox(height: 5),
                               _biliAudioService.playerIndex.value?.let((it) {
                                     final playerItem =
-                                    _biliAudioService.playerList[it];
-                                    if (playerItem.lyricList != null && playerItem.lyricList!.isNotEmpty) {
+                                        _biliAudioService.playerList[it];
+                                    if (playerItem.lyricList != null &&
+                                        playerItem.lyricList!.isNotEmpty) {
                                       //上面已经判断过了
                                       return Text(playerItem
                                           .lyricList![_biliAudioService
@@ -433,8 +432,10 @@ class _PlayerPageState extends State<PlayerPage>
                                                           1), // 取消触摸时滑块外的圆形覆盖
                                             ),
                                             child: Slider(
-                                              max: _biliAudioService.totalDuration
-                                                      .value?.inSeconds
+                                              max: _biliAudioService
+                                                      .totalDuration
+                                                      .value
+                                                      ?.inSeconds
                                                       .toDouble() ??
                                                   0,
                                               value: _biliAudioService
@@ -443,7 +444,7 @@ class _PlayerPageState extends State<PlayerPage>
                                                   .inSeconds
                                                   .toDouble(),
                                               onChanged: (newValue) {
-                                                audioController
+                                                _audioController
                                                     .seek(newValue.toInt());
                                               },
                                             ),
@@ -485,44 +486,44 @@ class _PlayerPageState extends State<PlayerPage>
                                         IconButton(
                                             onPressed: () {},
                                             icon: Icon(
-                                                color: myCustomTheme
+                                                color: _myCustomTheme
                                                     .colorScheme.secondary,
                                                 Icons.shuffle_rounded)),
                                         IconButton(
                                             onPressed: () {
-                                              audioController.playPrevious();
+                                              _audioController.playPrevious();
                                             },
                                             icon: Icon(
-                                                color: myCustomTheme
+                                                color: _myCustomTheme
                                                     .colorScheme.secondary,
                                                 Icons.skip_previous_rounded)),
                                         FloatingActionButton(
                                           elevation: 0,
                                           highlightElevation: 0,
-                                          backgroundColor:
-                                              myCustomTheme.colorScheme.primary,
+                                          backgroundColor: _myCustomTheme
+                                              .colorScheme.primary,
                                           child: AnimatedIcon(
                                             icon: AnimatedIcons.pause_play,
                                             progress:
-                                                playIconAnimationController,
+                                                _playIconAnimationController,
                                             color: Colors.white,
                                           ),
                                           onPressed: () {
                                             if (_biliAudioService
                                                 .playerState.value.playing) {
-                                              audioController.pause();
+                                              _audioController.pause();
                                             } else {
-                                              audioController.play();
+                                              _audioController.play();
                                             }
                                           },
                                         ),
                                         IconButton(
                                             onPressed: () {
-                                              audioController.playNext();
+                                              _audioController.playNext();
                                             },
                                             icon: Icon(
                                               Icons.skip_next_rounded,
-                                              color: myCustomTheme
+                                              color: _myCustomTheme
                                                   .colorScheme.secondary,
                                             )),
                                         IconButton(
@@ -530,7 +531,7 @@ class _PlayerPageState extends State<PlayerPage>
                                               await _showModalBottomSheet();
                                             },
                                             icon: Icon(
-                                                color: myCustomTheme
+                                                color: _myCustomTheme
                                                     .colorScheme.secondary,
                                                 Icons.queue_music_rounded)),
                                       ],

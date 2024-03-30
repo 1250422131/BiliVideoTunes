@@ -90,29 +90,28 @@ class _PlayerHistoryCardState extends State<PlayerHistoryCard> {
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: CachedNetworkImage(
-                              height: 80,
-                              filterQuality: FilterQuality.none,
-                              imageUrl: "${_item.cover}",
-                              fit: BoxFit.cover, //设置图片的平铺模式
-                              placeholder: (context, url) {
-                                return Expanded(child: Container(
-                                  color: Colors.grey.shade400,
-                                  child: Align(
-                                    alignment: Alignment.center,
-                                    child: Image.asset(
-                                      "assets/images/app/bili_load.png",
-                                      width: 50,
-                                      height: 50,
-                                    ),
-                                  ),
-                                ));
-                              },
-                            ),
-                          )),
+                     Expanded(child:  ClipRRect(
+                       borderRadius: BorderRadius.circular(10),
+                       child: CachedNetworkImage(
+                         height: 80,
+                         filterQuality: FilterQuality.none,
+                         imageUrl: "${_item.cover}",
+                         fit: BoxFit.cover, //设置图片的平铺模式
+                         placeholder: (context, url) {
+                           return Container(
+                             color: Colors.grey.shade400,
+                             child: Align(
+                               alignment: Alignment.center,
+                               child: Image.asset(
+                                 "assets/images/app/bili_load.png",
+                                 width: 50,
+                                 height: 50,
+                               ),
+                             ),
+                           );
+                         },
+                       ),
+                     ))
                     ],
                   ),
                   Positioned(

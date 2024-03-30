@@ -17,6 +17,7 @@ class LoginApiInterceptor implements Interceptor{
       options.baseUrl = passportBaseUrl;
     } else if (options.uri.path == bliUrl) {
       // 替换B站主站结课
+      options.contentType = "";
       options.baseUrl = bliUrl;
       options.path = "";
       options.responseType = ResponseType.bytes;

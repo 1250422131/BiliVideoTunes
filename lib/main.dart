@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   static final _defaultLightColorScheme =
-  ColorScheme.fromSeed(seedColor: Colors.deepPurple);
+      ColorScheme.fromSeed(seedColor: Colors.deepPurple);
 
   static final _defaultDarkColorScheme = ColorScheme.fromSeed(
       seedColor: Colors.deepPurple, brightness: Brightness.dark);
@@ -91,7 +91,7 @@ class MyApp extends StatelessWidget {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
   static FirebaseAnalyticsObserver observer =
-  FirebaseAnalyticsObserver(analytics: analytics);
+      FirebaseAnalyticsObserver(analytics: analytics);
 
   // This widget is the root of your application.
   @override
@@ -171,6 +171,8 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   int _currentPage = 0;
 
+  final GlobalKey _bottomNavBarKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -240,7 +242,6 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: !Platform.isAndroid && !Platform.isIOS && !kIsWeb
           ? buildMainAppBar() //
@@ -270,52 +271,50 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
             ),
             Expanded(
                 child: Stack(
-                  children: [
-                    PageView(
-                      controller: _pageController,
-                      // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
-                      onPageChanged: (int index) {
-                        setState(() {
-                          _currentPage = index;
-                        });
-                      },
-                      physics: const NeverScrollableScrollPhysics(),
-                      scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
-                          ? Axis.vertical
-                          : Axis.horizontal,
-                      children: const [
-                        VideoMusicPage(),
-                        BiLiMusicPage(),
-                        UserInfoPage()
-                      ],
-                    ),
-                    Obx(() =>
-                    _biliAudioService.playerIndex.value
-                        ?.let((it) => SlidingUpPanel(
+              children: [
+                PageView(
+                  controller: _pageController,
+                  // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
+                  onPageChanged: (int index) {
+                    setState(() {
+                      _currentPage = index;
+                    });
+                  },
+                  physics: const NeverScrollableScrollPhysics(),
+                  scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
+                      ? Axis.vertical
+                      : Axis.horizontal,
+                  children: const [
+                    VideoMusicPage(),
+                    BiLiMusicPage(),
+                    UserInfoPage()
+                  ],
+                ),
+                Obx(() =>
+                    SlidingUpPanel(
                       controller: _panelController,
                       onPanelSlide: (double position) {
                         setState(() {
                           _panelPosition = position;
                         });
                       },
-                              minHeight: 50.h,
-                              collapsed: SizedBox(
-                          child: MusicPlayer(
+                      minHeight: _biliAudioService.playerIndex.value != null ? 50.h : 0,
+                      collapsed: SizedBox(
+                          child: _biliAudioService.playerIndex.value?.let((it) => MusicPlayer(
                             panelController: _panelController,
-                          )),
+                          ))),
                       maxHeight: MediaQuery.of(context).size.height,
                       panel: Container(
-                        height: MediaQuery.of(context).size.height,
+                        height: MediaQuery.of(context).size.height.h,
                         color: Colors.white,
                         child: Opacity(
                           opacity: _panelPosition,
                           child: const PlayerPage(),
                         ),
                       ),
-                    )) ??
-                        const Column()),
-                  ],
-                ))
+                    )),
+              ],
+            ))
           ],
         ),
       ),
@@ -323,40 +322,51 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     );
   }
 
-
-  Widget buildMainAppBottomNavigationBar(){
-    return SizedBox(
-      // _panelPosition 是底部对话框的高度变化
-      height: (0.80 * (1 - _panelPosition) * 100).h,
-      child: Stack(
-        children: [
-          if (getWindowsWidth(context) <= ScreenSize.Normal)
-          // AnimatedPositioned 当底部对话框出现时，NavigationBar需要缓慢下降
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 0),
-              curve: Curves.easeInOut,
-              bottom: -(0.80 * (_panelPosition) * 100).h,
-              left: 0,
-              right: 0,
-              child: NavigationBar(
-                destinations: navigationItem,
-                selectedIndex: _currentPage,
-                onDestinationSelected: (int index) {
-                  setState(() {
-                    _currentPage = index;
-                    _pageController.jumpToPage(index);
-                  });
-                },
-              ),
-            ),
-        ],
-      ),
-    );
+  Widget buildMainAppBottomNavigationBar() {
+    return LayoutBuilder(builder: (context, constraints) {
+      return SizedBox(
+        // _panelPosition 是底部对话框的高度变化
+        height: ((_bottomNavBarKey.currentContext
+                        ?.findRenderObject()
+                        ?.let((it) => (it as RenderBox).size.height) ??
+                    0) *
+                (1 - _panelPosition))
+            .h,
+        child: Stack(
+          children: [
+            if (getWindowsWidth(context) <= ScreenSize.Normal)
+              // AnimatedPositioned 当底部对话框出现时，NavigationBar需要缓慢下降
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 0),
+                curve: Curves.easeInOut,
+                bottom: -((_bottomNavBarKey.currentContext
+                                ?.findRenderObject()
+                                ?.let((it) => (it as RenderBox).size.height) ??
+                            0) *
+                        (_panelPosition))
+                    .h,
+                left: 0,
+                right: 0,
+                child: NavigationBar(
+                  key: _bottomNavBarKey,
+                  destinations: navigationItem,
+                  selectedIndex: _currentPage,
+                  onDestinationSelected: (int index) {
+                    setState(() {
+                      _currentPage = index;
+                      _pageController.jumpToPage(index);
+                    });
+                  },
+                ),
+              )
+          ],
+        ),
+      );
+    });
   }
 
   // 这个Appbar是给桌面平台准备的，目前还没有实现完整
-  PreferredSizeWidget buildMainAppBar(){
-
+  PreferredSizeWidget buildMainAppBar() {
     final windowsButtonStyle = ButtonStyle(
       shape: MaterialStateProperty.all<OutlinedBorder>(
         RoundedRectangleBorder(
@@ -389,8 +399,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           },
         ),
         IconButton(
-          constraints:
-          const BoxConstraints(maxHeight: 30, maxWidth: 30),
+          constraints: const BoxConstraints(maxHeight: 30, maxWidth: 30),
           padding: const EdgeInsets.all(6),
           style: windowsButtonStyle,
           hoverColor: Colors.red,
