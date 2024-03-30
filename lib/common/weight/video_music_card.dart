@@ -95,32 +95,29 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                   Row(
                     children: [
                       Expanded(
-                          child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LayoutBuilder(
-                            builder: (BuildContext context, constraints) {
-                          final imageHeight =
-                              getWindowsWidth(context).let((it) {
-                            if (it > ScreenSize.ExtraLarge) {
-                              return 140;
-                            } else if (it > ScreenSize.Large) {
-                              return 120;
-                            } else {
-                              return 100;
-                            }
-                          }).toDouble();
-                          return VideoCoverImage(
-                            // cacheWidth: (_box.maxWidth *
-                            //         MediaQuery.of(context).devicePixelRatio)
-                            //     .toInt(),
-                            // cacheHeight: (_box.maxHeight *
-                            //         MediaQuery.of(context).devicePixelRatio)
-                            //     .toInt(),
-                            coverUrl: "${_item.pic}",
-                            height: imageHeight,
-                          );
-                        }),
-                      )),
+                          child: LayoutBuilder(
+                              builder: (BuildContext context, constraints) {
+                                final imageHeight =
+                                getWindowsWidth(context).let((it) {
+                                  if (it > ScreenSize.ExtraLarge) {
+                                    return 140;
+                                  } else if (it > ScreenSize.Large) {
+                                    return 120;
+                                  } else {
+                                    return 100;
+                                  }
+                                }).toDouble();
+                                return VideoCoverImage(
+                                  // cacheWidth: (_box.maxWidth *
+                                  //         MediaQuery.of(context).devicePixelRatio)
+                                  //     .toInt(),
+                                  // cacheHeight: (_box.maxHeight *
+                                  //         MediaQuery.of(context).devicePixelRatio)
+                                  //     .toInt(),
+                                  coverUrl: "${_item.pic}",
+                                  height: imageHeight,
+                                );
+                              }),),
                     ],
                   ),
                   if ((_item.duration ?? 0) > 0)
@@ -136,8 +133,8 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(7),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: ListView(
+                    physics: NeverScrollableScrollPhysics() ,
                     children: [
                       Text(
                         _item.title ?? "解析错误",
