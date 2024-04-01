@@ -90,51 +90,52 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                          child: LayoutBuilder(
-                              builder: (BuildContext context, constraints) {
-                                final imageHeight =
-                                getWindowsWidth(context).let((it) {
-                                  if (it > ScreenSize.ExtraLarge) {
-                                    return 140;
-                                  } else if (it > ScreenSize.Large) {
-                                    return 120;
-                                  } else {
-                                    return 100;
-                                  }
-                                }).toDouble();
-                                return VideoCoverImage(
-                                  // cacheWidth: (_box.maxWidth *
-                                  //         MediaQuery.of(context).devicePixelRatio)
-                                  //     .toInt(),
-                                  // cacheHeight: (_box.maxHeight *
-                                  //         MediaQuery.of(context).devicePixelRatio)
-                                  //     .toInt(),
-                                  coverUrl: "${_item.pic}",
-                                  height: imageHeight,
-                                );
-                              }),),
-                    ],
-                  ),
-                  if ((_item.duration ?? 0) > 0)
-                    PBadge(
-                      bottom: 6,
-                      right: 7,
-                      size: 'small',
-                      type: 'gray',
-                      text:formatSeconds(_item.duration ?? 0),
-                    )
-                ],
-              ),
+             Expanded(flex: 6,child:  Stack(
+               children: [
+                 Row(
+                   children: [
+                     Expanded(
+                       child: LayoutBuilder(
+                           builder: (BuildContext context, constraints) {
+                             final imageHeight =
+                             getWindowsWidth(context).let((it) {
+                               if (it > ScreenSize.ExtraLarge) {
+                                 return 140;
+                               } else if (it > ScreenSize.Large) {
+                                 return 120;
+                               } else {
+                                 return 100;
+                               }
+                             }).toDouble();
+                             return VideoCoverImage(
+                               // cacheWidth: (_box.maxWidth *
+                               //         MediaQuery.of(context).devicePixelRatio)
+                               //     .toInt(),
+                               // cacheHeight: (_box.maxHeight *
+                               //         MediaQuery.of(context).devicePixelRatio)
+                               //     .toInt(),
+                               coverUrl: "${_item.pic}",
+                               // height: imageHeight,
+                             );
+                           }),),
+                   ],
+                 ),
+                 if ((_item.duration ?? 0) > 0)
+                   PBadge(
+                     bottom: 6,
+                     right: 7,
+                     size: 'small',
+                     type: 'gray',
+                     text:formatSeconds(_item.duration ?? 0),
+                   )
+               ],
+             ),),
               Expanded(
+                flex: 5,
                 child: Padding(
                   padding: const EdgeInsets.all(7),
-                  child: ListView(
-                    physics: NeverScrollableScrollPhysics() ,
+                  child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         _item.title ?? "解析错误",
@@ -152,16 +153,13 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                               type: 'color',
                             )
                           ],
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              _item.owner?.name ?? "解析错误",
-                              maxLines: 1,
-                              style: TextStyle(
-                                fontSize:
-                                Theme.of(context).textTheme.labelMedium!.fontSize,
-                                color: Theme.of(context).colorScheme.outline,
-                              ),
+                          Text(
+                            _item.owner?.name ?? "解析错误",
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontSize:
+                              Theme.of(context).textTheme.labelMedium!.fontSize,
+                              color: Theme.of(context).colorScheme.outline,
                             ),
                           ),
                         ],

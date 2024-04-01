@@ -1,7 +1,6 @@
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -33,7 +32,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 100.h,
+      height: MediaQuery.of(context).size.height,
       child: Column(
         children: [
           Expanded(
@@ -66,8 +65,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                                 .playerList[it].coverImageUrl;
                                           }) ??
                                           "https://picx.zhimg.com/70/v2-53504944558fe60816f2633fd7543f72_1440w.png",
-                                      width: 35.w,
-                                      height: 35.h,
+                                      width: 35,
+                                      height: 35,
                                       fit: BoxFit.cover,
                                     ))),
                               ),

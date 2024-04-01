@@ -19,7 +19,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -88,37 +87,34 @@ class MyApp extends StatelessWidget {
   static final _defaultDarkColorScheme = ColorScheme.fromSeed(
       seedColor: Colors.deepPurple, brightness: Brightness.dark);
 
-  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-
-  static FirebaseAnalyticsObserver observer =
-      FirebaseAnalyticsObserver(analytics: analytics);
+  // static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  //
+  // static FirebaseAnalyticsObserver observer =
+  //     FirebaseAnalyticsObserver(analytics: analytics);
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(412, 823),
-      child: DynamicColorBuilder(builder: (lightColorScheme, darkColorScheme) {
-        return GetMaterialApp(
-          title: 'Flutter Demo',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            colorScheme: lightColorScheme ?? _defaultLightColorScheme,
-            useMaterial3: true,
-          ),
-          // navigatorObservers: [observer],
-          darkTheme: ThemeData(
-            colorScheme: darkColorScheme ?? _defaultDarkColorScheme,
-            useMaterial3: true,
-          ),
-          home: MyHomePage(
-            title: 'Flutter Demo Home Page',
-            analytics: analytics,
-            observer: observer,
-          ),
-        );
-      }),
-    );
+    return DynamicColorBuilder(builder: (lightColorScheme, darkColorScheme) {
+      return GetMaterialApp(
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: lightColorScheme ?? _defaultLightColorScheme,
+          useMaterial3: true,
+        ),
+        // navigatorObservers: [observer],
+        darkTheme: ThemeData(
+          colorScheme: darkColorScheme ?? _defaultDarkColorScheme,
+          useMaterial3: true,
+        ),
+        home: MyHomePage(
+          title: 'Flutter Demo Home Page',
+          // analytics: analytics,
+          // observer: observer,
+        ),
+      );
+    });
   }
 }
 
@@ -126,13 +122,13 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({
     Key? key,
     required this.title,
-    required this.analytics,
-    required this.observer,
+    // required this.analytics,
+    // required this.observer,
   }) : super(key: key);
 
   final String title;
-  final FirebaseAnalytics analytics;
-  final FirebaseAnalyticsObserver observer;
+  // final FirebaseAnalytics analytics;
+  // final FirebaseAnalyticsObserver observer;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -236,7 +232,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
     // 上报日志
     if (GetPlatform.isMobile) {
-      await widget.analytics.logAppOpen();
+      // await widget.analytics.logAppOpen();
     }
   }
 
@@ -298,14 +294,14 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                           _panelPosition = position;
                         });
                       },
-                      minHeight: _biliAudioService.playerIndex.value != null ? 50.h : 0,
+                      minHeight: _biliAudioService.playerIndex.value != null ? 50 : 0,
                       collapsed: SizedBox(
                           child: _biliAudioService.playerIndex.value?.let((it) => MusicPlayer(
                             panelController: _panelController,
                           ))),
                       maxHeight: MediaQuery.of(context).size.height,
                       panel: Container(
-                        height: MediaQuery.of(context).size.height.h,
+                        height: MediaQuery.of(context).size.height,
                         color: Colors.white,
                         child: Opacity(
                           opacity: _panelPosition,
@@ -326,12 +322,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     return LayoutBuilder(builder: (context, constraints) {
       return SizedBox(
         // _panelPosition 是底部对话框的高度变化
-        height: ((_bottomNavBarKey.currentContext
-                        ?.findRenderObject()
-                        ?.let((it) => (it as RenderBox).size.height) ??
-                    0) *
-                (1 - _panelPosition))
-            .h,
+        height: (_bottomNavBarKey.currentContext
+            ?.findRenderObject()
+            ?.let((it) => (it as RenderBox).size.height) ??
+            0) *
+            (1 - _panelPosition),
         child: Stack(
           children: [
             if (getWindowsWidth(context) <= ScreenSize.Normal)
@@ -343,8 +338,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                                 ?.findRenderObject()
                                 ?.let((it) => (it as RenderBox).size.height) ??
                             0) *
-                        (_panelPosition))
-                    .h,
+                        (_panelPosition)),
                 left: 0,
                 right: 0,
                 child: NavigationBar(
@@ -376,10 +370,10 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     );
 
     return AppBar(
-      toolbarHeight: 32.h,
+      toolbarHeight: 32,
       actions: [
         IconButton(
-          constraints: BoxConstraints(maxHeight: 30.h, maxWidth: 30.w),
+          constraints: const BoxConstraints(maxHeight: 30, maxWidth: 30),
           padding: const EdgeInsets.all(6),
           style: windowsButtonStyle,
           iconSize: 15,
@@ -389,7 +383,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           },
         ),
         IconButton(
-          constraints: BoxConstraints(maxHeight: 30.h, maxWidth: 30.w),
+          constraints: const BoxConstraints(maxHeight: 30, maxWidth: 30),
           padding: const EdgeInsets.all(6),
           style: windowsButtonStyle,
           iconSize: 15,

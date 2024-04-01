@@ -130,7 +130,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
     /******************************
      * 用于切换标签
      ******************************/
-    Widget tagBar = TabBar(
+    TabBar tagBar = TabBar(
       tabs: _controller.tabItems.map((e) => Tab(text: e.name)).toList(),
       controller: _tabController,
       onTap: (int index) {
@@ -157,17 +157,10 @@ class _VideoMusicPageState extends State<VideoMusicPage>
       },
     );
 
-    tagBar = Container(
-      height: screenW*0.12,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child:
-          Container(
-            width: screenW*1.2,
-            child: tagBar,
-          )
-      ),
-    );
+    // tagBar = SingleChildScrollView(
+    //   scrollDirection: Axis.horizontal,
+    //   child: tagBar,
+    // );
 
     /******************************
      * 卡片列表视图
@@ -402,7 +395,6 @@ class _VideoMusicPageState extends State<VideoMusicPage>
 
     body = Column(
       children: [
-        tagBar,
         Expanded(child: body),
       ],
     );
@@ -415,7 +407,9 @@ class _VideoMusicPageState extends State<VideoMusicPage>
         toolbarHeight: 56,
         title:searchWidget,
         centerTitle: true,
+        bottom: tagBar,
       ),
+
       body: body,
     );
   }
