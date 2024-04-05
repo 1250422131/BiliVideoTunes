@@ -348,26 +348,24 @@ class _PlayerPageState extends State<PlayerPage>
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Hero(
-                                  tag: "cover",
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(10)),
-                                    child: _biliAudioService.playerIndex.value
-                                            ?.let((it) => Image.network(
-                                                  _biliAudioService
-                                                      .playerList[it]
-                                                      .coverImageUrl,
-                                                  width: 300,
-                                                  height: 300,
-                                                  fit: BoxFit.cover,
-                                                )) ??
-                                        Container(
-                                          width: 300,
-                                          height: 300,
-                                          color: _myCustomTheme.primaryColor,
-                                        ),
-                                  )), // 封面
+                              ClipRRect(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(10)),
+                                child: _biliAudioService.playerIndex.value
+                                    ?.let((it) => Image.network(
+                                  _biliAudioService
+                                      .playerList[it]
+                                      .coverImageUrl,
+                                  width: 300,
+                                  height: 300,
+                                  fit: BoxFit.cover,
+                                )) ??
+                                    Container(
+                                      width: 300,
+                                      height: 300,
+                                      color: _myCustomTheme.primaryColor,
+                                    ),
+                              ), // 封面
                               const SizedBox(height: 40), // 间距
                               Padding(
                                 padding:

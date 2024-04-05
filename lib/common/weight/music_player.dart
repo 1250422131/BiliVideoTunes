@@ -49,26 +49,24 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       child: InkWell(
                         child: Padding(
                           padding: const EdgeInsets.only(
-                              left: 8, right: 8, top: 0.8, bottom: 0.8),
+                              left: 8, right: 8, ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               ClipRRect(
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(5)),
-                                child: Obx(() => Hero(
-                                    tag: "cover",
-                                    child: Image.network(
-                                      _biliAudioService.playerIndex.value
-                                              ?.let((it) {
-                                            return _biliAudioService
-                                                .playerList[it].coverImageUrl;
-                                          }) ??
-                                          "https://picx.zhimg.com/70/v2-53504944558fe60816f2633fd7543f72_1440w.png",
-                                      width: 35,
-                                      height: 35,
-                                      fit: BoxFit.cover,
-                                    ))),
+                                child: Obx(() => Image.network(
+                                  _biliAudioService.playerIndex.value
+                                      ?.let((it) {
+                                    return _biliAudioService
+                                        .playerList[it].coverImageUrl;
+                                  }) ??
+                                      "https://picx.zhimg.com/70/v2-53504944558fe60816f2633fd7543f72_1440w.png",
+                                  width: 35,
+                                  height: 35,
+                                  fit: BoxFit.cover,
+                                )),
                               ),
                               Expanded(
                                   child: Padding(
