@@ -127,6 +127,7 @@ class MyHomePage extends StatefulWidget {
   }) : super(key: key);
 
   final String title;
+
   // final FirebaseAnalytics analytics;
   // final FirebaseAnalyticsObserver observer;
 
@@ -147,13 +148,13 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   // 控制器
   final PageController _pageController = PageController();
 
-  late AudioController _audioController;
+  final AudioController _audioController = Get.find<AudioController>();
 
-  late BiliAudioService _biliAudioService;
+  final BiliAudioService _biliAudioService = Get.find<BiliAudioService>();
 
-  late BiliAudioHandler _biliAudioHandler;
+  final BiliAudioHandler _biliAudioHandler = Get.find<BiliAudioHandler>();
 
-  late UserController _userController;
+  final UserController _userController = Get.find<UserController>();
 
   late List<NavInfo> _navList;
 
@@ -169,71 +170,62 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   final GlobalKey _bottomNavBarKey = GlobalKey();
 
+// 在 initState 方法中，将一些初始化逻辑提取为单独的函数
   @override
   void initState() {
     super.initState();
-    _biliAudioService = Get.find<BiliAudioService>();
-    _audioController = Get.find<AudioController>();
-    _userController = Get.find<UserController>();
-    _biliAudioHandler = Get.find<BiliAudioHandler>();
-
-    initData();
-    _navList = [
-      const NavInfo(
-          title: "音频",
-          icon: Icons.video_collection_outlined,
-          selectedIcon: Icons.video_collection),
-      const NavInfo(
-          title: "音乐",
-          icon: Icons.library_music_outlined,
-          selectedIcon: Icons.library_music),
-      const NavInfo(
-          title: "我的",
-          icon: Icons.account_box_outlined,
-          selectedIcon: Icons.account_box)
-    ];
-
-    navigationItem = [
-      for (var itemData in _navList)
-        NavigationDestination(
-          icon: Icon(itemData.icon),
-          selectedIcon: Icon(itemData.selectedIcon),
-          label: itemData.title,
-          tooltip: itemData.title,
-        ),
-    ];
-
-    navRailItem = [
-      for (var itemData in _navList)
-        NavigationRailDestination(
-          icon: Icon(itemData.icon),
-          selectedIcon: Icon(itemData.selectedIcon),
-          label: Text(itemData.title),
-        ),
-    ];
+    _initData();
+    _initNavList();
   }
 
-  Future<void> initData() async {
-    // 初始化网络请求
-    await initCookieJar();
-    // 初始化用户信息
-    await _userController.initLoginUserData();
-
-    // 只在移动端生效
-    if (GetPlatform.isMobile) {
-      // 音乐服务 -> 主动规避耳机电话等
-      final session = await AudioSession.instance;
-      await session.configure(const AudioSessionConfiguration.music());
-      // Activate the audio session before playing audio.
-      await session.setActive(true);
+  Future<void> _initData() async {
+    try {
+      await initCookieJar();
+      await _userController.initLoginUserData();
+      if (GetPlatform.isMobile) {
+        final session = await AudioSession.instance;
+        await session.configure(const AudioSessionConfiguration.music());
+        await session.setActive(true);
+      }
+      await _audioController.loadPlayerHistoryList();
+    } catch (e) {
+      debugPrint('Error during initialization: $e');
     }
+  }
 
-    await _audioController.loadPlayerHistoryList();
+  void _initNavList() {
+    // 将 NavInfo 的实例化提取为常量
+    const navInfoAudio = NavInfo(
+        title: "音频",
+        icon: Icons.video_collection_outlined,
+        selectedIcon: Icons.video_collection);
 
-    // 上报日志
-    if (GetPlatform.isMobile) {
-      // await widget.analytics.logAppOpen();
-    }
+    const navInfoMusic = NavInfo(
+        title: "音乐",
+        icon: Icons.library_music_outlined,
+        selectedIcon: Icons.library_music);
+
+    const navInfoMy = NavInfo(
+        title: "我的",
+        icon: Icons.account_box_outlined,
+        selectedIcon: Icons.account_box);
+
+    _navList = [navInfoAudio, navInfoMusic, navInfoMy];
+    navigationItem = _navList
+        .map((itemData) => NavigationDestination(
+              icon: Icon(itemData.icon),
+              selectedIcon: Icon(itemData.selectedIcon),
+              label: itemData.title,
+              tooltip: itemData.title,
+            ))
+        .toList();
+    navRailItem = _navList
+        .map((itemData) => NavigationRailDestination(
+              icon: Icon(itemData.icon),
+              selectedIcon: Icon(itemData.selectedIcon),
+              label: Text(itemData.title),
+            ))
+        .toList();
   }
 
   @override
@@ -286,19 +278,19 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                     UserInfoPage()
                   ],
                 ),
-                Obx(() =>
-                    SlidingUpPanel(
+                Obx(() => SlidingUpPanel(
                       controller: _panelController,
                       onPanelSlide: (double position) {
                         setState(() {
                           _panelPosition = position;
                         });
                       },
-                      minHeight: _biliAudioService.playerIndex.value != null ? 50 : 0,
-                      collapsed: SizedBox(
-                          child: _biliAudioService.playerIndex.value?.let((it) => MusicPlayer(
-                            panelController: _panelController,
-                          ))),
+                      minHeight:
+                          _biliAudioService.playerIndex.value != null ? 50 : 0,
+                      collapsed: _biliAudioService.playerIndex.value
+                          ?.let((it) => MusicPlayer(
+                                panelController: _panelController,
+                              )),
                       maxHeight: MediaQuery.of(context).size.height,
                       panel: Container(
                         height: MediaQuery.of(context).size.height,
@@ -323,9 +315,9 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
       return SizedBox(
         // _panelPosition 是底部对话框的高度变化
         height: (_bottomNavBarKey.currentContext
-            ?.findRenderObject()
-            ?.let((it) => (it as RenderBox).size.height) ??
-            0) *
+                    ?.findRenderObject()
+                    ?.let((it) => (it as RenderBox).size.height) ??
+                0) *
             (1 - _panelPosition),
         child: Stack(
           children: [
@@ -335,10 +327,10 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 duration: const Duration(milliseconds: 0),
                 curve: Curves.easeInOut,
                 bottom: -((_bottomNavBarKey.currentContext
-                                ?.findRenderObject()
-                                ?.let((it) => (it as RenderBox).size.height) ??
-                            0) *
-                        (_panelPosition)),
+                            ?.findRenderObject()
+                            ?.let((it) => (it as RenderBox).size.height) ??
+                        0) *
+                    (_panelPosition)),
                 left: 0,
                 right: 0,
                 child: NavigationBar(

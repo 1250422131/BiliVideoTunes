@@ -14,7 +14,7 @@ import 'package:just_audio/just_audio.dart';
 /// 目前这样只是为了快速实现功能
 /// TODO 待分离解析逻辑
 class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
-  AudioPlayer _audioPlayer = AudioPlayer(
+  final AudioPlayer _audioPlayer = AudioPlayer(
     useProxyForRequestHeaders: false, // 关闭代理，否则需要允许明文
   );
 
@@ -378,7 +378,7 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         controls: [
           MediaControl.skipToPrevious,
           if (playing) MediaControl.pause else MediaControl.play,
-          MediaControl.stop,
+          // MediaControl.stop,
           MediaControl.skipToNext,
         ],
         systemActions: const {

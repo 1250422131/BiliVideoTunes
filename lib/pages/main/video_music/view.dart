@@ -1,13 +1,16 @@
+import 'package:animations/animations.dart';
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/controller/user_controller.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/utils/screen_utils.dart';
+import 'package:bili_video_tunes/common/weight/assemble_animated_opacity.dart';
 import 'package:bili_video_tunes/common/weight/common_error.dart';
 import 'package:bili_video_tunes/common/weight/hots_tag_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/qr_login_dialog/index.dart';
 import 'package:bili_video_tunes/common/weight/shimmer/video_card_grid_view_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/video_music_card.dart';
 import 'package:bili_video_tunes/pages/main/video_music/index.dart';
+import 'package:bili_video_tunes/pages/main_search/view.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +26,6 @@ class VideoMusicPage extends StatefulWidget {
 
 class _VideoMusicPageState extends State<VideoMusicPage>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-
   //声明
   late VideoMusicPageController _controller;
   late TabController _tabController;
@@ -60,70 +62,90 @@ class _VideoMusicPageState extends State<VideoMusicPage>
     /******************************
      * 音频页面的顶部搜索组件
      ******************************/
-    Widget searchWidget = MaterialButton(
-      onPressed: () {},
-      color: Theme.of(context).colorScheme.surfaceVariant,
+    Widget searchWidget = Container(
       height: 50,
-      elevation: 0,
-      focusElevation: 0,
-      hoverElevation: 0,
-      disabledElevation: 0,
-      highlightElevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(28)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(28),
       ),
-      child: Row(
-        children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(15),
-            onTap: () {},
-            child: Icon(
-              (Icons.search),
-              size: 24,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+      clipBehavior: Clip.antiAlias,
+      child: OpenContainer(
+        openElevation: 0,
+        closedElevation: 0,
+        transitionDuration: const Duration(seconds: 10),
+        closedBuilder: (context, _) {
+          return Container(
+            padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+            // 设置所有方向的内边距为10.0
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              borderRadius: BorderRadius.circular(28),
             ),
-          ),
-          const SizedBox(
-            width: 16,
-          ),
-          Expanded(
-              child: Text("",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyLarge)),
-          const SizedBox(
-            width: 16,
-          ),
-          Obx(() => InkWell(
-            child: GestureDetector(
-              onTap: () {
-                if (_userController.loginUserData.value == null) {
-                  showLoginDialog();
-                }
-              },
-              child: ClipOval(
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: ShapeDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(_userController
-                          .loginUserData.value?.face ??
-                          "https://i0.hdslb.com/bfs/face/member/noface.jpg@240w_240h"),
-                      fit: BoxFit.contain,
-                    ),
-                    shape: const OvalBorder(),
+            height: 50,
+            child: Row(
+              children: [
+                InkWell(
+                  borderRadius: BorderRadius.circular(15),
+                  onTap: () {},
+                  child: Icon(
+                    (Icons.search),
+                    size: 24,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
-              ),
+                const SizedBox(
+                  width: 16,
+                ),
+                Expanded(
+                    child: Text("",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyLarge)),
+                const SizedBox(
+                  width: 16,
+                ),
+                Obx(() => InkWell(
+                      child: GestureDetector(
+                        onTap: () {
+                          if (_userController.loginUserData.value == null) {
+                            showLoginDialog();
+                          }
+                        },
+                        child: ClipOval(
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: ShapeDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(_userController
+                                        .loginUserData.value?.face ??
+                                    "https://i0.hdslb.com/bfs/face/member/noface.jpg@240w_240h"),
+                                fit: BoxFit.contain,
+                              ),
+                              shape: const OvalBorder(),
+                            ),
+                          ),
+                        ),
+                      ),
+                      onTap: () {
+                        if (_userController.loginUserData.value == null) {
+                          showLoginDialog();
+                        }
+                      },
+                    )),
+              ],
             ),
-            onTap: () {
-              if (_userController.loginUserData.value == null) {
-                showLoginDialog();
-              }
-            },
-          )),
-        ],
+          );
+        },
+        openBuilder: (context, _) {
+          return const MainSearch();
+        },
+        openShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+        ),
+        closedShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+        ),
       ),
     );
 
@@ -165,20 +187,15 @@ class _VideoMusicPageState extends State<VideoMusicPage>
     /******************************
      * 卡片列表视图
      ******************************/
-    var videoCardList = Obx(() => EasyRefresh(
+    var videoCardList = Obx(() => AssembleAutoAnimatedOpacity(duration: const Duration(milliseconds: 300),child: EasyRefresh(
         onLoad: () async {
           await _controller.loadNewVideoDynamicInfo(
-              rid: _controller.tabItems
-                  .elementAt(videoTabSelectIndex)
-                  .rid,
-              tagId: _controller.hotsTags
-                  .elementAt(hotsTagSelectIndex)
-                  .tagId,
+              rid: _controller.tabItems.elementAt(videoTabSelectIndex).rid,
+              tagId: _controller.hotsTags.elementAt(hotsTagSelectIndex).tagId,
               pn: ++videoPageNum,
               ps: 14);
           return _controller.videoMusicPageInfo.value.let((it) {
-            if (videoPageNum <
-                (it.count / it.size * 1.0).ceil()) {
+            if (videoPageNum < (it.count / it.size * 1.0).ceil()) {
               return IndicatorResult.success;
             } else {
               IndicatorResult.noMore;
@@ -203,8 +220,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               }),
               crossAxisSpacing: 5,
               mainAxisSpacing: 5,
-              childAspectRatio:
-              getWindowsWidth(context).let((it) {
+              childAspectRatio: getWindowsWidth(context).let((it) {
                 if (it > ScreenSize.ExtraLarge) {
                   return 1.3;
                 } else if (it > ScreenSize.Large) {
@@ -231,10 +247,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               ],
             ),
             SliverFixedExtentList(
-              itemExtent:
-              _biliAudioService.playerIndex.value != null
-                  ? 70
-                  : 0,
+              itemExtent: _biliAudioService.playerIndex.value != null ? 70 : 0,
               delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
                   //创建列表项
@@ -244,9 +257,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               ),
             ),
           ],
-        )
-      )
-    );
+        )),));
 
     /******************************
      * 主体
@@ -258,8 +269,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
             child: Container(
               alignment: Alignment.topLeft,
               child: SingleChildScrollView(
-                padding:
-                const EdgeInsets.only(left: 10, right: 10, top: 10),
+                padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
                 scrollDirection: Axis.horizontal,
                 child: FutureBuilder<void>(
                   future: _initHostTagFuture,
@@ -267,20 +277,17 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                       (BuildContext context, AsyncSnapshot<void> snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       // 当Future还未完成时，显示加载中的UI
-                      return const HotsTagShimmerWrap(
-                          mockNum: 5, spacing: 10);
+                      return const HotsTagShimmerWrap(mockNum: 5, spacing: 10);
                     } else if (snapshot.hasError) {
-                      return ClipRRect(
+                      return AssembleAutoAnimatedOpacity(duration: const Duration(milliseconds: 500),child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
                           color: Theme.of(context).colorScheme.errorContainer,
                           width: MediaQuery.of(context).size.width - 20,
                           child: Padding(
-                            padding:
-                            const EdgeInsets.only(left: 16, right: 8),
+                            padding: const EdgeInsets.only(left: 16, right: 8),
                             child: Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Row(
                                   children: [
@@ -315,44 +322,47 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                             ),
                           ),
                         ),
-                      );
+                      ),);
                     } else {
-                      // 当Future成功完成时，显示数据
-                      return Obx(() => Wrap(
-                        spacing: 10,
-                        children: [
-                          for (var index = 0;
-                          index < _controller.hotsTags.length;
-                          index++)
-                            ChoiceChip(
-                              label: Text(
-                                  _controller.hotsTags[index].tagName ??
-                                      ""),
-                              selected: index == hotsTagSelectIndex,
-                              onSelected: (isSelected) {
-                                setState(() {
-                                  final item =
-                                  _controller.hotsTags[index];
+                      return Obx(() => AssembleAutoAnimatedOpacity(
+                            duration: const Duration(milliseconds: 300),
+                            child: Wrap(
+                              spacing: 10,
+                              children: [
+                                for (var index = 0;
+                                    index < _controller.hotsTags.length;
+                                    index++)
+                                  ChoiceChip(
+                                    showCheckmark: false,
+                                    label: Text(
+                                        _controller.hotsTags[index].tagName ??
+                                            ""),
+                                    selected: index == hotsTagSelectIndex,
+                                    onSelected: (isSelected) {
+                                      setState(() {
+                                        final item =
+                                            _controller.hotsTags[index];
 
-                                  if (isSelected) {
-                                    hotsTagSelectIndex = index;
-                                    videoPageNum = 1;
-                                    _initVideoListFuture = _controller
-                                        .loadNewVideoDynamicInfo(
-                                        rid: _controller.tabItems
-                                            .elementAt(
-                                            videoTabSelectIndex)
-                                            .rid,
-                                        pn: videoPageNum,
-                                        ps: 14,
-                                        tagId: item.tagId,
-                                        isClear: true);
-                                  }
-                                });
-                              },
+                                        if (isSelected) {
+                                          hotsTagSelectIndex = index;
+                                          videoPageNum = 1;
+                                          _initVideoListFuture = _controller
+                                              .loadNewVideoDynamicInfo(
+                                                  rid: _controller.tabItems
+                                                      .elementAt(
+                                                          videoTabSelectIndex)
+                                                      .rid,
+                                                  pn: videoPageNum,
+                                                  ps: 14,
+                                                  tagId: item.tagId,
+                                                  isClear: true);
+                                        }
+                                      });
+                                    },
+                                  ),
+                              ],
                             ),
-                        ],
-                      ));
+                          ));
                     }
                   },
                 ),
@@ -369,7 +379,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const VideoCardGridViewShimmer();
               } else if (snapshot.hasError) {
-                return CommonError(
+                return AssembleAutoAnimatedOpacity(duration: const Duration(milliseconds: 500),child: CommonError(
                     tip: "网络异常或数据异常",
                     iconData: Icons.cloud_off_rounded,
                     retryTip: "重试",
@@ -382,16 +392,14 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                                 ps: 14,
                                 isClear: true);
                       });
-                    });
+                    }),);
               } else {
                 // 当Future成功完成时，显示卡片
                 return videoCardList;
               }
             },
-          )
-      ),
+          )),
     );
-
 
     body = Column(
       children: [
@@ -405,15 +413,13 @@ class _VideoMusicPageState extends State<VideoMusicPage>
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 56,
-        title:searchWidget,
+        title: searchWidget,
         centerTitle: true,
         bottom: tagBar,
       ),
-
       body: body,
     );
   }
-
 
   @override
   void initState() {
