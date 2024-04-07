@@ -1,3 +1,4 @@
+import 'package:bili_video_tunes/common/weight/assemble_animated_opacity.dart';
 import 'package:flutter/material.dart';
 
 typedef Retry = void Function();
@@ -18,7 +19,7 @@ class CommonError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return AssembleAutoAnimatedOpacity(duration: const Duration(milliseconds: 300),child: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -49,6 +50,6 @@ class CommonError extends StatelessWidget {
                   )))
         ],
       ),
-    );
+    ),);
   }
 }

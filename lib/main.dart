@@ -14,7 +14,6 @@ import 'package:bili_video_tunes/pages/main/video_music/index.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:bili_video_tunes/services/service_locator.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -211,6 +210,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         selectedIcon: Icons.account_box);
 
     _navList = [navInfoAudio, navInfoMusic, navInfoMy];
+
     navigationItem = _navList
         .map((itemData) => NavigationDestination(
               icon: Icon(itemData.icon),

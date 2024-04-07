@@ -14,6 +14,12 @@ class _MainSearch extends State<MainSearch> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading:  InkWell(child: const Hero(
+          tag: 'main_search_icon',
+          child: Icon(Icons.arrow_back),
+        ),onTap: () {
+          Navigator.of(context).pop();
+        },),
         title: SearchBar(
           hintText: "搜索一下？",
           elevation: MaterialStateProperty.all(0),

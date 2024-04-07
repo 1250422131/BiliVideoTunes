@@ -1,4 +1,5 @@
 import 'package:bili_video_tunes/common/utils/extends.dart';
+import 'package:bili_video_tunes/common/weight/assemble_animated_opacity.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,7 +31,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return AssembleAutoAnimatedOpacity(duration: const Duration(milliseconds: 300),child: SizedBox(
       width: double.infinity,
       height: MediaQuery.of(context).size.height,
       child: Column(
@@ -49,13 +50,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       child: InkWell(
                         child: Padding(
                           padding: const EdgeInsets.only(
-                              left: 8, right: 8, ),
+                            left: 8, right: 8, ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               ClipRRect(
                                 borderRadius:
-                                    const BorderRadius.all(Radius.circular(5)),
+                                const BorderRadius.all(Radius.circular(5)),
                                 child: Obx(() => Image.network(
                                   _biliAudioService.playerIndex.value
                                       ?.let((it) {
@@ -70,35 +71,35 @@ class _MusicPlayerState extends State<MusicPlayer> {
                               ),
                               Expanded(
                                   child: Padding(
-                                padding: const EdgeInsets.only(left: 10),
-                                child: Obx(() => Text(
+                                    padding: const EdgeInsets.only(left: 10),
+                                    child: Obx(() => Text(
                                       _biliAudioService.playerIndex.value
-                                              ?.let((it) {
-                                            return _biliAudioService.playerList
-                                                .elementAt(it)
-                                                .title;
-                                          }) ??
+                                          ?.let((it) {
+                                        return _biliAudioService.playerList
+                                            .elementAt(it)
+                                            .title;
+                                      }) ??
                                           "暂无播放",
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                       softWrap: false,
                                     )),
-                              )),
+                                  )),
                               Padding(
                                 padding: const EdgeInsets.only(right: 10),
                                 child: Obx(() =>
-                                    _biliAudioService.playerState.value.playing
-                                        ? IconButton(
-                                            onPressed: () {
-                                              controller.pause();
-                                            },
-                                            icon: const Icon(Icons.pause))
-                                        : IconButton(
-                                            onPressed: () {
-                                              controller.play();
-                                            },
-                                            icon: const Icon(
-                                                Icons.play_arrow_rounded))),
+                                _biliAudioService.playerState.value.playing
+                                    ? IconButton(
+                                    onPressed: () {
+                                      controller.pause();
+                                    },
+                                    icon: const Icon(Icons.pause))
+                                    : IconButton(
+                                    onPressed: () {
+                                      controller.play();
+                                    },
+                                    icon: const Icon(
+                                        Icons.play_arrow_rounded))),
                               ),
                             ],
                           ),
@@ -120,15 +121,15 @@ class _MusicPlayerState extends State<MusicPlayer> {
             ),
           ),
           Obx(
-            () => LinearProgressIndicator(
+                () => LinearProgressIndicator(
               value: _biliAudioService.totalDuration.value != null
                   ? (_biliAudioService.currentPosition.value.inSeconds /
-                      _biliAudioService.totalDuration.value!.inSeconds)
+                  _biliAudioService.totalDuration.value!.inSeconds)
                   : 0,
             ),
           )
         ],
       ),
-    );
+    ),);
   }
 }

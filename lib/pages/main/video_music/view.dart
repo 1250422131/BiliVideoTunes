@@ -72,7 +72,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
       child: OpenContainer(
         openElevation: 0,
         closedElevation: 0,
-        transitionDuration: const Duration(seconds: 10),
+        transitionDuration: const Duration(milliseconds: 500),
         closedBuilder: (context, _) {
           return Container(
             padding: const EdgeInsets.only(left: 10.0, right: 10.0),
@@ -87,11 +87,11 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                 InkWell(
                   borderRadius: BorderRadius.circular(15),
                   onTap: () {},
-                  child: Icon(
+                  child: Hero(tag: "main_search_icon", child: Icon(
                     (Icons.search),
                     size: 24,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                  )),
                 ),
                 const SizedBox(
                   width: 16,
@@ -140,9 +140,9 @@ class _VideoMusicPageState extends State<VideoMusicPage>
         openBuilder: (context, _) {
           return const MainSearch();
         },
-        openShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
+        // openShape: RoundedRectangleBorder(
+        //   borderRadius: BorderRadius.circular(28),
+        // ),
         closedShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28),
         ),
@@ -379,7 +379,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const VideoCardGridViewShimmer();
               } else if (snapshot.hasError) {
-                return AssembleAutoAnimatedOpacity(duration: const Duration(milliseconds: 500),child: CommonError(
+                return CommonError(
                     tip: "网络异常或数据异常",
                     iconData: Icons.cloud_off_rounded,
                     retryTip: "重试",
@@ -392,7 +392,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                                 ps: 14,
                                 isClear: true);
                       });
-                    }),);
+                    });
               } else {
                 // 当Future成功完成时，显示卡片
                 return videoCardList;
