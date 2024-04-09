@@ -1,4 +1,6 @@
+import 'package:bili_video_tunes/common/api/search_info_api.dart';
 import 'package:bili_video_tunes/common/api/video_music_api.dart';
+import 'package:bili_video_tunes/common/model/network/home/search_default_info.dart';
 import 'package:bili_video_tunes/common/model/network/video_music/new_video_dynamic_info.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:get/get.dart';
@@ -33,6 +35,9 @@ class VideoMusicPageController extends GetxController {
   final hotsTags = <HostTagItemInfo>[].obs;
   final videoMusicList = [].obs;
 
+  // 默认搜索信息
+  final searchDefaultInfo = SearchDefaultInfo().obs;
+
   // 音乐视频
   final videoMusicPageInfo = VideoMusicPageInfo().obs;
 
@@ -46,9 +51,6 @@ class VideoMusicPageController extends GetxController {
   ];
 
   Future<void> loadHotsTage({required num rid, required num type}) async {
-
-
-
     final hostInfo = await VideoMusicApi.getHostInfo(rid: rid, type: type);
 
     hotsTags.clear();
@@ -132,10 +134,13 @@ class VideoMusicPageController extends GetxController {
     await loadVideoList(cateId: 28, page: 1, pageSize: 30, isClear: true);
   }
 
-  Future<void> initNewVideoList() async{
+  Future<void> initNewVideoList() async {
     await loadNewVideoDynamicInfo(
         rid: tabItems.elementAt(0).rid, pn: 1, ps: 14);
   }
 
-
+  Future<void> loadSearchDefaultInfo() async {
+    final result = await SearchInfoApi.getSearchDefaultInfo();
+    searchDefaultInfo.value = result;
+  }
 }

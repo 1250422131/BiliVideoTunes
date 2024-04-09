@@ -39,7 +39,15 @@ const String loginQrcodePollPath = "x/passport-login/web/qrcode/poll";
 
 const String userCreateFolderListPath = "/x/v3/fav/folder/created/list";
 
-const String searchDefaultInfo = "x/web-interface/search/default";
+// 默认提示搜索
+const String searchDefaultInfo = "x/web-interface/wbi/search/default";
+
+// 搜索排行
+const String searchRankInfo = "x/web-interface/wbi/search/square";
+
+const String searchByTypeInfo = "x/web-interface/wbi/search/type";
+
+const String suggestSearchInfo = "main/suggest";
 
 const String browserUserAgent =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.76";
@@ -49,5 +57,7 @@ const String userAgent = "User-Agent";
 const String bliUrl = "https://www.bilibili.com";
 
 const String aiSubtitleUrl = "https://aisubtitle.hdslb.com";
+
+const String searchUrl = "https://s.search.bilibili.com";
 
 const String referer = "Referer";

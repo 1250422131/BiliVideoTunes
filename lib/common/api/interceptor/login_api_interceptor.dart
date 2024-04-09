@@ -15,6 +15,9 @@ class LoginApiInterceptor implements Interceptor{
     // 替换BaseUrl
     if (options.uri.path.contains("passport-login")) {
       options.baseUrl = passportBaseUrl;
+    }else if(options.uri.path.contains(suggestSearchInfo)){
+      // 替换搜索接口
+      options.baseUrl = searchUrl;
     } else if (options.uri.path == bliUrl) {
       // 替换B站主站结课
       options.contentType = "";

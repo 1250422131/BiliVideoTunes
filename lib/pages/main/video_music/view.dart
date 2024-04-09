@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/controller/user_controller.dart';
+import 'package:bili_video_tunes/common/model/network/home/search_default_info.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/utils/screen_utils.dart';
 import 'package:bili_video_tunes/common/weight/assemble_animated_opacity.dart';
@@ -38,6 +39,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
   //不可变Future->防止UI多次刷新造成卡顿
   late Future<void> _initVideoListFuture;
   late Future<void> _initHostTagFuture;
+  late Future<void> _loadSearchDefaultFuture;
 
   //界面标签
   int hotsTagSelectIndex = 0;
@@ -87,20 +89,46 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                 InkWell(
                   borderRadius: BorderRadius.circular(15),
                   onTap: () {},
-                  child: Hero(tag: "main_search_icon", child: Icon(
-                    (Icons.search),
-                    size: 24,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  )),
+                  child: Hero(
+                      tag: "main_search_icon",
+                      child: Icon(
+                        (Icons.search),
+                        size: 24,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      )),
                 ),
                 const SizedBox(
                   width: 16,
                 ),
                 Expanded(
-                    child: Text("",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyLarge)),
+                    child: FutureBuilder<void>(
+                  future: _loadSearchDefaultFuture,
+                  builder: (BuildContext context,
+                      AsyncSnapshot<void> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        // TODO
+                        child: Text(""),
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Center(
+                        child: Text("网络异常"),
+                      );
+                    } else {
+                      return Hero(
+                          tag: "default_search",
+                          child: Text(
+                            _controller.searchDefaultInfo.value.data?.showName ?? "搜索",
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant
+                                  .withOpacity(0.8),
+                            ),
+                          ));
+                    }
+                  },
+                )),
                 const SizedBox(
                   width: 16,
                 ),
@@ -138,7 +166,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
           );
         },
         openBuilder: (context, _) {
-          return const MainSearch();
+          return  MainSearch(defaultSearch: _controller.searchDefaultInfo.value.data?.showName,);
         },
         // openShape: RoundedRectangleBorder(
         //   borderRadius: BorderRadius.circular(28),
@@ -187,77 +215,84 @@ class _VideoMusicPageState extends State<VideoMusicPage>
     /******************************
      * 卡片列表视图
      ******************************/
-    var videoCardList = Obx(() => AssembleAutoAnimatedOpacity(duration: const Duration(milliseconds: 300),child: EasyRefresh(
-        onLoad: () async {
-          await _controller.loadNewVideoDynamicInfo(
-              rid: _controller.tabItems.elementAt(videoTabSelectIndex).rid,
-              tagId: _controller.hotsTags.elementAt(hotsTagSelectIndex).tagId,
-              pn: ++videoPageNum,
-              ps: 14);
-          return _controller.videoMusicPageInfo.value.let((it) {
-            if (videoPageNum < (it.count / it.size * 1.0).ceil()) {
-              return IndicatorResult.success;
-            } else {
-              IndicatorResult.noMore;
-            }
-          });
-        },
-        child: CustomScrollView(
-          slivers: [
-            SliverGrid.count(
-              crossAxisCount: getWindowsWidth(context).let((it) {
-                if (it > ScreenSize.ExtraLarge) {
-                  return 5;
-                } else if (it > ScreenSize.Large) {
-                  return 4;
-                } else if (it > ScreenSize.Normal) {
-                  return 3;
-                } else if (it > ScreenSize.Small) {
-                  return 2;
-                } else {
-                  return 1;
-                }
-              }),
-              crossAxisSpacing: 5,
-              mainAxisSpacing: 5,
-              childAspectRatio: getWindowsWidth(context).let((it) {
-                if (it > ScreenSize.ExtraLarge) {
-                  return 1.3;
-                } else if (it > ScreenSize.Large) {
-                  return 1.2;
-                } else if (it > ScreenSize.Normal) {
-                  return 1.1;
-                } else {
-                  return 1.05;
-                }
-              }),
-              children: [
-                for (var item in _controller.videoMusicList)
-                  LayoutBuilder(
-                    builder: (context, box) {
-                      //传递audioController是由于不希望Getx在每次循环都去Find
-                      return VideoMusicCard(
-                        item: item,
-                        box: box,
-                        audioController: _audioController,
-                        biliAudioService: _biliAudioService,
-                      );
-                    },
+    var videoCardList = Obx(() => AssembleAutoAnimatedOpacity(
+          duration: const Duration(milliseconds: 300),
+          child: EasyRefresh(
+              onLoad: () async {
+                await _controller.loadNewVideoDynamicInfo(
+                    rid:
+                        _controller.tabItems.elementAt(videoTabSelectIndex).rid,
+                    tagId: _controller.hotsTags
+                        .elementAt(hotsTagSelectIndex)
+                        .tagId,
+                    pn: ++videoPageNum,
+                    ps: 14);
+                return _controller.videoMusicPageInfo.value.let((it) {
+                  if (videoPageNum < (it.count / it.size * 1.0).ceil()) {
+                    return IndicatorResult.success;
+                  } else {
+                    IndicatorResult.noMore;
+                  }
+                });
+              },
+              child: CustomScrollView(
+                slivers: [
+                  SliverGrid.count(
+                    crossAxisCount: getWindowsWidth(context).let((it) {
+                      if (it > ScreenSize.ExtraLarge) {
+                        return 5;
+                      } else if (it > ScreenSize.Large) {
+                        return 4;
+                      } else if (it > ScreenSize.Normal) {
+                        return 3;
+                      } else if (it > ScreenSize.Small) {
+                        return 2;
+                      } else {
+                        return 1;
+                      }
+                    }),
+                    crossAxisSpacing: 5,
+                    mainAxisSpacing: 5,
+                    childAspectRatio: getWindowsWidth(context).let((it) {
+                      if (it > ScreenSize.ExtraLarge) {
+                        return 1.3;
+                      } else if (it > ScreenSize.Large) {
+                        return 1.2;
+                      } else if (it > ScreenSize.Normal) {
+                        return 1.1;
+                      } else {
+                        return 1.05;
+                      }
+                    }),
+                    children: [
+                      for (var item in _controller.videoMusicList)
+                        LayoutBuilder(
+                          builder: (context, box) {
+                            //传递audioController是由于不希望Getx在每次循环都去Find
+                            return VideoMusicCard(
+                              item: item,
+                              box: box,
+                              audioController: _audioController,
+                              biliAudioService: _biliAudioService,
+                            );
+                          },
+                        ),
+                    ],
                   ),
-              ],
-            ),
-            SliverFixedExtentList(
-              itemExtent: _biliAudioService.playerIndex.value != null ? 70 : 0,
-              delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                  //创建列表项
-                  return Container();
-                },
-                childCount: 1,
-              ),
-            ),
-          ],
-        )),));
+                  SliverFixedExtentList(
+                    itemExtent:
+                        _biliAudioService.playerIndex.value != null ? 70 : 0,
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        //创建列表项
+                        return Container();
+                      },
+                      childCount: 1,
+                    ),
+                  ),
+                ],
+              )),
+        ));
 
     /******************************
      * 主体
@@ -279,50 +314,55 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                       // 当Future还未完成时，显示加载中的UI
                       return const HotsTagShimmerWrap(mockNum: 5, spacing: 10);
                     } else if (snapshot.hasError) {
-                      return AssembleAutoAnimatedOpacity(duration: const Duration(milliseconds: 500),child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          color: Theme.of(context).colorScheme.errorContainer,
-                          width: MediaQuery.of(context).size.width - 20,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 16, right: 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.signal_wifi_bad_outlined,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onErrorContainer,
-                                    ),
-                                    const SizedBox(
-                                      width: 8,
-                                    ),
-                                    const Text("网络异常或加载失败")
-                                  ],
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _initHostTagFuture =
-                                          _controller.initHotsTag();
-                                    });
-                                  },
-                                  child: Text(
-                                    "重试",
-                                    style: TextStyle(
+                      return AssembleAutoAnimatedOpacity(
+                        duration: const Duration(milliseconds: 500),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            color: Theme.of(context).colorScheme.errorContainer,
+                            width: MediaQuery.of(context).size.width - 20,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 16, right: 8),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.signal_wifi_bad_outlined,
                                         color: Theme.of(context)
                                             .colorScheme
-                                            .onErrorContainer),
+                                            .onErrorContainer,
+                                      ),
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+                                      const Text("网络异常或加载失败")
+                                    ],
                                   ),
-                                )
-                              ],
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _initHostTagFuture =
+                                            _controller.initHotsTag();
+                                      });
+                                    },
+                                    child: Text(
+                                      "重试",
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onErrorContainer),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),);
+                      );
                     } else {
                       return Obx(() => AssembleAutoAnimatedOpacity(
                             duration: const Duration(milliseconds: 300),
@@ -435,6 +475,9 @@ class _VideoMusicPageState extends State<VideoMusicPage>
     _initHostTagFuture = _controller.initHotsTag();
 
     _tabScrollController = ScrollController();
+
+    _loadSearchDefaultFuture = _controller.loadSearchDefaultInfo();
+
     super.initState();
   }
 
