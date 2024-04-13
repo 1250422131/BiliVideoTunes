@@ -48,278 +48,256 @@ class _UserInfoPageState extends State<UserInfoPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Scaffold(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-                onPressed: () {},
-                icon: Badge(
-                  backgroundColor:
-                      Theme.of(context).colorScheme.secondaryContainer,
-                  textColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                  label: const Text('0'),
-                  child: const Icon(Icons.info_outline_rounded),
-                )),
-            IconButton(
-                onPressed: () {}, icon: const Icon(Icons.settings_rounded))
-          ],
-        ),
-        body: FutureBuilder<void>(
-            future: _initMyUserPageDataFuture,
-            builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                // 当Future还未完成时，显示加载中的UI
-                return const UserPageShimmer();
-              } else if (snapshot.hasError) {
-                return CommonError(
-                    tip: "网络异常或数据错误",
-                    iconData: Icons.cloud_off_rounded,
-                    retryTip: "重试",
-                    retry: () {
-                      setState(() {
-                        _initMyUserPageDataFuture = initMyUserPageData();
-                      });
-                    });
-              } else {
-                return _controller.myUserData.value != null
-                    ? AssembleAutoAnimatedOpacity(duration: const Duration(milliseconds: 300),child: NestedScrollView(
-                  headerSliverBuilder:
-                      (BuildContext context, bool innerBoxIsScrolled) {
-                    return [
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _controller.myUserData.value?.pendant
-                                  ?.image !=
-                                  null
-                                  ? SizedBox(
-                                width: 140,
-                                height: 140,
-                                child: Stack(
-                                  children: [
-                                    Positioned(
-                                      left: 30,
-                                      top: 30,
-                                      child: ClipOval(
-                                        child: Image.network(
-                                          _controller.myUserData
-                                              .value!.face!,
-                                          width: 80,
-                                          height: 80,
-                                        ),
-                                      ),
-                                    ),
-                                    _controller.myUserData.value!
-                                        .pendant!.image!
-                                        .let((it) {
-                                      if (it != "") {
-                                        return CachedNetworkImage(
-                                            imageUrl: it);
-                                      } else {
-                                        return const SizedBox();
-                                      }
-                                    }),
-                                  ],
-                                ),
-                              )
-                                  : SizedBox(
-                                width: 120,
-                                height: 120,
-                                child: Image.network(_controller
-                                    .myUserData
-                                    .value!
-                                    .pendant!
-                                    .image!),
-                              ),
-                              Row(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.center,
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    _controller.myUserData.value?.uname ??
-                                        "请先登录",
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 4,
-                                  ),
-                                  ClipRRect(
-                                    borderRadius:
-                                    BorderRadius.circular(4),
-                                    child: Container(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .tertiaryContainer,
-                                      child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 8, right: 8),
-                                          child: Text(
-                                            "Lv${_controller.myUserData.value?.levelInfo?.currentLevel}",
-                                            style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onTertiaryContainer,
-                                            ),
-                                          )),
-                                    ),
-                                  )
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 4,
-                              ),
-                              Row(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.center,
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "${_controller.myUserData.value?.mid} | ",
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  Row(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.center,
-                                    children: [
-                                      Image.network(
-                                        "https://message.biliimg.com/bfs/im_new/8e9153fa9dfdfca8ebe97daea70075ef351201307.png",
-                                        width: 15,
-                                        height: 15,
-                                      ),
-                                      const SizedBox(
-                                        width: 2,
-                                      ),
-                                      InkWell(
-                                          onTap: () async {
-                                            var map = {
-                                              'name': '哔哩哔哩',
-                                              'package':
-                                              'tv.danmaku.bili',
-                                              'path': 'bilibili://space'
-                                            };
-                                            await _methodChannel
-                                                .invokeMethod(
-                                                'openAppChannel',
-                                                map);
-                                          },
-                                          child: const Text(
-                                            "B站首页",
-                                            style:
-                                            TextStyle(fontSize: 12),
-                                          )),
-                                    ],
-                                  )
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
-                      )
-                    ];
-                  },
-                  body: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Row(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.history_rounded,
-                                  ),
-                                  SizedBox(
-                                    width: 4,
-                                  ),
-                                  Text("历史播放")
-                                ],
-                              ),
-                              TextButton(
-                                  onPressed: () {},
-                                  child: const Row(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.center,
-                                    children: [
-                                      Text("更多"),
-                                      Icon(Icons.navigate_next_rounded),
-                                    ],
-                                  )),
-                            ],
-                          ),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Wrap(
-                              spacing: 5,
-                              children: [
-                                for (var item
-                                in _controller.playerHistoryList)
-                                  LayoutBuilder(
-                                    builder: (context, box) {
-                                      return SizedBox(
-                                        width: 160,
-                                        height: 165,
-                                        child: PlayerHistoryCard(
-                                          item: item,
-                                          box: box,
-                                          audioController:
-                                          _audioController,
-                                          biliAudioService:
-                                          _biliAudioService,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                              ],
+
+    // 顶部栏
+    AppBar appBar = AppBar(
+      actions: [
+        IconButton(
+            onPressed: () {},
+            icon: Badge(
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              textColor: Theme.of(context).colorScheme.onSecondaryContainer,
+              label: const Text('0'),
+              child: const Icon(Icons.info_outline_rounded),
+            )),
+        IconButton(onPressed: () {}, icon: const Icon(Icons.settings_rounded))
+      ],
+    );
+
+    Widget userTopSliverToBoxAdapter = _controller.myUserData.value != null ? SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _controller.myUserData.value?.pendant?.image != null
+                ? SizedBox(
+                    width: 140,
+                    height: 140,
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          left: 30,
+                          top: 30,
+                          child: ClipOval(
+                            child: Image.network(
+                              _controller.myUserData.value!.face!,
+                              width: 80,
+                              height: 80,
                             ),
                           ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
+                        ),
+                        _controller.myUserData.value!.pendant!.image!.let((it) {
+                          if (it != "") {
+                            return CachedNetworkImage(imageUrl: it);
+                          } else {
+                            return const SizedBox();
+                          }
+                        }),
+                      ],
+                    ),
+                  )
+                : SizedBox(
+                    width: 120,
+                    height: 120,
+                    child: Image.network(
+                        _controller.myUserData.value!.pendant!.image!),
+                  ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  _controller.myUserData.value?.uname ?? "请先登录",
+                  style: const TextStyle(
+                    fontSize: 20,
+                  ),
+                ),
+                const SizedBox(
+                  width: 4,
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
+                    color: Theme.of(context).colorScheme.tertiaryContainer,
+                    child: Padding(
+                        padding: const EdgeInsets.only(left: 8, right: 8),
+                        child: Text(
+                          "Lv${_controller.myUserData.value?.levelInfo?.currentLevel}",
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onTertiaryContainer,
+                          ),
+                        )),
+                  ),
+                )
+              ],
+            ),
+            const SizedBox(
+              height: 4,
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "${_controller.myUserData.value?.mid} | ",
+                  style: const TextStyle(fontSize: 12),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.network(
+                      "https://message.biliimg.com/bfs/im_new/8e9153fa9dfdfca8ebe97daea70075ef351201307.png",
+                      width: 15,
+                      height: 15,
+                    ),
+                    const SizedBox(
+                      width: 2,
+                    ),
+                    InkWell(
+                        onTap: () async {
+                          var map = {
+                            'name': '哔哩哔哩',
+                            'package': 'tv.danmaku.bili',
+                            'path': 'bilibili://space'
+                          };
+                          await _methodChannel.invokeMethod(
+                              'openAppChannel', map);
+                        },
+                        child: const Text(
+                          "B站首页",
+                          style: TextStyle(fontSize: 12),
+                        )),
+                  ],
+                )
+              ],
+            )
+          ],
+        ),
+      ),
+    ) : const Column();
+
+    Widget body = FutureBuilder<void>(
+        future: _initMyUserPageDataFuture,
+        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // 当Future还未完成时，显示加载中的UI
+            return const UserPageShimmer();
+          } else if (snapshot.hasError) {
+            return CommonError(
+                tip: "网络异常或数据错误",
+                iconData: Icons.cloud_off_rounded,
+                retryTip: "重试",
+                retry: () {
+                  setState(() {
+                    _initMyUserPageDataFuture = initMyUserPageData();
+                  });
+                });
+          } else {
+            return _controller.myUserData.value != null
+                ? AssembleAutoAnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    child: NestedScrollView(
+                      headerSliverBuilder:
+                          (BuildContext context, bool innerBoxIsScrolled) {
+                        return [userTopSliverToBoxAdapter];
+                      },
+                      body: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Column(
                             children: [
-                              const Row(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.center,
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Icon(
-                                    Icons.playlist_play_rounded,
+                                  const Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.history_rounded,
+                                      ),
+                                      SizedBox(
+                                        width: 4,
+                                      ),
+                                      Text("历史播放")
+                                    ],
                                   ),
-                                  SizedBox(
-                                    width: 4,
-                                  ),
-                                  Text("我的歌单")
+                                  TextButton(
+                                      onPressed: () {},
+                                      child: const Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text("更多"),
+                                          Icon(Icons.navigate_next_rounded),
+                                        ],
+                                      )),
                                 ],
                               ),
-                              TextButton(
-                                  onPressed: () {},
-                                  child: const Row(
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Wrap(
+                                  spacing: 5,
+                                  children: [
+                                    for (var item
+                                        in _controller.playerHistoryList)
+                                      LayoutBuilder(
+                                        builder: (context, box) {
+                                          return SizedBox(
+                                            width: 160,
+                                            height: 165,
+                                            child: PlayerHistoryCard(
+                                              item: item,
+                                              box: box,
+                                              audioController: _audioController,
+                                              biliAudioService:
+                                                  _biliAudioService,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Row(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.center,
+                                        CrossAxisAlignment.center,
                                     children: [
-                                      Text("更多"),
-                                      Icon(Icons.navigate_next_rounded),
+                                      Icon(
+                                        Icons.playlist_play_rounded,
+                                      ),
+                                      SizedBox(
+                                        width: 4,
+                                      ),
+                                      Text("我的歌单")
                                     ],
-                                  )),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                  child: Padding(
+                                  ),
+                                  TextButton(
+                                      onPressed: () {},
+                                      child: const Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text("更多"),
+                                          Icon(Icons.navigate_next_rounded),
+                                        ],
+                                      )),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                      child: Padding(
                                     padding: const EdgeInsets.only(left: 7),
                                     child: FilledButton.tonal(
                                         onPressed: () {},
@@ -328,7 +306,7 @@ class _UserInfoPageState extends State<UserInfoPage>
                                               top: 10, bottom: 10),
                                           child: Row(
                                             crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                                CrossAxisAlignment.center,
                                             children: [
                                               Icon(Icons.add_outlined),
                                               SizedBox(
@@ -338,14 +316,14 @@ class _UserInfoPageState extends State<UserInfoPage>
                                                 "新建我的歌单",
                                                 style: TextStyle(
                                                     fontWeight:
-                                                    FontWeight.bold),
+                                                        FontWeight.bold),
                                               )
                                             ],
                                           ),
                                         )),
                                   )),
-                              Expanded(
-                                  child: Padding(
+                                  Expanded(
+                                      child: Padding(
                                     padding: const EdgeInsets.only(
                                         left: 7, right: 7),
                                     child: FilledButton.tonal(
@@ -353,21 +331,21 @@ class _UserInfoPageState extends State<UserInfoPage>
                                         backgroundColor: MaterialStateProperty
                                             .resolveWith<Color?>(
                                                 (Set<MaterialState> states) {
-                                              if (states.contains(
-                                                  MaterialState.pressed)) {
-                                                // 当按钮被按下时的背景颜色
-                                                return Theme.of(context)
-                                                    .colorScheme
-                                                    .primary
-                                                    .withOpacity(0.2);
-                                              } else {
-                                                // 默认状态下的背景颜色
-                                                return Theme.of(context)
-                                                    .colorScheme
-                                                    .primary
-                                                    .withOpacity(0.1);
-                                              }
-                                            }),
+                                          if (states.contains(
+                                              MaterialState.pressed)) {
+                                            // 当按钮被按下时的背景颜色
+                                            return Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.2);
+                                          } else {
+                                            // 默认状态下的背景颜色
+                                            return Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.1);
+                                          }
+                                        }),
                                       ),
                                       onPressed: () {},
                                       child: const Padding(
@@ -375,7 +353,7 @@ class _UserInfoPageState extends State<UserInfoPage>
                                             top: 10, bottom: 10),
                                         child: Row(
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                              CrossAxisAlignment.center,
                                           children: [
                                             Icon(Icons.edit_outlined),
                                             SizedBox(
@@ -384,57 +362,57 @@ class _UserInfoPageState extends State<UserInfoPage>
                                             Text(
                                               "编辑我的歌单",
                                               style: TextStyle(
-                                                  fontWeight:
-                                                  FontWeight.bold),
+                                                  fontWeight: FontWeight.bold),
                                             )
                                           ],
                                         ),
                                       ),
                                     ),
                                   )),
+                                ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 15),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Wrap(
+                                    spacing: 20,
+                                    children: List.generate(
+                                        _controller.favorites.length,
+                                        (index) => SongSheetCard(
+                                              id: _controller
+                                                      .favorites[index].id ??
+                                                  0,
+                                              title: _controller
+                                                      .favorites[index].title ??
+                                                  "",
+                                              cover: _controller
+                                                      .favorites[index].cover ??
+                                                  "",
+                                            )),
+                                  ),
+                                ),
+                              )
                             ],
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 15),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Wrap(
-                                spacing: 20,
-                                children: List.generate(
-                                    _controller.favorites.length,
-                                        (index) => SongSheetCard(
-                                      id: _controller
-                                          .favorites[index].id ??
-                                          0,
-                                      title: _controller
-                                          .favorites[index]
-                                          .title ??
-                                          "",
-                                      cover: _controller
-                                          .favorites[index]
-                                          .cover ??
-                                          "",
-                                    )),
-                              ),
-                            ),
-                          )
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),)
-                    : CommonError(
-                        tip: "未登录",
-                        iconData: Icons.cloud_off_rounded,
-                        retryTip: "登录",
-                        retry: () async {
-                          await showLoginDialog();
-                          setState(() {
-                            _initMyUserPageDataFuture = initMyUserPageData();
-                          });
-                        });
-              }
-            }));
+                  )
+                : CommonError(
+                    tip: "未登录",
+                    iconData: Icons.no_accounts_rounded,
+                    retryTip: "登录",
+                    retry: () async {
+                      await showLoginDialog();
+                      setState(() {
+                        _initMyUserPageDataFuture = initMyUserPageData();
+                      });
+                    });
+          }
+        });
+
+    return Scaffold(appBar: appBar, body: body);
   }
 
   Future<void> showLoginDialog() async {

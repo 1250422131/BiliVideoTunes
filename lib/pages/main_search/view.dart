@@ -100,76 +100,80 @@ class _MainSearch extends State<MainSearch> with TickerProviderStateMixin {
                     });
                   });
             } else if (snapshot.connectionState == ConnectionState.waiting) {
-              return const VideoCardGridViewShimmer();
+              return const SizedBox();
             } else {
-              return NestedScrollView(headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                return [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: searchOrderTabBar,
+              return NestedScrollView(
+                headerSliverBuilder:
+                    (BuildContext context, bool innerBoxIsScrolled) {
+                  return [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: searchOrderTabBar,
+                        ),
                       ),
-                    ),
-                  )
-                ];
-              }
-              ,body: EasyRefresh(
-                child: CustomScrollView(
-                  slivers: [
-                    Obx(() => SliverGrid.count(
-                      crossAxisCount: getWindowsWidth(context).let((it) {
-                        if (it > ScreenSize.ExtraLarge) {
-                          return 5;
-                        } else if (it > ScreenSize.Large) {
-                          return 4;
-                        } else if (it > ScreenSize.Normal) {
-                          return 3;
-                        } else if (it > ScreenSize.Small) {
-                          return 2;
-                        } else {
-                          return 1;
-                        }
-                      }),
-                      crossAxisSpacing: 5,
-                      mainAxisSpacing: 5,
-                      childAspectRatio: getWindowsWidth(context).let((it) {
-                        if (it > ScreenSize.ExtraLarge) {
-                          return 1.3;
-                        } else if (it > ScreenSize.Large) {
-                          return 1.2;
-                        } else if (it > ScreenSize.Normal) {
-                          return 1;
-                        } else {
-                          return 1;
-                        }
-                      }),
-                      children: [
-                        for (var item in _controller.searchResultList)
-                          LayoutBuilder(
-                            builder: (context, box) {
-                              return SearchResultVideoCard(
-                                item: item,
-                                audioController: _audioController,
-                                biliAudioService: _biliAudioService,
-                                box: box,
-                              );
-                            },
-                          ),
-                      ],
-                    ))
-                  ],
-                ),
-                onLoad: () {
-                  _loadSearchResultData =
-                      _controller.loadSearchByTypeResultInfo(
-                          keyword: _textEditingController.value.text,
-                          page: _controller.searchResultInfo.value.data?.page
-                              ?.let((it) => it + 1) ??
-                              1);
+                    )
+                  ];
                 },
-              ),);
+                body: EasyRefresh(
+                  child: CustomScrollView(
+                    slivers: [
+                      Obx(() => SliverGrid.count(
+                            crossAxisCount: getWindowsWidth(context).let((it) {
+                              if (it > ScreenSize.ExtraLarge) {
+                                return 5;
+                              } else if (it > ScreenSize.Large) {
+                                return 4;
+                              } else if (it > ScreenSize.Normal) {
+                                return 3;
+                              } else if (it > ScreenSize.Small) {
+                                return 2;
+                              } else {
+                                return 1;
+                              }
+                            }),
+                            crossAxisSpacing: 5,
+                            mainAxisSpacing: 5,
+                            childAspectRatio:
+                                getWindowsWidth(context).let((it) {
+                              if (it > ScreenSize.ExtraLarge) {
+                                return 1.3;
+                              } else if (it > ScreenSize.Large) {
+                                return 1.2;
+                              } else if (it > ScreenSize.Normal) {
+                                return 1;
+                              } else {
+                                return 1;
+                              }
+                            }),
+                            children: [
+                              for (var item in _controller.searchResultList)
+                                LayoutBuilder(
+                                  builder: (context, box) {
+                                    return SearchResultVideoCard(
+                                      item: item,
+                                      audioController: _audioController,
+                                      biliAudioService: _biliAudioService,
+                                      box: box,
+                                    );
+                                  },
+                                ),
+                            ],
+                          ))
+                    ],
+                  ),
+                  onLoad: () {
+                    _loadSearchResultData =
+                        _controller.loadSearchByTypeResultInfo(
+                            keyword: _textEditingController.value.text,
+                            page: _controller.searchResultInfo.value.data?.page
+                                    ?.let((it) => it + 1) ??
+                                1);
+                  },
+                ),
+              );
             }
           }),
     );
@@ -258,30 +262,55 @@ class _MainSearch extends State<MainSearch> with TickerProviderStateMixin {
                       mainAxisSpacing: 0,
                     ),
                     itemBuilder: (BuildContext context, int index) {
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          _controller.searchQueryInfo.value.data?.trending
-                                  ?.list?[index].icon
-                                  ?.let((it) => it != ""
-                                      ? CachedNetworkImage(
-                                          height: 15,
-                                          imageUrl: it,
-                                        )
-                                      : null) ??
-                              const SizedBox(),
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          Expanded(
-                              child: Text(
+                      return GestureDetector(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
                             _controller.searchQueryInfo.value.data?.trending
-                                    ?.list?[index].keyword ??
-                                "",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          )),
-                        ],
+                                    ?.list?[index].icon
+                                    ?.let((it) => it != ""
+                                        ? CachedNetworkImage(
+                                            height: 15,
+                                            imageUrl: it,
+                                          )
+                                        : null) ??
+                                const SizedBox(),
+                            const SizedBox(
+                              width: 5,
+                            ),
+                            Expanded(
+                                child: Text(
+                              _controller.searchQueryInfo.value.data?.trending
+                                      ?.list?[index].keyword ??
+                                  "",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            )),
+                          ],
+                        ),
+                        onTap: () {
+                          _textEditingController.text = _controller
+                                  .searchQueryInfo
+                                  .value
+                                  .data
+                                  ?.trending
+                                  ?.list?[index]
+                                  .keyword ??
+                              "";
+                          setState(() {
+                            _loadSearchResultData =
+                                _controller.loadSearchByTypeResultInfo(
+                                    keyword: _controller
+                                            .searchQueryInfo
+                                            .value
+                                            .data
+                                            ?.trending
+                                            ?.list?[index]
+                                            .keyword ??
+                                        "",
+                                    isClear: true);
+                          });
+                        },
                       );
                     },
                   ),
