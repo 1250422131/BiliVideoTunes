@@ -23,3 +23,10 @@ jobs:
       - run: flutter test
       - run: flutter build apk
       - run: flutter build appbundle
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build artifacts
+          path: |
+            ./build/app/outputs/flutter-apk/*.apk
+            ./build/app/outputs/bundle/*.aab
