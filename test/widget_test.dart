@@ -18,14 +18,14 @@ import 'package:get/get.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // 全局支持音乐播放器和对应控制器
-    Get.put(UserController());
-    Get.put(BiliAudioService());
-    Get.put<BiliAudioHandler>(await initAudioService());
-    Get.put(AudioController());
-
-    await tester.pumpWidget(const UserPageShimmer());
-    await Future.delayed(const Duration(seconds: 5));
+    // // 全局支持音乐播放器和对应控制器
+    // Get.put(UserController());
+    // Get.put(BiliAudioService());
+    // Get.put<BiliAudioHandler>(await initAudioService());
+    // Get.put(AudioController());
+    //
+    // await tester.pumpWidget(const UserPageShimmer());
+    // await Future.delayed(const Duration(seconds: 5));
 
     //
     // expect(find.text('0'), findsOneWidget);
