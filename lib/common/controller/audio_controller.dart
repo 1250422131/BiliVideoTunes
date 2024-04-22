@@ -5,6 +5,7 @@ import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:just_audio/just_audio.dart';
 
 enum AudioMediaType { video, audio, cache, local, url }
 
@@ -114,6 +115,10 @@ class AudioController extends GetxController {
 
   void updateCurrentLine(int currentTime) {
     _biliAudioHandler.updateCurrentLine(currentTime);
+  }
+
+  Future<void> setLoopMode(LoopMode loopMode) async {
+    await _biliAudioHandler.setLoopMode(loopMode);
   }
 
   // 暂停音乐

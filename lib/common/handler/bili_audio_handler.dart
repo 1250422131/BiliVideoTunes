@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:bili_video_tunes/common/api/api_path.dart';
 import 'package:bili_video_tunes/common/api/video_api.dart';
@@ -139,20 +141,9 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         //检查播放模式
         switch (_loopModel.value) {
           case LoopMode.off:
-            // 无模式
-            _playerIndex.value?.also((it) {
-              if (it < _playerList.length - 1) {
-                // 是否存在下一首
-                it = it + 1;
-                final audioMediaItem = _playerList.elementAt(it);
-                _analysisPlay(audioMediaItem, mPlayerIndex: it);
-              } else if (it == _playerList.length - 1) {
-                // 确实播放完了
-                _currentPosition.value = (Duration.zero);
-                _playerIndex.value = null;
-                stop();
-              }
-            });
+            // 无模式 -> 随机播放
+            final randomIndex = Random().nextInt(_playerList.length);
+            _analysisPlay(_playerList[randomIndex], mPlayerIndex: randomIndex);
             break;
           case LoopMode.one:
             // 单曲循环
@@ -422,5 +413,10 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
             playType: playType);
       }
     });
+  }
+
+  Future<void> setLoopMode(LoopMode loopMode) async {
+    _loopModel.value = loopMode;
+    await _audioPlayer.setLoopMode(loopMode);
   }
 }

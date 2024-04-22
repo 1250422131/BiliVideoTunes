@@ -72,49 +72,50 @@ class _VideoMusicPageState extends State<VideoMusicPage>
       ),
       clipBehavior: Clip.antiAlias,
       child: OpenContainer(
-        tappable:  true,
+        tappable: true,
         openElevation: 0,
         closedElevation: 0,
         transitionDuration: const Duration(milliseconds: 500),
         closedBuilder: (context, _) {
           return Obx(() => AbsorbPointer(
-            absorbing: _userController.loginUserData.value != null,
-            child: GestureDetector(
-              onTap: () {
-                if (_userController.loginUserData.value == null) {
-                  showLoginDialog();
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                // 设置所有方向的内边距为10.0
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                height: 50,
-                child: Row(
-                  children: [
-                    InkWell(
-                      borderRadius: BorderRadius.circular(15),
-                      onTap: () {},
-                      child: Hero(
-                          tag: "main_search_icon",
-                          child: Icon(
-                            (Icons.search),
-                            size: 24,
-                            color:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
-                          )),
+                absorbing: _userController.loginUserData.value != null,
+                child: GestureDetector(
+                  onTap: () {
+                    if (_userController.loginUserData.value == null) {
+                      showLoginDialog();
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                    // 设置所有方向的内边距为10.0
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      borderRadius: BorderRadius.circular(28),
                     ),
-                    const SizedBox(
-                      width: 16,
-                    ),
-                    Expanded(
-                        child: FutureBuilder<void>(
+                    height: 50,
+                    child: Row(
+                      children: [
+                        InkWell(
+                          borderRadius: BorderRadius.circular(15),
+                          onTap: () {},
+                          child: Hero(
+                              tag: "main_search_icon",
+                              child: Icon(
+                                (Icons.search),
+                                size: 24,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              )),
+                        ),
+                        const SizedBox(
+                          width: 16,
+                        ),
+                        Expanded(
+                            child: FutureBuilder<void>(
                           future: _loadSearchDefaultFuture,
-                          builder:
-                              (BuildContext context, AsyncSnapshot<void> snapshot) {
+                          builder: (BuildContext context,
+                              AsyncSnapshot<void> snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
                               return const Center(
@@ -130,7 +131,7 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                                   tag: "default_search",
                                   child: Text(
                                     _controller.searchDefaultInfo.value.data
-                                        ?.showName ??
+                                            ?.showName ??
                                         "搜索",
                                     style: TextStyle(
                                       color: Theme.of(context)
@@ -142,48 +143,51 @@ class _VideoMusicPageState extends State<VideoMusicPage>
                             }
                           },
                         )),
-                    const SizedBox(
-                      width: 16,
-                    ),
-                    Obx(() => InkWell(
-                      child: GestureDetector(
-                        onTap: () {
-                          if (_userController.loginUserData.value == null) {
-                            showLoginDialog();
-                          }
-                        },
-                        child: ClipOval(
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: ShapeDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage(_userController
-                                    .loginUserData.value?.face ??
-                                    "https://i0.hdslb.com/bfs/face/member/noface.jpg@240w_240h"),
-                                fit: BoxFit.contain,
-                              ),
-                              shape: const OvalBorder(),
-                            ),
-                          ),
+                        const SizedBox(
+                          width: 16,
                         ),
-                      ),
-                      onTap: () {
-                        if (_userController.loginUserData.value == null) {
-                          showLoginDialog();
-                        }
-                      },
-                    )),
-                  ],
+                        Obx(() => InkWell(
+                              child: GestureDetector(
+                                onTap: () {
+                                  if (_userController.loginUserData.value ==
+                                      null) {
+                                    showLoginDialog();
+                                  }
+                                },
+                                child: ClipOval(
+                                  child: Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: ShapeDecoration(
+                                      image: DecorationImage(
+                                        image: NetworkImage(_userController
+                                                .loginUserData.value?.face ??
+                                            "https://i0.hdslb.com/bfs/face/member/noface.jpg@240w_240h"),
+                                        fit: BoxFit.contain,
+                                      ),
+                                      shape: const OvalBorder(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              onTap: () {
+                                if (_userController.loginUserData.value ==
+                                    null) {
+                                  showLoginDialog();
+                                }
+                              },
+                            )),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ));
+              ));
         },
         openBuilder: (context, _) {
           return Obx(() => MainSearch(
-            defaultSearch: _controller.searchDefaultInfo.value.data?.showName,
-          ));
+                defaultSearch:
+                    _controller.searchDefaultInfo.value.data?.showName,
+              ));
         },
         // openShape: RoundedRectangleBorder(
         //   borderRadius: BorderRadius.circular(28),
@@ -235,6 +239,17 @@ class _VideoMusicPageState extends State<VideoMusicPage>
     var videoCardList = Obx(() => AssembleAutoAnimatedOpacity(
           duration: const Duration(milliseconds: 300),
           child: EasyRefresh(
+              onRefresh: () async {
+                videoPageNum = 1;
+                await _controller.loadNewVideoDynamicInfo(
+                    rid: _controller.tabItems.elementAt(videoTabSelectIndex).rid,
+                    tagId: _controller.hotsTags
+                        .elementAt(hotsTagSelectIndex)
+                        .tagId,
+                    pn: videoPageNum,
+                    ps: 14,
+                    isClear: true);
+              },
               onLoad: () async {
                 await _controller.loadNewVideoDynamicInfo(
                     rid:

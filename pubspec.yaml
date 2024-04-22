@@ -111,7 +111,7 @@ dev_dependencies:
 
   isar_generator: ^3.1.0+1
 
-  build_runner: ^2.4.8
+  build_runner: ^2.4.9
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

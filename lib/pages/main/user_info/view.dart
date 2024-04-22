@@ -53,14 +53,7 @@ class _UserInfoPageState extends State<UserInfoPage>
     // 顶部栏
     AppBar appBar = AppBar(
       actions: [
-        IconButton(
-            onPressed: () {},
-            icon: Badge(
-              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-              textColor: Theme.of(context).colorScheme.onSecondaryContainer,
-              label: const Text('0'),
-              child: const Icon(Icons.info_outline_rounded),
-            )),
+
         IconButton(onPressed: () {}, icon: const Icon(Icons.settings_rounded))
       ],
     );
@@ -162,7 +155,7 @@ class _UserInfoPageState extends State<UserInfoPage>
                           var map = {
                             'name': '哔哩哔哩',
                             'package': 'tv.danmaku.bili',
-                            'path': 'bilibili://space'
+                            'path': 'bilibili://space/${_controller.myUserData.value?.mid}?from=bili_video_tunes'
                           };
                           await _methodChannel.invokeMethod(
                               'openAppChannel', map);
