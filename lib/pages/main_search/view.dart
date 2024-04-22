@@ -5,7 +5,6 @@ import 'package:bili_video_tunes/common/weight/common_error.dart';
 import 'package:bili_video_tunes/common/weight/search/search_result_video_card.dart';
 import 'package:bili_video_tunes/common/weight/search/search_text.dart';
 import 'package:bili_video_tunes/common/weight/shimmer/search_squear_list_shimmer.dart';
-import 'package:bili_video_tunes/common/weight/shimmer/video_card_grid_view_shimmer.dart';
 import 'package:bili_video_tunes/pages/main_search/controller.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';

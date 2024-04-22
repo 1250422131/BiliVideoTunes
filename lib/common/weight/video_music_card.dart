@@ -118,7 +118,7 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                                  // cacheHeight: (_box.maxHeight *
                                  //         MediaQuery.of(context).devicePixelRatio)
                                  //     .toInt(),
-                                 coverUrl: "${_item.pic}$imageAVIF",
+                                 coverUrl: "${_item.pic}",
                                  height: MediaQuery.of(context).size.width,
                                );
                              }),

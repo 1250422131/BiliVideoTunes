@@ -71,7 +71,7 @@ class _FavVideoCardState extends State<FavVideoCard> {
             final audioMediaItem = AudioMediaItem(
                 title: _item.title ?? "",
                 description: _item.intro ?? "",
-                coverImageUrl: "${_item.cover}$imageAVIF",
+                coverImageUrl: "${_item.cover}",
                 type: AudioMediaType.video,
                 bvId: _item.bvid);
 
@@ -92,7 +92,7 @@ class _FavVideoCardState extends State<FavVideoCard> {
                       // cacheHeight: (_box.maxHeight *
                       //         MediaQuery.of(context).devicePixelRatio)
                       //     .toInt(),
-                      coverUrl: "${_item.cover}$imageAVIF",
+                      coverUrl: "${_item.cover}",
 
                       // height: imageHeight,
                     );
