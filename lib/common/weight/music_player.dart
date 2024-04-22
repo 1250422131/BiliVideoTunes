@@ -1,6 +1,7 @@
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/weight/assemble_animated_opacity.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -57,8 +58,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
                               ClipRRect(
                                 borderRadius:
                                 const BorderRadius.all(Radius.circular(5)),
-                                child: Obx(() => Image.network(
-                                  _biliAudioService.playerIndex.value
+                                child: Obx(() => CachedNetworkImage(
+                                  imageUrl: _biliAudioService.playerIndex.value
                                       ?.let((it) {
                                     return _biliAudioService
                                         .playerList[it].coverImageUrl;

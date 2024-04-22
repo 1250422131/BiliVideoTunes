@@ -41,3 +41,4 @@ class _VideoCoverImage extends State<VideoCoverImage> {
     );
   }
 }
+

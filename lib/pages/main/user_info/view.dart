@@ -6,6 +6,7 @@ import 'package:bili_video_tunes/common/weight/player_history_card.dart';
 import 'package:bili_video_tunes/common/weight/shimmer/user_page_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/song_sheet_card.dart';
 import 'package:bili_video_tunes/pages/main/user_info/controller.dart';
+import 'package:bili_video_tunes/pages/user/fav_list/view.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +65,7 @@ class _UserInfoPageState extends State<UserInfoPage>
       ],
     );
 
-    Widget userTopSliverToBoxAdapter = _controller.myUserData.value != null ? SliverToBoxAdapter(
+    Widget userTopSliverToBoxAdapter = Obx(() => _controller.myUserData.value != null ? SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -72,37 +73,37 @@ class _UserInfoPageState extends State<UserInfoPage>
           children: [
             _controller.myUserData.value?.pendant?.image != null
                 ? SizedBox(
-                    width: 140,
-                    height: 140,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          left: 30,
-                          top: 30,
-                          child: ClipOval(
-                            child: Image.network(
-                              _controller.myUserData.value!.face!,
-                              width: 80,
-                              height: 80,
-                            ),
-                          ),
-                        ),
-                        _controller.myUserData.value!.pendant!.image!.let((it) {
-                          if (it != "") {
-                            return CachedNetworkImage(imageUrl: it);
-                          } else {
-                            return const SizedBox();
-                          }
-                        }),
-                      ],
+              width: 140,
+              height: 140,
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 30,
+                    top: 30,
+                    child: ClipOval(
+                      child: Image.network(
+                        _controller.myUserData.value!.face!,
+                        width: 80,
+                        height: 80,
+                      ),
                     ),
-                  )
-                : SizedBox(
-                    width: 120,
-                    height: 120,
-                    child: Image.network(
-                        _controller.myUserData.value!.pendant!.image!),
                   ),
+                  _controller.myUserData.value!.pendant!.image!.let((it) {
+                    if (it != "") {
+                      return CachedNetworkImage(imageUrl: it);
+                    } else {
+                      return const SizedBox();
+                    }
+                  }),
+                ],
+              ),
+            )
+                : SizedBox(
+              width: 120,
+              height: 120,
+              child: Image.network(
+                  _controller.myUserData.value!.pendant!.image!),
+            ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -177,7 +178,9 @@ class _UserInfoPageState extends State<UserInfoPage>
           ],
         ),
       ),
-    ) : const Column();
+    ) : const SliverToBoxAdapter(
+      child: SizedBox(),
+    ));
 
     Widget body = FutureBuilder<void>(
         future: _initMyUserPageDataFuture,
@@ -379,17 +382,29 @@ class _UserInfoPageState extends State<UserInfoPage>
                                     spacing: 20,
                                     children: List.generate(
                                         _controller.favorites.length,
-                                        (index) => SongSheetCard(
-                                              id: _controller
-                                                      .favorites[index].id ??
-                                                  0,
-                                              title: _controller
-                                                      .favorites[index].title ??
-                                                  "",
-                                              cover: _controller
-                                                      .favorites[index].cover ??
-                                                  "",
-                                            )),
+                                        (index) => InkWell(
+                                          child: SongSheetCard(
+                                            id: _controller
+                                                .favorites[index].id ??
+                                                0,
+                                            title: _controller
+                                                .favorites[index].title ??
+                                                "",
+                                            cover: _controller
+                                                .favorites[index].cover ??
+                                                "",
+                                          ),
+                                          onTap: (){
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => FavListPage(
+                                                  oid: _controller.favorites[index].id?.toInt() ?? 0,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        )),
                                   ),
                                 ),
                               )

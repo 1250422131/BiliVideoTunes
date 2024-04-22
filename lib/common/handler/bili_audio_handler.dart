@@ -67,7 +67,7 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     listenPlayerDuration();
     listenPlayerLoopModel();
     // 打开通知
-    
+
     if (GetPlatform.isMobile) {
       // 移动端才具有这个功能
       _notifyAudioHandlerAboutPlaybackEvents();
@@ -119,12 +119,10 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     }
   }
 
-  Future<void> deletePlayerAudioByIndex(int index)  async{
-    if(index == _biliAudioService.playerIndex.value){
+  Future<void> deletePlayerAudioByIndex(int index) async {
+    if (index == _biliAudioService.playerIndex.value) {
       _playerIndex.value = null;
       stop();
-
-
     }
 
     queue.value.removeAt(index);
@@ -218,8 +216,9 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     });
   }
 
-  Future<void> addPlayerAudio(AudioMediaItem audioMediaItem) async {
-    await _analysisPlay(audioMediaItem);
+  Future<void> addPlayerAudio(AudioMediaItem audioMediaItem,
+      {bool autoPlay = true}) async {
+    await _analysisPlay(audioMediaItem, autoPlay: autoPlay);
   }
 
   void updateCurrentLine(int currentTime) {
@@ -243,12 +242,12 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   // 解析并且播放音乐只允许该类调用
   Future<void> _analysisPlay(AudioMediaItem audioMediaItem,
-      {int? mPlayerIndex}) async {
+      {int? mPlayerIndex, bool autoPlay = true}) async {
     switch (audioMediaItem.type) {
       case AudioMediaType.video:
         // 交由解析函数完成处理
         await _analysisVideoMusicPlayer(audioMediaItem,
-            mPlayerIndex: mPlayerIndex);
+            mPlayerIndex: mPlayerIndex, autoPlay: autoPlay);
         break;
       case AudioMediaType.audio:
       case AudioMediaType.cache:
@@ -285,7 +284,7 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   // 解析视频音乐
   Future<void> _analysisVideoMusicPlayer(AudioMediaItem audioMediaItem,
-      {int? mPlayerIndex}) async {
+      {int? mPlayerIndex, bool autoPlay = true}) async {
     // TODO 这部分代码需要进一步的异常检测，去除!部分。
 
     final videoInfo =
@@ -294,7 +293,9 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     final videoPlayerInfo = await VideoApi.getVideoPlayerDashInfo(
         bvid: audioMediaItem.bvId!, cid: videoInfo.data?.cid);
 
-    await _updatePaletteGenerator(audioMediaItem.coverImageUrl);
+    if (autoPlay) {
+      await _updatePaletteGenerator(audioMediaItem.coverImageUrl);
+    }
 
     final morePlayerInfo = await VideoApi.getMorePlayerInfo(
         bvid: audioMediaItem.bvId!, cid: videoInfo.data!.cid!);
@@ -308,7 +309,10 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       final videoSubtitleInfo = await VideoApi.getVideoSubtitles(
           uri: item.subtitleUrl!.replaceAll("//aisubtitle.hdslb.com", ""));
       videoSubtitleInfo.body?.forEach((item) => lyricList.add(LyricData(
-          lyric: item.content!, starTime: item.from!, endTime: item.to!)));
+          lyric: item.content!,
+          starTime: item.from!,
+          endTime: item.to!,
+          duration: item.to! - item.from!)));
     });
 
     audioMediaItem.lyricList = lyricList;
@@ -331,15 +335,20 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
           _playerList.insert(newPlayIndex, audioMediaItem);
           queue.value.insert(newPlayIndex, audioMediaItem.toMediaItem());
         }
-        _playerIndex.value = newPlayIndex;
 
+        if (autoPlay) {
+          _playerIndex.value = newPlayIndex;
+        }
       }
-      await _player(
-          videoPlayerInfo.data?.dash?.audio
-              ?.elementAt(0)
-              .backupUrl
-              ?.elementAt(0),
-          audioMediaItem.startTime?.toInt());
+
+      if (autoPlay) {
+        await _player(
+            videoPlayerInfo.data?.dash?.audio
+                ?.elementAt(0)
+                .backupUrl
+                ?.elementAt(0),
+            audioMediaItem.startTime?.toInt());
+      }
     }
   }
 

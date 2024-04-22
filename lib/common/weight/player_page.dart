@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -187,8 +188,8 @@ class _PlayerPageState extends State<PlayerPage>
                                     children: [
                                       ClipRRect(
                                         borderRadius: const BorderRadius.all(Radius.circular(5)),
-                                        child: Image.network(
-                                          _biliAudioService.playerList[index].coverImageUrl,
+                                        child: CachedNetworkImage(
+                                          imageUrl: _biliAudioService.playerList[index].coverImageUrl,
                                           width: 50,
                                           height: 50,
                                           fit: BoxFit.cover,
@@ -352,8 +353,8 @@ class _PlayerPageState extends State<PlayerPage>
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(10)),
                                 child: _biliAudioService.playerIndex.value
-                                    ?.let((it) => Image.network(
-                                  _biliAudioService
+                                    ?.let((it) => CachedNetworkImage(
+                                  imageUrl: _biliAudioService
                                       .playerList[it]
                                       .coverImageUrl,
                                   width: 300,

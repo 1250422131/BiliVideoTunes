@@ -91,8 +91,9 @@ class AudioController extends GetxController {
     await pause();
   }
 
-  Future<void> addPlayerAudio(AudioMediaItem audioMediaItem) async {
-    await _biliAudioHandler.addPlayerAudio(audioMediaItem);
+  Future<void> addPlayerAudio(AudioMediaItem audioMediaItem,
+      {bool autoPlay = true}) async {
+    await _biliAudioHandler.addPlayerAudio(audioMediaItem, autoPlay: autoPlay);
     await _isar.writeTxn(() async {
       await _isar.videoAudioPlayerTasks
           .put(audioMediaItem.toVideoAudioPlayerTask());

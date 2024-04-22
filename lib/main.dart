@@ -96,7 +96,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return DynamicColorBuilder(builder: (lightColorScheme, darkColorScheme) {
       return GetMaterialApp(
-        title: 'Flutter Demo',
+        title: 'BiliVideoTunes',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: lightColorScheme ?? _defaultLightColorScheme,

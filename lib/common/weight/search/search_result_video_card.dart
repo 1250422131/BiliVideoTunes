@@ -7,6 +7,8 @@ import 'package:bili_video_tunes/common/weight/video_cover_image.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:flutter/material.dart';
 
+import '../../StyleString.dart';
+
 class SearchResultVideoCard extends StatefulWidget {
   final BoxConstraints box;
 
@@ -66,14 +68,17 @@ class _SearchResultVideoCardState extends State<SearchResultVideoCard> {
   Widget build(BuildContext context) {
     return Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(StyleString.imgRadius.x),
         ),
         clipBehavior: Clip.antiAlias, //<--- 裁剪行为
         child: InkWell(
           onTap: () async {
             // 确定无重复的项目
             final audioMediaItem = AudioMediaItem(
-                title: _item.title ?? "",
+                title: _item.title
+                        ?.replaceAll('<em class="keyword">', "")
+                        .replaceAll("</em>", "") ??
+                    "",
                 description: _item.desc ?? "",
                 coverImageUrl: "http:${_item.pic}" ?? "",
                 type: AudioMediaType.video,
@@ -94,29 +99,35 @@ class _SearchResultVideoCardState extends State<SearchResultVideoCard> {
                     Row(
                       children: [
                         Expanded(
-                          child: LayoutBuilder(
-                              builder: (BuildContext context, constraints) {
-                            final imageHeight =
-                                getWindowsWidth(context).let((it) {
-                              if (it > ScreenSize.ExtraLarge) {
-                                return 140;
-                              } else if (it > ScreenSize.Large) {
-                                return 120;
-                              } else {
-                                return 100;
-                              }
-                            }).toDouble();
-                            return VideoCoverImage(
-                              // cacheWidth: (_box.maxWidth *
-                              //         MediaQuery.of(context).devicePixelRatio)
-                              //     .toInt(),
-                              // cacheHeight: (_box.maxHeight *
-                              //         MediaQuery.of(context).devicePixelRatio)
-                              //     .toInt(),
-                              coverUrl: "http:${_item.pic}",
-                              // height: imageHeight,
-                            );
-                          }),
+                          child: ClipRRect(
+                            borderRadius:
+                                BorderRadius.circular(StyleString.imgRadius.x),
+                            clipBehavior: Clip.antiAlias,
+
+                            child:  LayoutBuilder(
+                                builder: (BuildContext context, constraints) {
+                                  final imageHeight =
+                                  getWindowsWidth(context).let((it) {
+                                    if (it > ScreenSize.ExtraLarge) {
+                                      return 140;
+                                    } else if (it > ScreenSize.Large) {
+                                      return 120;
+                                    } else {
+                                      return 100;
+                                    }
+                                  }).toDouble();
+                                  return VideoCoverImage(
+                                    // cacheWidth: (_box.maxWidth *
+                                    //         MediaQuery.of(context).devicePixelRatio)
+                                    //     .toInt(),
+                                    // cacheHeight: (_box.maxHeight *
+                                    //         MediaQuery.of(context).devicePixelRatio)
+                                    //     .toInt(),
+                                    coverUrl: "http:${_item.pic}",
+                                    // height: imageHeight,
+                                  );
+                                }),
+                          ),
                         ),
                       ],
                     ),
