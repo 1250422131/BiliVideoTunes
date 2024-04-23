@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:bili_video_tunes/common/controller/user_controller.dart';
+import 'package:bili_video_tunes/common/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,12 +26,6 @@ class _QrLoginDialogState extends State<QrLoginDialog> {
     userController = Get.find<UserController>();
     controller = Get.put(QrLoginDialogController());
     loginQrcodeFuture = controller.loadLoginQrcodeInfo();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -65,7 +62,7 @@ class _QrLoginDialogState extends State<QrLoginDialog> {
                       ),
                     ),
                   ),
-                  onTap: ()  {
+                  onTap: () {
                     setState(() {
                       loginQrcodeFuture = controller.loadLoginQrcodeInfo();
                     });
@@ -74,16 +71,30 @@ class _QrLoginDialogState extends State<QrLoginDialog> {
               }
             },
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           const Text('请使用 "B站" 客户端扫码'),
         ],
       ),
       actions: [
+        if (GetPlatform.isMobile)
+          TextButton(
+            child: const Text("跳转扫码"),
+            onPressed: () async {
+              await saveNetworkImage(
+                  "https://pan.misakamoe.com/qrcode/?url=${Uri.encodeComponent(controller.loginQrcodeInfo.value?.data?.url ?? "")}");
+              goToApp(
+                name: "B站",
+                package: "tv.danmaku.bili",
+                path: "bilibili://qrscan",
+              );
+            }, // 关闭对话框
+          ),
         TextButton(
           child: const Text("取消"),
           onPressed: () => Navigator.of(context).pop(), // 关闭对话框
         ),
-
       ],
     );
   }

@@ -46,15 +46,6 @@ void main() async {
     });
   }
 
-  //状态栏、导航栏沉浸
-  // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  // SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarIconBrightness: Brightness.dark,
-    systemNavigationBarColor: Colors.transparent,
-    systemNavigationBarDividerColor: Colors.transparent,
-    statusBarColor: Colors.transparent,
-  ));
 
   // 用户信息
   Get.put(UserController());
@@ -72,6 +63,16 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    //状态栏、导航栏沉浸
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      statusBarColor: Colors.transparent,
+    ));
   }
 
   runApp(const MyApp());
@@ -92,6 +93,10 @@ class MyApp extends StatelessWidget {
   //     FirebaseAnalyticsObserver(analytics: analytics);
 
   // This widget is the root of your application.
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return DynamicColorBuilder(builder: (lightColorScheme, darkColorScheme) {
@@ -297,7 +302,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                         color: Colors.white,
                         child: Opacity(
                           opacity: _panelPosition,
-                          child: const PlayerPage(),
+                          child:  PlayerPage(panelController: _panelController,),
                         ),
                       ),
                     )),
