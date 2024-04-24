@@ -112,17 +112,13 @@ class _PlayerPageState extends State<PlayerPage>
   }
 
   // AppBar
-  PreferredSizeWidget buildBottomSheetAppBar() =>
-      AppBar(
+  PreferredSizeWidget buildBottomSheetAppBar() => AppBar(
         centerTitle: true, // 标题居中
         title: const Text(
           "播放列表",
           textAlign: TextAlign.center,
         ),
-        toolbarHeight: 56 + MediaQuery
-            .of(context)
-            .padding
-            .top,
+        toolbarHeight: 56 + MediaQuery.of(context).padding.top,
       );
 
   // 等待单独抽离
@@ -137,167 +133,147 @@ class _PlayerPageState extends State<PlayerPage>
               data: _myCustomTheme,
               child: Scaffold(
                 appBar: buildBottomSheetAppBar(),
-                body: Obx(() =>
-                    ReorderableListView(
-                        onReorder: (int oldIndex, int newIndex) {
-                          setState(() {
-                            if (oldIndex < newIndex) {
-                              newIndex -= 1;
-                            }
+                body: Obx(() => ReorderableListView(
+                    onReorder: (int oldIndex, int newIndex) {
+                      setState(() {
+                        if (oldIndex < newIndex) {
+                          newIndex -= 1;
+                        }
 
-                            final item =
+                        final item =
                             _biliAudioService.playerList.removeAt(oldIndex);
-                            _biliAudioService.playerList.insert(newIndex, item);
+                        _biliAudioService.playerList.insert(newIndex, item);
 
-                            // 更新高亮索引
-                            if ((_biliAudioService.playerIndex.value ?? 0) ==
-                                oldIndex) {
-                              _biliAudioService.playerIndex.value = newIndex;
-                            } else if (oldIndex <
+                        // 更新高亮索引
+                        if ((_biliAudioService.playerIndex.value ?? 0) ==
+                            oldIndex) {
+                          _biliAudioService.playerIndex.value = newIndex;
+                        } else if (oldIndex <
                                 (_biliAudioService.playerIndex.value ?? 0) &&
-                                newIndex >=
-                                    (_biliAudioService.playerIndex.value ??
-                                        0)) {
-                              _biliAudioService.playerIndex.value =
-                                  (_biliAudioService.playerIndex.value ?? 0) -
-                                      1;
-                            } else if (oldIndex >
+                            newIndex >=
+                                (_biliAudioService.playerIndex.value ?? 0)) {
+                          _biliAudioService.playerIndex.value =
+                              (_biliAudioService.playerIndex.value ?? 0) - 1;
+                        } else if (oldIndex >
                                 (_biliAudioService.playerIndex.value ?? 0) &&
-                                newIndex <=
-                                    (_biliAudioService.playerIndex.value ??
-                                        0)) {
-                              _biliAudioService.playerIndex.value =
-                                  (_biliAudioService.playerIndex.value ?? 0) +
-                                      1;
-                            }
-                          });
-                        },
-                        children: List.generate(
-                            _biliAudioService.playerList.length,
-                                (index) =>
-                                Dismissible(
-                                    key: Key(_biliAudioService.playerList
-                                        .elementAt(index)
-                                        .title),
-                                    onDismissed: (direction) {
-                                      setState(() {
-                                        _audioController
-                                            .deletePlayerAudioByIndex(index);
-                                        // Then show a snackbar.
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                            SnackBar(
-                                                content: Text(
-                                                    '$index dismissed')));
-                                      });
-                                    },
-                                    background: Container(color: Colors.red),
-                                    child: InkWell(
-                                      child: Container(
-                                        color: _myCustomTheme.primaryColor
-                                            .withOpacity(
-                                            index ==
-                                                (_biliAudioService
+                            newIndex <=
+                                (_biliAudioService.playerIndex.value ?? 0)) {
+                          _biliAudioService.playerIndex.value =
+                              (_biliAudioService.playerIndex.value ?? 0) + 1;
+                        }
+                      });
+                    },
+                    children: List.generate(
+                        _biliAudioService.playerList.length,
+                        (index) => Dismissible(
+                            key: Key(_biliAudioService.playerList
+                                .elementAt(index)
+                                .title),
+                            onDismissed: (direction) {
+                              setState(() {
+                                _audioController
+                                    .deletePlayerAudioByIndex(index);
+                                // Then show a snackbar.
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text('$index dismissed')));
+                              });
+                            },
+                            background: Container(color: Colors.red),
+                            child: InkWell(
+                              child: Container(
+                                color: _myCustomTheme.primaryColor.withOpacity(
+                                    index ==
+                                            (_biliAudioService
                                                     .playerIndex.value ??
-                                                    0)
-                                                ? 0.2
-                                                : 0.05),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(10),
-                                          child: Row(
-                                            crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius: const BorderRadius
-                                                    .all(
-                                                    Radius.circular(5)),
-                                                child: CachedNetworkImage(
-                                                  imageUrl: _biliAudioService
-                                                      .playerList[index]
-                                                      .coverImageUrl,
-                                                  width: 50,
-                                                  height: 50,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                width: 20,
-                                              ),
-                                              Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(
-                                                        _biliAudioService
-                                                            .playerList[index]
-                                                            .title,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        maxLines: 1,
-                                                        softWrap: false,
-                                                        style: const TextStyle(
-                                                            fontWeight: FontWeight
-                                                                .bold,
-                                                            fontSize: 15),
-                                                      ),
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                            _biliAudioService
-                                                                .playerList[index]
-                                                                .bvId ??
-                                                                "",
-                                                            overflow: TextOverflow
-                                                                .ellipsis,
-                                                            maxLines: 1,
-                                                            style: const TextStyle(
-                                                                fontSize: 12),
-                                                            softWrap: false,
-                                                          ),
-                                                          const Padding(
-                                                            padding: EdgeInsets
-                                                                .only(
-                                                                left: 5,
-                                                                right: 5),
-                                                            child: Text(
-                                                              "·",
-                                                              style:
-                                                              TextStyle(
-                                                                  fontSize: 12),
-                                                            ),
-                                                          ),
-                                                          Expanded(
-                                                              child: Text(
-                                                                _biliAudioService
-                                                                    .playerList[index]
-                                                                    .totalDuration
-                                                                    .formatSeconds(),
-                                                                overflow: TextOverflow
-                                                                    .ellipsis,
-                                                                maxLines: 1,
-                                                                style: const TextStyle(
-                                                                    fontSize: 11),
-                                                                softWrap: false,
-                                                                textAlign: TextAlign
-                                                                    .start,
-                                                              ))
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  )),
-                                              const SizedBox(
-                                                width: 20,
-                                              ),
-                                            ],
-                                          ),
+                                                0)
+                                        ? 0.2
+                                        : 0.05),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(5)),
+                                        child: CachedNetworkImage(
+                                          imageUrl: _biliAudioService
+                                              .playerList[index].coverImageUrl,
+                                          width: 50,
+                                          height: 50,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
-                                      onTap: () {
-                                        _audioController.playAtIndex(index);
-                                      },
-                                    ))))),
+                                      const SizedBox(
+                                        width: 20,
+                                      ),
+                                      Expanded(
+                                          child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            _biliAudioService
+                                                .playerList[index].title,
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                            softWrap: false,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                _biliAudioService
+                                                        .playerList[index]
+                                                        .bvId ??
+                                                    "",
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                style: const TextStyle(
+                                                    fontSize: 12),
+                                                softWrap: false,
+                                              ),
+                                              const Padding(
+                                                padding: EdgeInsets.only(
+                                                    left: 5, right: 5),
+                                                child: Text(
+                                                  "·",
+                                                  style:
+                                                      TextStyle(fontSize: 12),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                  child: Text(
+                                                _biliAudioService
+                                                    .playerList[index]
+                                                    .totalDuration
+                                                    .formatSeconds(),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                style: const TextStyle(
+                                                    fontSize: 11),
+                                                softWrap: false,
+                                                textAlign: TextAlign.start,
+                                              ))
+                                            ],
+                                          ),
+                                        ],
+                                      )),
+                                      const SizedBox(
+                                        width: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              onTap: () {
+                                _audioController.playAtIndex(index);
+                              },
+                            ))))),
               ));
         });
   }
@@ -305,10 +281,6 @@ class _PlayerPageState extends State<PlayerPage>
   /// 构建AppBar
   AppBar buildAppBar() {
     return AppBar(
-      // title: _biliAudioService.playerIndex.value?.let((it) {
-      //       return Text(_biliAudioService.playerList.elementAt(it).title);
-      //     }) ??
-      //     const Text("暂无播放"),
       leading: IconButton(
           onPressed: () {
             widget.panelController.close();
@@ -320,58 +292,57 @@ class _PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildAudioCover() {
-    return Stack(
-      children: [
-        _biliAudioService.playerIndex.value?.let((it) =>
-            LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return CachedNetworkImage(
-                  imageUrl: _biliAudioService.playerList[it].coverImageUrl,
-                  fit: BoxFit.cover,
-                  height: MediaQuery.of(context).size.width,
-                );
-              },)) ??
-            Container(
-              height: MediaQuery.of(context).size.width,
-              color: _myCustomTheme.primaryColor,
-            ),
-        Positioned(
-          right: 10,
-          bottom: 10,
-          child: InkWell(
-            onTap: () {
-              goToBiliVideoPage();
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
-                  borderRadius: const BorderRadius.all(Radius.circular(12))),
-              child: const Padding(
-                padding: EdgeInsets.all(6),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.play_circle_outline_rounded,
-                      color: Colors.white,
-                      size: 12,
-                    ),
-                    SizedBox(
-                      width: 2,
-                    ),
-                    Text(
-                      "播放视频",
-                      style: TextStyle(
-                          color: Colors.white, fontSize: 10, height: 1.2),
-                    )
-                  ],
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      return Stack(
+        children: [
+          _biliAudioService.playerIndex.value
+              ?.let((it) => CachedNetworkImage(
+            imageUrl:
+            _biliAudioService.playerList[it].coverImageUrl,
+            fit: BoxFit.cover,
+            height: MediaQuery.of(context).size.width,
+          )) ??
+              Container(
+                color: _myCustomTheme.primaryColor,
+              ),
+          Positioned(
+            right: 10,
+            bottom: 10,
+            child: InkWell(
+              onTap: () {
+                goToBiliVideoPage();
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    borderRadius: const BorderRadius.all(Radius.circular(12))),
+                child: const Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.play_circle_outline_rounded,
+                        color: Colors.white,
+                        size: 12,
+                      ),
+                      SizedBox(
+                        width: 2,
+                      ),
+                      Text(
+                        "播放视频",
+                        style: TextStyle(
+                            color: Colors.white, fontSize: 10, height: 1.2),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        )
-      ],
-    );
+        ],
+      );
+    },);
   }
 
   /// 播放信息页面
@@ -379,13 +350,19 @@ class _PlayerPageState extends State<PlayerPage>
     return Visibility(
         visible: true,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(child: Padding(padding: const EdgeInsets.all(25),child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              child: buildAudioCover(),
-            ),)), // 封面
+            Expanded(child: Row(
+              children: [
+                Expanded(child: Padding(
+                  padding: const EdgeInsets.all(25),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    child: buildAudioCover(),
+                  ),
+                ))
+              ],
+            )), // 封面
+
             const SizedBox(height: 20), // 间距
 
             Row(
@@ -393,51 +370,70 @@ class _PlayerPageState extends State<PlayerPage>
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(left: 30),
-                    child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _biliAudioService.playerIndex.value?.let((it) =>
-                              SizedBox(
-                                width: constraints.maxWidth - 30,
-                                height: 30,
-                                child:  Marquee(
-                                  text:  _biliAudioService.playerList[it].title,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20),
-                                ),
-                              )) ??
-                              const Text("暂无播放",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold, fontSize: 20)),
-                          const SizedBox(height: 10),
+                    child: LayoutBuilder(
+                      builder:
+                          (BuildContext context, BoxConstraints constraints) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _biliAudioService.playerIndex.value
+                                    ?.let((it) => SizedBox(
+                                          width: constraints.maxWidth - 30,
+                                          height: 30,
+                                          child: Marquee(
+                                            text: _biliAudioService
+                                                .playerList[it].title,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20),
+                                          ),
+                                        )) ??
+                                const Text("暂无播放",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20)),
+                            const SizedBox(height: 10),
 
-                          _biliAudioService.playerIndex.value?.let((it) {
-                            final playerItem = _biliAudioService.playerList[it];
-                            if (playerItem.lyricList != null &&
-                                playerItem.lyricList!.isNotEmpty) {
-                              //上面已经判断过了
-                              return Text(playerItem
-                                  .lyricList![_biliAudioService.lyricLineIndex.value]
-                                  .lyric, style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 14,color: _myCustomTheme.colorScheme.onPrimaryContainer));
-                            } else {
-                              return  Text("暂无歌词", style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 14,color: _myCustomTheme.colorScheme.onPrimaryContainer));
-                            }
-                          }) ??
-                               Text("暂无播放", style: TextStyle(
-                                   fontWeight: FontWeight.bold, fontSize: 14,color: _myCustomTheme.colorScheme.onPrimaryContainer)),
+                            /// 歌词判断
+                            _biliAudioService.playerIndex.value?.let((it) {
+                                  final playerItem =
+                                      _biliAudioService.playerList[it];
+                                  if (playerItem.lyricList != null &&
+                                      playerItem.lyricList!.isNotEmpty) {
+                                    //上面已经判断过了
+                                    return Text(
+                                        playerItem
+                                            .lyricList![_biliAudioService
+                                                .lyricLineIndex.value]
+                                            .lyric,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                            color: _myCustomTheme.colorScheme
+                                                .onPrimaryContainer));
+                                  } else {
+                                    return Text("暂无歌词",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                            color: _myCustomTheme.colorScheme
+                                                .onPrimaryContainer));
+                                  }
+                                }) ??
+                                Text("暂无播放",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        color: _myCustomTheme
+                                            .colorScheme.onPrimaryContainer)),
 
-                          const SizedBox(height: 10),
-
-                        ],
-                      );
-                    },),
+                            const SizedBox(height: 10),
+                          ],
+                        );
+                      },
+                    ),
                   ), // 视频BV号
                 )
-
               ],
             ),
             Padding(
@@ -448,32 +444,32 @@ class _PlayerPageState extends State<PlayerPage>
                     children: [
                       Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 20, right: 20, bottom: 10, top: 10),
-                            child: SliderTheme(
-                              data: SliderTheme.of(context).copyWith(
-                                thumbShape: const RoundSliderThumbShape(
-                                    enabledThumbRadius: 4,
-                                    elevation: 0,
-                                    pressedElevation: 2),
-                                trackHeight: 2,
-                                overlayShape: const RoundSliderOverlayShape(
-                                    overlayRadius: 1), // 取消触摸时滑块外的圆形覆盖
-                              ),
-                              child: Slider(
-                                max: _biliAudioService
+                        padding: const EdgeInsets.only(
+                            left: 20, right: 20, bottom: 10, top: 10),
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            thumbShape: const RoundSliderThumbShape(
+                                enabledThumbRadius: 4,
+                                elevation: 0,
+                                pressedElevation: 2),
+                            trackHeight: 2,
+                            overlayShape: const RoundSliderOverlayShape(
+                                overlayRadius: 1), // 取消触摸时滑块外的圆形覆盖
+                          ),
+                          child: Slider(
+                            max: _biliAudioService
                                     .totalDuration.value?.inSeconds
                                     .toDouble() ??
-                                    0,
-                                value: _biliAudioService
-                                    .currentPosition.value.inSeconds
-                                    .toDouble(),
-                                onChanged: (newValue) {
-                                  _audioController.seek(newValue.toInt());
-                                },
-                              ),
-                            ),
-                          ))
+                                0,
+                            value: _biliAudioService
+                                .currentPosition.value.inSeconds
+                                .toDouble(),
+                            onChanged: (newValue) {
+                              _audioController.seek(newValue.toInt());
+                            },
+                          ),
+                        ),
+                      ))
                     ],
                   ), // 播放进度指示器
                   Padding(
@@ -484,13 +480,15 @@ class _PlayerPageState extends State<PlayerPage>
                         Text(
                           _biliAudioService.currentPosition.value.inSeconds
                               .formatSeconds(),
-                          style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 11),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 11),
                         ),
                         Text(
                             _biliAudioService.totalDuration.value?.inSeconds
-                                .formatSeconds() ??
+                                    .formatSeconds() ??
                                 "0:00",
-                            style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 11))
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 11))
                       ],
                     ),
                   ),
@@ -552,7 +550,6 @@ class _PlayerPageState extends State<PlayerPage>
               ),
             ),
             const SizedBox(height: 80), // 间距
-
           ],
         ));
   }
@@ -564,40 +561,34 @@ class _PlayerPageState extends State<PlayerPage>
         child: Align(
           alignment: Alignment.center,
           child: _biliAudioService.playerIndex.value?.let((it) {
-            final lyricList = _biliAudioService.playerList[it].lyricList;
-            if (lyricList != null) {
-              return ListView.builder(
-                controller: _scrollController,
-                itemCount: lyricList.length,
-                itemExtent: 70,
-                //强制高度为50.0
-                physics: const BouncingScrollPhysics(),
-                // 禁用ListView的默认滚动行为
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                      title: ColorfulTextWidget(
-                          text:
-                          "${lyricList
-                              .elementAt(index)
-                              .lyric} -- $index",
-                          duration: Duration(
-                              seconds: (lyricList
-                                  .elementAt(index)
-                                  .endTime -
-                                  lyricList
-                                      .elementAt(index)
-                                      .starTime)
-                                  .toInt()),
-                          shouldStartAnimation:
-                          _biliAudioService.lyricLineIndex.value ==
-                              index));
-                },
-                padding: EdgeInsets.only(bottom: screenHeightHalf),
-              );
-            } else {
-              return const Text("暂无歌词");
-            }
-          }) ??
+                final lyricList = _biliAudioService.playerList[it].lyricList;
+                if (lyricList != null) {
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: lyricList.length,
+                    itemExtent: 70,
+                    //强制高度为50.0
+                    physics: const BouncingScrollPhysics(),
+                    // 禁用ListView的默认滚动行为
+                    itemBuilder: (BuildContext context, int index) {
+                      return ListTile(
+                          title: ColorfulTextWidget(
+                              text:
+                                  "${lyricList.elementAt(index).lyric} -- $index",
+                              duration: Duration(
+                                  seconds: (lyricList.elementAt(index).endTime -
+                                          lyricList.elementAt(index).starTime)
+                                      .toInt()),
+                              shouldStartAnimation:
+                                  _biliAudioService.lyricLineIndex.value ==
+                                      index));
+                    },
+                    padding: EdgeInsets.only(bottom: screenHeightHalf),
+                  );
+                } else {
+                  return const Text("暂无歌词");
+                }
+              }) ??
               const Text("暂无播放"),
         ));
   }
@@ -605,51 +596,44 @@ class _PlayerPageState extends State<PlayerPage>
   @override
   Widget build(BuildContext context) {
     // 获取屏幕中心位置
-    final screenHeightHalf = MediaQuery
-        .of(context)
-        .size
-        .height / 2;
-    final bool isDarkMode = Theme
-        .of(context)
-        .brightness == Brightness.dark;
-    return Obx(() =>
-        Theme(
-            data: ThemeData.from(
-              colorScheme: isDarkMode
-                  ? _biliAudioService.audioDarkColorScheme.value
-                  : _biliAudioService.audioLightColorScheme.value,
-            ).let((it) {
-              _myCustomTheme = it;
-              return it;
-            }).copyWith(
-              appBarTheme: const AppBarTheme(
-                systemOverlayStyle: SystemUiOverlayStyle(
-                  statusBarIconBrightness: Brightness.dark,
-                  systemNavigationBarColor: Colors.transparent,
-                  systemNavigationBarDividerColor: Colors.transparent,
-                  statusBarColor: Colors.transparent,
+    final screenHeightHalf = MediaQuery.of(context).size.height / 2;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return Obx(() => Theme(
+        data: ThemeData.from(
+          colorScheme: isDarkMode
+              ? _biliAudioService.audioDarkColorScheme.value
+              : _biliAudioService.audioLightColorScheme.value,
+        ).let((it) {
+          _myCustomTheme = it;
+          return it;
+        }).copyWith(
+          appBarTheme: const AppBarTheme(
+            systemOverlayStyle: SystemUiOverlayStyle(
+              statusBarIconBrightness: Brightness.dark,
+              systemNavigationBarColor: Colors.transparent,
+              systemNavigationBarDividerColor: Colors.transparent,
+              statusBarColor: Colors.transparent,
+            ),
+          ),
+        ),
+        child: Scaffold(
+          appBar: buildAppBar(),
+          body: ConstrainedBox(
+            constraints: const BoxConstraints.expand(),
+            child: Container(
+              color: _myCustomTheme.colorScheme.primary.withOpacity(0.08),
+              child: Obx(
+                () => Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    buildPlayLyricPage(screenHeightHalf),
+                    buildPlayInfoPage(),
+                  ],
                 ),
               ),
             ),
-            child: Scaffold(
-              appBar: buildAppBar(),
-              body: ConstrainedBox(
-                constraints: const BoxConstraints.expand(),
-                child: Container(
-                  color: _myCustomTheme.colorScheme.primary.withOpacity(0.08),
-                  child: Obx(
-                        () =>
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            buildPlayLyricPage(screenHeightHalf),
-                            buildPlayInfoPage(),
-                          ],
-                        ),
-                  ),
-                ),
-              ),
-            )));
+          ),
+        )));
   }
 
   /// 切换播放模式
@@ -675,8 +659,7 @@ class _PlayerPageState extends State<PlayerPage>
         'name': '哔哩哔哩',
         'package': 'tv.danmaku.bili',
         'path':
-        'bilibili://video/${_biliAudioService.playerList[p0]
-            .bvId}?from=bili_video_tu nes',
+            'bilibili://video/${_biliAudioService.playerList[p0].bvId}?from=bili_video_tu nes',
       };
       await _methodChannel.invokeMethod('openAppChannel', map);
     });

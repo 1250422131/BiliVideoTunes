@@ -46,7 +46,6 @@ void main() async {
     });
   }
 
-
   // 用户信息
   Get.put(UserController());
   // Isar数据库
@@ -65,8 +64,9 @@ void main() async {
     );
 
     //状态栏、导航栏沉浸
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarIconBrightness: Brightness.dark,
       systemNavigationBarColor: Colors.transparent,
@@ -93,9 +93,6 @@ class MyApp extends StatelessWidget {
   //     FirebaseAnalyticsObserver(analytics: analytics);
 
   // This widget is the root of your application.
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -302,7 +299,9 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                         color: Colors.white,
                         child: Opacity(
                           opacity: _panelPosition,
-                          child:  PlayerPage(panelController: _panelController,),
+                          child: PlayerPage(
+                            panelController: _panelController,
+                          ),
                         ),
                       ),
                     )),
