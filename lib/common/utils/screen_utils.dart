@@ -10,3 +10,5 @@ class ScreenSize {
 
 
 double getWindowsWidth(BuildContext context) => MediaQuery.of(context).size.width;
+
+double getWindowsHeight(BuildContext context) => MediaQuery.of(context).size.height;
