@@ -313,39 +313,39 @@ class _MainSearch extends State<MainSearch> with TickerProviderStateMixin {
                       );
                     },
                   ),
-                  SliverList.builder(
-                    itemBuilder: (BuildContext context, int index) {
-                      return const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "搜索历史",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                        ],
-                      );
-                    },
-                    itemCount: 1,
-                  ),
-                  SliverToBoxAdapter(
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      direction: Axis.horizontal,
-                      textDirection: TextDirection.ltr,
-                      children: List.generate(20, (index) {
-                        return SearchText(
-                          searchText: "搜索历史$index",
-                        );
-                      }),
-                    ),
-                  ),
+                  // SliverList.builder(
+                  //   itemBuilder: (BuildContext context, int index) {
+                  //     return const Column(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: [
+                  //         Text(
+                  //           "搜索历史",
+                  //           style: TextStyle(
+                  //             fontSize: 16,
+                  //             fontWeight: FontWeight.bold,
+                  //           ),
+                  //         ),
+                  //         SizedBox(
+                  //           height: 10,
+                  //         ),
+                  //       ],
+                  //     );
+                  //   },
+                  //   itemCount: 1,
+                  // ),
+                  // SliverToBoxAdapter(
+                  //   child: Wrap(
+                  //     spacing: 8,
+                  //     runSpacing: 8,
+                  //     direction: Axis.horizontal,
+                  //     textDirection: TextDirection.ltr,
+                  //     children: List.generate(20, (index) {
+                  //       return SearchText(
+                  //         searchText: "搜索历史$index",
+                  //       );
+                  //     }),
+                  //   ),
+                  // ),
                 ],
               ),
             );

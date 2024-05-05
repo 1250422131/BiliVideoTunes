@@ -170,14 +170,7 @@ class _PlayerPageState extends State<PlayerPage>
                                 .elementAt(index)
                                 .title),
                             onDismissed: (direction) {
-                              setState(() {
-                                _audioController
-                                    .deletePlayerAudioByIndex(index);
-                                // Then show a snackbar.
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text('$index dismissed')));
-                              });
+                              _audioController.deletePlayerAudioByIndex(index);
                             },
                             background: Container(color: Colors.red),
                             child: InkWell(
@@ -292,57 +285,58 @@ class _PlayerPageState extends State<PlayerPage>
   }
 
   Widget buildAudioCover() {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      return Stack(
-        children: [
-          _biliAudioService.playerIndex.value
-              ?.let((it) => CachedNetworkImage(
-            imageUrl:
-            _biliAudioService.playerList[it].coverImageUrl,
-            fit: BoxFit.cover,
-            height: MediaQuery.of(context).size.width,
-          )) ??
-              Container(
-                color: _myCustomTheme.primaryColor,
-              ),
-          Positioned(
-            right: 10,
-            bottom: 10,
-            child: InkWell(
-              onTap: () {
-                goToBiliVideoPage();
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
-                    borderRadius: const BorderRadius.all(Radius.circular(12))),
-                child: const Padding(
-                  padding: EdgeInsets.all(6),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.play_circle_outline_rounded,
-                        color: Colors.white,
-                        size: 12,
-                      ),
-                      SizedBox(
-                        width: 2,
-                      ),
-                      Text(
-                        "播放视频",
-                        style: TextStyle(
-                            color: Colors.white, fontSize: 10, height: 1.2),
-                      )
-                    ],
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Stack(
+          children: [
+            _biliAudioService.playerIndex.value?.let((it) => CachedNetworkImage(
+                      imageUrl: _biliAudioService.playerList[it].coverImageUrl,
+                      fit: BoxFit.cover,
+                      height: MediaQuery.of(context).size.width,
+                    )) ??
+                Container(
+                  color: _myCustomTheme.primaryColor,
+                ),
+            Positioned(
+              right: 10,
+              bottom: 10,
+              child: InkWell(
+                onTap: () {
+                  goToBiliVideoPage();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(12))),
+                  child: const Padding(
+                    padding: EdgeInsets.all(6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.play_circle_outline_rounded,
+                          color: Colors.white,
+                          size: 12,
+                        ),
+                        SizedBox(
+                          width: 2,
+                        ),
+                        Text(
+                          "播放视频",
+                          style: TextStyle(
+                              color: Colors.white, fontSize: 10, height: 1.2),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      );
-    },);
+          ],
+        );
+      },
+    );
   }
 
   /// 播放信息页面
@@ -351,9 +345,11 @@ class _PlayerPageState extends State<PlayerPage>
         visible: true,
         child: Column(
           children: [
-            Expanded(child: Row(
+            Expanded(
+                child: Row(
               children: [
-                Expanded(child: Padding(
+                Expanded(
+                    child: Padding(
                   padding: const EdgeInsets.all(25),
                   child: ClipRRect(
                     borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -545,11 +541,25 @@ class _PlayerPageState extends State<PlayerPage>
                               color: _myCustomTheme.colorScheme.secondary,
                               Icons.queue_music_rounded)),
                     ],
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      IconButton(
+                          onPressed: () {},
+                          icon:  Icon(
+                              color: _myCustomTheme.colorScheme.secondary,
+                              Icons.alarm_off_rounded))
+                    ],
                   )
                 ],
               ),
             ),
-            const SizedBox(height: 80), // 间距
+            const SizedBox(height: 30), // 间距
           ],
         ));
   }
@@ -654,12 +664,12 @@ class _PlayerPageState extends State<PlayerPage>
 
   // 前往B站视频页面
   Future<void> goToBiliVideoPage() async {
-    _biliAudioService.playerIndex.value?.also((p0) async {
+    _biliAudioService.playerIndex.value?.also((it) async {
       var map = {
         'name': '哔哩哔哩',
         'package': 'tv.danmaku.bili',
         'path':
-            'bilibili://video/${_biliAudioService.playerList[p0].bvId}?from=bili_video_tu nes',
+            'bilibili://video/${_biliAudioService.playerList[it].bvId}?from=bili_video_tu nes',
       };
       await _methodChannel.invokeMethod('openAppChannel', map);
     });

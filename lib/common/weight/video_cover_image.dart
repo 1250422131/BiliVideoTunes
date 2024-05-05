@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/src/simple/list_notifier.dart';
 
 class VideoCoverImage extends StatefulWidget {
   final double? width;
@@ -14,7 +15,13 @@ class VideoCoverImage extends StatefulWidget {
   State<StatefulWidget> createState() => _VideoCoverImage();
 }
 
-class _VideoCoverImage extends State<VideoCoverImage> {
+class _VideoCoverImage extends State<VideoCoverImage>{
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return CachedNetworkImage(
@@ -41,4 +48,3 @@ class _VideoCoverImage extends State<VideoCoverImage> {
     );
   }
 }
-

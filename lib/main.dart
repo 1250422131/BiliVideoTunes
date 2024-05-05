@@ -165,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   final PanelController _panelController = PanelController();
 
-  double _panelPosition = 0;
+  double _panelPosition = 1;
 
   int _currentPage = 0;
 
@@ -177,6 +177,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     super.initState();
     _initData();
     _initNavList();
+    _initBottomNavBar();
   }
 
   Future<void> _initData() async {
@@ -188,6 +189,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         await session.configure(const AudioSessionConfiguration.music());
         await session.setActive(true);
       }
+      // 无论是否初始化成功，都要关闭加载中的UI
       await _audioController.loadPlayerHistoryList();
     } catch (e) {
       debugPrint('Error during initialization: $e');
@@ -211,7 +213,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         icon: Icons.account_box_outlined,
         selectedIcon: Icons.account_box);
 
-    _navList = [navInfoAudio, navInfoMusic, navInfoMy];
+    _navList = [navInfoAudio, navInfoMy];
 
     navigationItem = _navList
         .map((itemData) => NavigationDestination(
@@ -276,7 +278,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                       : Axis.horizontal,
                   children: const [
                     VideoMusicPage(),
-                    BiLiMusicPage(),
+                    // BiLiMusicPage(),
                     UserInfoPage()
                   ],
                 ),
@@ -332,7 +334,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 curve: Curves.easeInOut,
                 bottom: -((_bottomNavBarKey.currentContext
                             ?.findRenderObject()
-                            ?.let((it) => (it as RenderBox).size.height) ??
+                              ?.let((it) => (it as RenderBox).size.height) ??
                         0) *
                     (_panelPosition)),
                 left: 0,
@@ -410,5 +412,20 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   void dispose() {
     _biliAudioHandler.stop();
     super.dispose();
+  }
+
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initBottomNavBar();
+  }
+
+  Future<void> _initBottomNavBar() async{
+    Future.delayed(const Duration(milliseconds: 1000),(){
+      setState(() {
+        _panelPosition = 0;
+      });
+    });
   }
 }

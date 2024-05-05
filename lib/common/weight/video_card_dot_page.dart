@@ -51,7 +51,7 @@ class _VideoCardDotPageState extends State<VideoCardDotPage> with SingleTickerPr
         return Positioned(
           left: offsetAnimation.value.dx,
           top: offsetAnimation.value.dy,
-          child: ClipRRect(
+          child: Opacity(opacity: 1 - _controller.value,child: ClipRRect(
             borderRadius: BorderRadius.circular(5),
             child: CachedNetworkImage(
               imageUrl: widget.imageUrl,
@@ -75,7 +75,7 @@ class _VideoCardDotPageState extends State<VideoCardDotPage> with SingleTickerPr
               filterQuality: FilterQuality.none,
               fit: BoxFit.cover,
             ),
-          ),
+          ),),
         );
       },
     );

@@ -128,7 +128,7 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     }
 
     queue.value.removeAt(index);
-    _playerList.removeAt(index);
+    // _playerList.removeAt(index);
   }
 
   // 监听播放状态变化
