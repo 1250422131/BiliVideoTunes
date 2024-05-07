@@ -198,7 +198,7 @@ class _FavListPageState extends State<FavListPage> {
 
                     if (!_biliAudioService.playerList
                         .containsByToString(audioMediaItem)) {
-                      _audioController.addPlayerAudio(audioMediaItem);
+                      _audioController.addPlayerAudio(audioMediaItem,autoPlay: _biliAudioService.playerList.isEmpty);
                     }
                   },
                 );

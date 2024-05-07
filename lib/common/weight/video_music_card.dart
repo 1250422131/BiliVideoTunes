@@ -76,8 +76,6 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
           builder: (BuildContext mContext) {
             return InkWell(
               onTap: () async {
-
-
                 // 确定无重复的项目
                 final audioMediaItem = AudioMediaItem(
                     title: _item.title ?? "",
@@ -91,8 +89,7 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                     .containsByToString(audioMediaItem)) {
 
                   playerAddVideoAnimate(_item.pic ?? "", context, mContext);
-                  await _audioController.addPlayerAudio(audioMediaItem);
-
+                  await _audioController.addPlayerAudio(audioMediaItem,autoPlay: _biliAudioService.playerList.isEmpty);
                 }
 
               },

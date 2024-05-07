@@ -52,6 +52,9 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
           seedColor: Colors.deepPurple, brightness: Brightness.dark))
       .obs;
 
+  Rx<AnimationController?> _singleLyricAnimationController = Rx<AnimationController?>(null);
+
+
   BiliAudioHandler() {
     // 内部同步
     _playerList = _biliAudioService.playerList;
@@ -63,7 +66,7 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     _lyricLineIndex = _biliAudioService.lyricLineIndex;
     _audioDarkColorScheme = _biliAudioService.audioDarkColorScheme;
     _audioLightColorScheme = _biliAudioService.audioLightColorScheme;
-
+    _singleLyricAnimationController = _biliAudioService.singleLyricAnimationController;
     listenPlayerPosition();
     listenPlayerState();
     listenPlayerDuration();
@@ -93,11 +96,13 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   // The most common callbacks:
   @override
   Future<void> play() async {
+    _biliAudioService.singleLyricAnimationController.value?.forward();
     await _audioPlayer.play();
   }
 
   @override
   Future<void> pause() async {
+    _biliAudioService.singleLyricAnimationController.value?.stop();
     await _audioPlayer.pause();
     // // 发布播放心跳
     // postPlayerHeartbeat(playType: 2);
@@ -105,13 +110,21 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> stop() async {
+    _biliAudioService.singleLyricAnimationController.value?.stop();
     await _audioPlayer.stop();
     return super.stop();
   }
 
   @override
   Future<void> seek(Duration position) async {
+
     await _audioPlayer.seek(position);
+    _singleLyricAnimationController.value?.also((it) {
+      final thisPlayer = _playerList[_playerIndex.value!];
+      final playerEdTime = (thisPlayer.lyricList?[_lyricLineIndex.value].endTime ?? 0) - position.inSeconds;
+      it.value = ( playerEdTime * 1.0 / (thisPlayer.lyricList?[_lyricLineIndex.value].duration ?? 0));
+    });
+
   }
 
   @override
@@ -300,7 +313,7 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       final videoSubtitleInfo = await VideoApi.getVideoSubtitles(
           uri: item.subtitleUrl!.replaceAll("//aisubtitle.hdslb.com", ""));
       videoSubtitleInfo.body?.forEach((item) => lyricList.add(LyricData(
-          lyric: item.content!,
+          lyric: (item.content ?? "").replaceAll("♪ ", "").replaceAll(" ♪", ""),
           starTime: item.from!,
           endTime: item.to!,
           duration: item.to! - item.from!)));

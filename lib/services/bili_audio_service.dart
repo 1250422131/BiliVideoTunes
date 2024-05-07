@@ -1,11 +1,10 @@
-
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_rx/get_rx.dart';
 import 'package:just_audio/just_audio.dart';
 
 class BiliAudioService extends GetxService {
-
   // 播放任务列表
   RxList<AudioMediaItem> playerList = <AudioMediaItem>[].obs;
 
@@ -32,7 +31,8 @@ class BiliAudioService extends GetxService {
       (ColorScheme.fromSeed(seedColor: Colors.deepPurple)).obs;
 
   Rx<ColorScheme> audioDarkColorScheme = (ColorScheme.fromSeed(
-      seedColor: Colors.deepPurple, brightness: Brightness.dark))
+          seedColor: Colors.deepPurple, brightness: Brightness.dark))
       .obs;
 
+  Rx<AnimationController?> singleLyricAnimationController = Rx<AnimationController?>(null);
 }

@@ -146,8 +146,8 @@ class AudioController extends GetxController {
     _biliAudioHandler.playPrevious();
   }
 
-  Future<void> seek(int seconds) async {
-    await _biliAudioHandler.seek(Duration(seconds: seconds));
+  Future<void> seek(int milliseconds) async {
+    await _biliAudioHandler.seek(Duration(milliseconds: milliseconds));
   }
 
   Future<void> playAtIndex(int index) async {
