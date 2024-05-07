@@ -86,7 +86,7 @@ class _SearchResultVideoCardState extends State<SearchResultVideoCard> {
 
             if (!_biliAudioService.playerList
                 .containsByToString(audioMediaItem)) {
-              await _audioController.addPlayerAudio(audioMediaItem);
+              await _audioController.addPlayerAudio(audioMediaItem,autoPlay: _biliAudioService.playerList.isEmpty);
             }
           },
           child: Column(

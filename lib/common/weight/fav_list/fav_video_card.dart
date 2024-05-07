@@ -77,7 +77,7 @@ class _FavVideoCardState extends State<FavVideoCard> {
 
             if (!_biliAudioService.playerList
                 .containsByToString(audioMediaItem)) {
-              await _audioController.addPlayerAudio(audioMediaItem);
+              await _audioController.addPlayerAudio(audioMediaItem,autoPlay: _biliAudioService.playerList.isEmpty);
             }
           },
           child: Column(

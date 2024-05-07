@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
+import 'package:bili_video_tunes/common/weight/lyric/single_line_lyric.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -22,12 +24,12 @@ class PlayerPage extends StatefulWidget {
   State<StatefulWidget> createState() => _PlayerPageState();
 }
 
-class _PlayerPageState extends State<PlayerPage>
-    with SingleTickerProviderStateMixin {
+class _PlayerPageState extends State<PlayerPage> with TickerProviderStateMixin {
   late AudioController _audioController;
   final ScrollController _scrollController = ScrollController();
   late ThemeData _myCustomTheme;
   late AnimationController _playIconAnimationController;
+
   final BiliAudioService _biliAudioService = Get.find();
   final _methodChannel = const MethodChannel('openAppChannel');
 
@@ -53,6 +55,7 @@ class _PlayerPageState extends State<PlayerPage>
         _playIconAnimationController.reverse();
       }
     });
+    _biliAudioService.singleLyricAnimationController.value = AnimationController(vsync: this);
   }
 
   @override
@@ -396,17 +399,15 @@ class _PlayerPageState extends State<PlayerPage>
                                       _biliAudioService.playerList[it];
                                   if (playerItem.lyricList != null &&
                                       playerItem.lyricList!.isNotEmpty) {
-                                    //上面已经判断过了
-                                    return Text(
-                                        playerItem
-                                            .lyricList![_biliAudioService
-                                                .lyricLineIndex.value]
-                                            .lyric,
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                            color: _myCustomTheme.colorScheme
-                                                .onPrimaryContainer));
+                                    final lyricInfo = playerItem.lyricList![
+                                        _biliAudioService.lyricLineIndex.value];
+                                    return SingleLineLyric(
+                                      lyric: lyricInfo.lyric,
+                                      totalTime: lyricInfo.duration.toInt(),
+                                      themeData: _myCustomTheme,
+                                      animationController:
+                                      _biliAudioService.singleLyricAnimationController.value,
+                                    );
                                   } else {
                                     return Text("暂无歌词",
                                         style: TextStyle(
@@ -454,11 +455,11 @@ class _PlayerPageState extends State<PlayerPage>
                           ),
                           child: Slider(
                             max: _biliAudioService
-                                    .totalDuration.value?.inSeconds
+                                    .totalDuration.value?.inMilliseconds
                                     .toDouble() ??
                                 0,
                             value: _biliAudioService
-                                .currentPosition.value.inSeconds
+                                .currentPosition.value.inMilliseconds
                                 .toDouble(),
                             onChanged: (newValue) {
                               _audioController.seek(newValue.toInt());
@@ -551,7 +552,7 @@ class _PlayerPageState extends State<PlayerPage>
                     children: [
                       IconButton(
                           onPressed: () {},
-                          icon:  Icon(
+                          icon: Icon(
                               color: _myCustomTheme.colorScheme.secondary,
                               Icons.alarm_off_rounded))
                     ],
