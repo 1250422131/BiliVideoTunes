@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 
 class SingleLineLyric extends StatefulWidget {
   final ThemeData themeData;
@@ -19,20 +18,10 @@ class SingleLineLyric extends StatefulWidget {
   State<StatefulWidget> createState() => _SingleLineLyric();
 }
 
-class LyricAnimationController extends AnimationController {
-  LyricAnimationController({
-    required TickerProvider vsync,
-    Duration duration = Duration.zero,
-  }) : super(vsync: vsync, duration: duration);
-}
-
 class _SingleLineLyric extends State<SingleLineLyric>
     with TickerProviderStateMixin {
   late Animation<double> _animation;
   late AnimationController _controller;
-
-  Size textSize = Size.zero;
-  Offset textOffset = Offset.zero;
 
   @override
   void initState() {
@@ -71,46 +60,31 @@ class _SingleLineLyric extends State<SingleLineLyric>
 
   @override
   Widget build(BuildContext context) {
-    return Builder(
-      builder: (BuildContext context) {
-        if (context.findRenderObject() != null) {
-          final renderBox = (context.findRenderObject() as RenderBox);
-          textSize = renderBox.size;
-          textOffset = renderBox.localToGlobal(Offset.zero);
-        }
-
-        _animation = Tween<double>(
-          begin: 0,
-          end: textSize.width * 2,
-        ).animate(_controller);
-
-        return AnimatedBuilder(
-          animation: _animation,
-          builder: (BuildContext context, Widget? child) {
-            return ShaderMask(
-              blendMode: BlendMode.srcATop,
-              shaderCallback: (Rect bounds) {
-                return LinearGradient(
-                  colors: [
-                    widget.themeData.colorScheme.onPrimaryContainer,
-                    widget.themeData.colorScheme.onPrimaryContainer
-                        .withOpacity(0.5),
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ).createShader(Rect.fromLTWH(_animation.value - textSize.width,
-                    0, textSize.width, textSize.height));
-              },
-              child: Text(
-                widget.lyric,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 16
-                ),
-              ),
-            );
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (BuildContext context, Widget? child) {
+        return ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (Rect bounds) {
+            _animation = Tween<double>(
+              begin: 0,
+              end: bounds.width * 2,
+            ).animate(_controller);
+            return LinearGradient(
+              colors: [
+                widget.themeData.colorScheme.onPrimaryContainer,
+                widget.themeData.colorScheme.onPrimaryContainer.withOpacity(0.5),
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ).createShader(Rect.fromLTWH(_animation.value - bounds.width, 0,
+                bounds.width, bounds.height));
           },
+          child: Text(
+            widget.lyric,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16),
+          ),
         );
       },
     );
