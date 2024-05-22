@@ -70,6 +70,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer-dash:$exoplayer_version"
     //    implementation "androidx.activity:activity:$activity_version"
     //    implementation "com.gitee.zackratos:UltimateBarX:$UltimateBarX_version"
+    implementation 'androidx.multidex:multidex:2.0.1'
 
 
 }

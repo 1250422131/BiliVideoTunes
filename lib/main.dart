@@ -82,7 +82,9 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   static final _defaultLightColorScheme =
-      ColorScheme.fromSeed(seedColor: Colors.deepPurple);
+      ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+      );
 
   static final _defaultDarkColorScheme = ColorScheme.fromSeed(
       seedColor: Colors.deepPurple, brightness: Brightness.dark);
@@ -109,8 +111,8 @@ class MyApp extends StatelessWidget {
           colorScheme: darkColorScheme ?? _defaultDarkColorScheme,
           useMaterial3: true,
         ),
-        home: MyHomePage(
-          title: 'Flutter Demo Home Page',
+        home: const MyHomePage(
+          title: 'BVT YES',
           // analytics: analytics,
           // observer: observer,
         ),
@@ -334,7 +336,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 curve: Curves.easeInOut,
                 bottom: -((_bottomNavBarKey.currentContext
                             ?.findRenderObject()
-                              ?.let((it) => (it as RenderBox).size.height) ??
+                            ?.let((it) => (it as RenderBox).size.height) ??
                         0) *
                     (_panelPosition)),
                 left: 0,
@@ -414,15 +416,14 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     super.dispose();
   }
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _initBottomNavBar();
   }
 
-  Future<void> _initBottomNavBar() async{
-    Future.delayed(const Duration(milliseconds: 1000),(){
+  Future<void> _initBottomNavBar() async {
+    Future.delayed(const Duration(milliseconds: 1000), () {
       setState(() {
         _panelPosition = 0;
       });

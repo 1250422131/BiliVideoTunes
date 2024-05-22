@@ -121,8 +121,10 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     await _audioPlayer.seek(position);
     _singleLyricAnimationController.value?.also((it) {
       final thisPlayer = _playerList[_playerIndex.value!];
+
       final playerEdTime = (thisPlayer.lyricList?[_lyricLineIndex.value].endTime ?? 0) - position.inSeconds;
       it.value = ( playerEdTime * 1.0 / (thisPlayer.lyricList?[_lyricLineIndex.value].duration ?? 0));
+      debugPrint(it.value.toString());
     });
 
   }
@@ -135,12 +137,12 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   Future<void> deletePlayerAudioByIndex(int index) async {
+    queue.value.removeAt(index);
+
     if (index == _biliAudioService.playerIndex.value) {
       _playerIndex.value = null;
       stop();
     }
-
-    queue.value.removeAt(index);
     // _playerList.removeAt(index);
   }
 

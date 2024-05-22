@@ -42,7 +42,7 @@ dependencies:
 
 
   # md配色
-  dynamic_color: ^1.6.9
+  dynamic_color: ^1.7.0
 
   # 动画
   lottie: ^3.0.0
@@ -103,6 +103,8 @@ dependencies:
   #  permission_handler: ^11.3.1
 
 
+dependency_overrides:
+  fading_edge_scrollview: ^4.1.1
 
 dev_dependencies:
   flutter_test:

@@ -53,127 +53,132 @@ class _UserInfoPageState extends State<UserInfoPage>
     // 顶部栏
     AppBar appBar = AppBar(
       actions: [
-
         IconButton(onPressed: () {}, icon: const Icon(Icons.settings_rounded))
       ],
     );
 
-    Widget userTopSliverToBoxAdapter = Obx(() => _controller.myUserData.value != null ? SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _controller.myUserData.value?.pendant?.image != null
-                ? SizedBox(
-              width: 140,
-              height: 140,
-              child: Stack(
+    Widget userTopSliverToBoxAdapter = Obx(() => _controller.myUserData.value !=
+            null
+        ? SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Positioned(
-                    left: 30,
-                    top: 30,
-                    child: ClipOval(
-                      child: Image.network(
-                        _controller.myUserData.value!.face!,
-                        width: 80,
-                        height: 80,
+                  _controller.myUserData.value?.pendant?.image != null
+                      ? SizedBox(
+                          width: 140,
+                          height: 140,
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                left: 30,
+                                top: 30,
+                                child: ClipOval(
+                                  child: Image.network(
+                                    _controller.myUserData.value!.face!,
+                                    width: 80,
+                                    height: 80,
+                                  ),
+                                ),
+                              ),
+                              _controller.myUserData.value!.pendant!.image!
+                                  .let((it) {
+                                if (it != "") {
+                                  return CachedNetworkImage(imageUrl: it);
+                                } else {
+                                  return const SizedBox();
+                                }
+                              }),
+                            ],
+                          ),
+                        )
+                      : SizedBox(
+                          width: 120,
+                          height: 120,
+                          child: Image.network(
+                              _controller.myUserData.value!.pendant!.image!),
+                        ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _controller.myUserData.value?.uname ?? "请先登录",
+                        style: const TextStyle(
+                          fontSize: 20,
+                        ),
                       ),
-                    ),
+                      const SizedBox(
+                        width: 4,
+                      ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Container(
+                          color:
+                              Theme.of(context).colorScheme.tertiaryContainer,
+                          child: Padding(
+                              padding: const EdgeInsets.only(left: 8, right: 8),
+                              child: Text(
+                                "Lv${_controller.myUserData.value?.levelInfo?.currentLevel}",
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onTertiaryContainer,
+                                ),
+                              )),
+                        ),
+                      )
+                    ],
                   ),
-                  _controller.myUserData.value!.pendant!.image!.let((it) {
-                    if (it != "") {
-                      return CachedNetworkImage(imageUrl: it);
-                    } else {
-                      return const SizedBox();
-                    }
-                  }),
+                  const SizedBox(
+                    height: 4,
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "${_controller.myUserData.value?.mid} | ",
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Image.network(
+                            "https://message.biliimg.com/bfs/im_new/8e9153fa9dfdfca8ebe97daea70075ef351201307.png",
+                            width: 15,
+                            height: 15,
+                          ),
+                          const SizedBox(
+                            width: 2,
+                          ),
+                          InkWell(
+                              onTap: () async {
+                                var map = {
+                                  'name': '哔哩哔哩',
+                                  'package': 'tv.danmaku.bili',
+                                  'path':
+                                      'bilibili://space/${_controller.myUserData.value?.mid}?from=bili_video_tunes'
+                                };
+                                await _methodChannel.invokeMethod(
+                                    'openAppChannel', map);
+                              },
+                              child: const Text(
+                                "B站首页",
+                                style: TextStyle(fontSize: 12),
+                              )),
+                        ],
+                      )
+                    ],
+                  )
                 ],
               ),
-            )
-                : SizedBox(
-              width: 120,
-              height: 120,
-              child: Image.network(
-                  _controller.myUserData.value!.pendant!.image!),
             ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  _controller.myUserData.value?.uname ?? "请先登录",
-                  style: const TextStyle(
-                    fontSize: 20,
-                  ),
-                ),
-                const SizedBox(
-                  width: 4,
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: Container(
-                    color: Theme.of(context).colorScheme.tertiaryContainer,
-                    child: Padding(
-                        padding: const EdgeInsets.only(left: 8, right: 8),
-                        child: Text(
-                          "Lv${_controller.myUserData.value?.levelInfo?.currentLevel}",
-                          style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onTertiaryContainer,
-                          ),
-                        )),
-                  ),
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 4,
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "${_controller.myUserData.value?.mid} | ",
-                  style: const TextStyle(fontSize: 12),
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Image.network(
-                      "https://message.biliimg.com/bfs/im_new/8e9153fa9dfdfca8ebe97daea70075ef351201307.png",
-                      width: 15,
-                      height: 15,
-                    ),
-                    const SizedBox(
-                      width: 2,
-                    ),
-                    InkWell(
-                        onTap: () async {
-                          var map = {
-                            'name': '哔哩哔哩',
-                            'package': 'tv.danmaku.bili',
-                            'path': 'bilibili://space/${_controller.myUserData.value?.mid}?from=bili_video_tunes'
-                          };
-                          await _methodChannel.invokeMethod(
-                              'openAppChannel', map);
-                        },
-                        child: const Text(
-                          "B站首页",
-                          style: TextStyle(fontSize: 12),
-                        )),
-                  ],
-                )
-              ],
-            )
-          ],
-        ),
-      ),
-    ) : const SliverToBoxAdapter(
-      child: SizedBox(),
-    ));
+          )
+        : const SliverToBoxAdapter(
+            child: SizedBox(),
+          ));
 
     Widget body = FutureBuilder<void>(
         future: _initMyUserPageDataFuture,
