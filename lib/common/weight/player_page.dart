@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
@@ -169,11 +168,10 @@ class _PlayerPageState extends State<PlayerPage> with TickerProviderStateMixin {
                     children: List.generate(
                         _biliAudioService.playerList.length,
                         (index) => Dismissible(
-                            key: Key(_biliAudioService.playerList
-                                .elementAt(index)
-                                .title),
+                            key: UniqueKey(),
                             onDismissed: (direction) {
                               _audioController.deletePlayerAudioByIndex(index);
+                              _biliAudioService.playerList.removeAt(index);
                             },
                             background: Container(color: Colors.red),
                             child: InkWell(
@@ -375,24 +373,37 @@ class _PlayerPageState extends State<PlayerPage> with TickerProviderStateMixin {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _biliAudioService.playerIndex.value
-                                    ?.let((it) => SizedBox(
-                                          width: constraints.maxWidth - 30,
-                                          height: 30,
-                                          child: Marquee(
-                                            text: _biliAudioService
-                                                .playerList[it].title,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 20),
-                                          ),
-                                        )) ??
+                            /// 标题
+                            _biliAudioService.playerIndex.value?.let((it) {
+                              if (_biliAudioService
+                                  .playerList[it].title.length * 20 <
+                                  constraints.maxWidth) {
+                                return Text(
+                                  _biliAudioService
+                                      .playerList[it].title,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20),
+                                );
+                              } else {
+                                return SizedBox(
+                                  width: constraints.maxWidth - 30,
+                                  height: 30,
+                                  child: Marquee(
+                                    text: _biliAudioService
+                                        .playerList[it].title,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20),
+                                  ),
+                                );
+                              }
+                            }) ??
                                 const Text("暂无播放",
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 20)),
                             const SizedBox(height: 10),
-
                             /// 歌词判断
                             _biliAudioService.playerIndex.value?.let((it) {
                                   final playerItem =

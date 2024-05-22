@@ -5,9 +5,6 @@ import 'package:bili_video_tunes/common/weight/video_cover_image.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:flutter/material.dart';
 
-import '../../api/res.dart';
-import '../../utils/screen_utils.dart';
-import '../badge.dart';
 import '../video_music_card.dart';
 
 class FavVideoCard extends StatefulWidget {

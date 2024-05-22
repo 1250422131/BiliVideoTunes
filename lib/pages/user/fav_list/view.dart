@@ -13,6 +13,7 @@ import '../../../common/StyleString.dart';
 import '../../../common/controller/audio_controller.dart';
 import '../../../common/weight/fav_list/fav_video_card_h.dart';
 import '../../../common/weight/shimmer/fav_list_card_shimmer.dart';
+import '../../../common/weight/video_music_card.dart';
 import '../../../services/bili_audio_service.dart';
 
 class FavListPage extends StatefulWidget {
@@ -185,23 +186,30 @@ class _FavListPageState extends State<FavListPage> {
       () => _controller.favList.isEmpty
           ? const SliverToBoxAdapter(child: SizedBox())
           : SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                return FavVideoCardH(
-                  videoItem: _controller.favList[index],
-                  onClick: () {
-                    final audioMediaItem = AudioMediaItem(
-                        title: _controller.favList[index].title ?? "",
-                        description: _controller.favList[index].intro ?? "",
-                        coverImageUrl: _controller.favList[index].cover ?? "",
-                        type: AudioMediaType.video,
-                        bvId: _controller.favList[index].bvid);
+              delegate: SliverChildBuilderDelegate((_, index) {
+                return Builder(
+                  builder: (BuildContext mContext) {
+                    return FavVideoCardH(
+                      videoItem: _controller.favList[index],
+                      onClick: () {
+                        final item = _controller.favList[index];
+                        final audioMediaItem = AudioMediaItem(
+                            title: item.title ?? "",
+                            description: item.intro ?? "",
+                            coverImageUrl: item.cover ?? "",
+                            type: AudioMediaType.video,
+                            bvId: item.bvid);
 
-                    if (!_biliAudioService.playerList
-                        .containsByToString(audioMediaItem)) {
-                      _audioController.addPlayerAudio(audioMediaItem,autoPlay: _biliAudioService.playerList.isEmpty);
-                    }
-                  },
-                );
+                        if (!_biliAudioService.playerList
+                    .containsByToString(audioMediaItem)) {
+                  playerAddVideoAnimate(item.cover ?? "", context, mContext);
+                  _audioController.addPlayerAudio(
+                      audioMediaItem, autoPlay: _biliAudioService.playerList
+                      .isEmpty);
+                }
+              },
+            );
+          },);
               }, childCount: _controller.favList.length),
             ),
     );

@@ -108,9 +108,9 @@ class AudioController extends GetxController {
           .filter()
           .bvIdEqualTo(item.bvId)
           .deleteAll();
-      // 确保它被正确的删除了
       _biliAudioHandler.deletePlayerAudioByIndex(index);
     });
+
   }
 
   void updateCurrentLine(int currentTime) {
