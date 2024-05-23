@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../../common/router/b_v_t_page.dart';
 import '../../../common/weight/qr_login_dialog/view.dart';
 
 class UserInfoPage extends StatefulWidget {
@@ -182,7 +183,7 @@ class _UserInfoPageState extends State<UserInfoPage>
 
     Widget body = FutureBuilder<void>(
         future: _initMyUserPageDataFuture,
-        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+        builder: (BuildContext mContext, AsyncSnapshot<void> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             // 当Future还未完成时，显示加载中的UI
             return const UserPageShimmer();
@@ -381,28 +382,31 @@ class _UserInfoPageState extends State<UserInfoPage>
                                     children: List.generate(
                                         _controller.favorites.length,
                                         (index) => InkWell(
-                                          child: SongSheetCard(
-                                            id: _controller
-                                                .favorites[index].id ??
-                                                0,
-                                            title: _controller
-                                                .favorites[index].title ??
-                                                "",
-                                            cover: _controller
-                                                .favorites[index].cover ??
-                                                "",
-                                          ),
-                                          onTap: (){
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => FavListPage(
-                                                  oid: _controller.favorites[index].id?.toInt() ?? 0,
-                                                ),
+                                              child: SongSheetCard(
+                                                id: _controller
+                                                        .favorites[index].id ??
+                                                    0,
+                                                title: _controller
+                                                        .favorites[index]
+                                                        .title ??
+                                                    "",
+                                                cover: _controller
+                                                        .favorites[index]
+                                                        .cover ??
+                                                    "",
                                               ),
-                                            );
-                                          },
-                                        )),
+                                              onTap: () {
+                                                Navigator.pushNamed(
+                                                    context, '/fav',
+                                                    arguments: {
+                                                      "oid": _controller
+                                                              .favorites[index]
+                                                              .id
+                                                              ?.toInt() ??
+                                                          0
+                                                    });
+                                              },
+                                            )),
                                   ),
                                 ),
                               )

@@ -99,6 +99,8 @@ dependencies:
 
   # 走马灯
   marquee: ^2.2.3
+  # 徽章
+  badges: ^3.1.2
   # 权限管理
   #  permission_handler: ^11.3.1
 

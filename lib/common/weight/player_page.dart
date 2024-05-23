@@ -54,7 +54,8 @@ class _PlayerPageState extends State<PlayerPage> with TickerProviderStateMixin {
         _playIconAnimationController.reverse();
       }
     });
-    _biliAudioService.singleLyricAnimationController.value = AnimationController(vsync: this);
+    _biliAudioService.singleLyricAnimationController.value =
+        AnimationController(vsync: this);
   }
 
   @override
@@ -374,36 +375,50 @@ class _PlayerPageState extends State<PlayerPage> with TickerProviderStateMixin {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             /// 标题
-                            _biliAudioService.playerIndex.value?.let((it) {
-                              if (_biliAudioService
-                                  .playerList[it].title.length * 20 <
-                                  constraints.maxWidth) {
-                                return Text(
-                                  _biliAudioService
-                                      .playerList[it].title,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20),
-                                );
-                              } else {
-                                return SizedBox(
-                                  width: constraints.maxWidth - 30,
-                                  height: 30,
-                                  child: Marquee(
-                                    text: _biliAudioService
-                                        .playerList[it].title,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20),
-                                  ),
-                                );
-                              }
-                            }) ??
-                                const Text("暂无播放",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20)),
+                            Row(
+                              children: [
+                                Expanded(child: _biliAudioService.playerIndex.value
+                                    ?.let((it) {
+                                  if (_biliAudioService.playerList[it]
+                                      .title.length *
+                                      20 <
+                                      constraints.maxWidth) {
+                                    return Text(
+                                      _biliAudioService
+                                          .playerList[it].title,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20),
+                                    );
+                                  } else {
+                                    return SizedBox(
+                                      width: constraints.maxWidth - 30,
+                                      height: 30,
+                                      child: Marquee(
+                                        text: _biliAudioService
+                                            .playerList[it].title,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20),
+                                      ),
+                                    );
+                                  }
+                                }) ??
+                                    const Text("暂无播放",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20))),
+                                const SizedBox(width: 15,),
+                                IconButton(onPressed: (){}, icon: Badge.count(
+                                  count: 99,
+                                  child: const Icon(Icons.favorite_outline_rounded),
+
+                                )),
+                                const SizedBox(width: 15,)
+                              ],
+                            ),
                             const SizedBox(height: 10),
+
                             /// 歌词判断
                             _biliAudioService.playerIndex.value?.let((it) {
                                   final playerItem =
@@ -416,8 +431,8 @@ class _PlayerPageState extends State<PlayerPage> with TickerProviderStateMixin {
                                       lyric: lyricInfo.lyric,
                                       totalTime: lyricInfo.duration.toInt(),
                                       themeData: _myCustomTheme,
-                                      animationController:
-                                      _biliAudioService.singleLyricAnimationController.value,
+                                      animationController: _biliAudioService
+                                          .singleLyricAnimationController.value,
                                     );
                                   } else {
                                     return Text("暂无歌词",

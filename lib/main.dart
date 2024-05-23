@@ -8,9 +8,12 @@ import 'package:bili_video_tunes/common/utils/http_utils.dart';
 import 'package:bili_video_tunes/common/utils/screen_utils.dart';
 import 'package:bili_video_tunes/common/weight/music_player.dart';
 import 'package:bili_video_tunes/common/weight/player_page.dart';
+import 'package:bili_video_tunes/main_controller.dart';
 import 'package:bili_video_tunes/pages/main/bili_music/index.dart';
+import 'package:bili_video_tunes/pages/main/home/view.dart';
 import 'package:bili_video_tunes/pages/main/user_info/index.dart';
 import 'package:bili_video_tunes/pages/main/video_music/index.dart';
+import 'package:bili_video_tunes/pages/user/fav_list/view.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:bili_video_tunes/services/service_locator.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -25,6 +28,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'common/controller/audio_controller.dart';
 import 'common/di/database_model.dart';
+import 'common/router/b_v_t_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -81,10 +85,9 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  static final _defaultLightColorScheme =
-      ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-      );
+  static final _defaultLightColorScheme = ColorScheme.fromSeed(
+    seedColor: Colors.deepPurple,
+  );
 
   static final _defaultDarkColorScheme = ColorScheme.fromSeed(
       seedColor: Colors.deepPurple, brightness: Brightness.dark);
@@ -148,9 +151,6 @@ class NavInfo {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WindowListener {
-  // 控制器
-  final PageController _pageController = PageController();
-
   final AudioController _audioController = Get.find<AudioController>();
 
   final BiliAudioService _biliAudioService = Get.find<BiliAudioService>();
@@ -159,6 +159,8 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   final UserController _userController = Get.find<UserController>();
 
+  final MainController _controller = Get.put(MainController());
+
   late List<NavInfo> _navList;
 
   late List<NavigationDestination> navigationItem;
@@ -166,10 +168,6 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   late List<NavigationRailDestination> navRailItem;
 
   final PanelController _panelController = PanelController();
-
-  double _panelPosition = 1;
-
-  int _currentPage = 0;
 
   final GlobalKey _bottomNavBarKey = GlobalKey();
 
@@ -234,6 +232,25 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         .toList();
   }
 
+  Route onGenerateRoute(RouteSettings settings) {
+    late Widget page;
+    switch (settings.name) {
+      case rootPagePath:
+        page = const HomePage();
+        break;
+      case favPagePath:
+        page = FavListPage(
+          oid: (settings.arguments as Map<String, int>)["oid"]!,
+        );
+        break;
+    }
+    return MaterialPageRoute(
+        settings: settings,
+        builder: (BuildContext context) {
+          return page;
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -254,42 +271,30 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
             Visibility(
               maintainState: true,
               visible: getWindowsWidth(context) > ScreenSize.Normal,
-              child: NavigationRail(
-                destinations: navRailItem,
-                selectedIndex: _currentPage,
-                onDestinationSelected: (int index) {
-                  _currentPage = index;
-                  _pageController.jumpToPage(index);
-                },
-              ),
+              child: Obx(() => NavigationRail(
+                    destinations: navRailItem,
+                    selectedIndex: _controller.currentPage.value,
+                    onDestinationSelected: (int index) {
+                      _controller.currentPage.value = index;
+                      pageController.jumpToPage(index);
+                    },
+                  )),
             ),
             Expanded(
                 child: Stack(
               children: [
-                PageView(
-                  controller: _pageController,
-                  // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
-                  onPageChanged: (int index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
-                  physics: const NeverScrollableScrollPhysics(),
-                  scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
-                      ? Axis.vertical
-                      : Axis.horizontal,
-                  children: const [
-                    VideoMusicPage(),
-                    // BiLiMusicPage(),
-                    UserInfoPage()
-                  ],
+                Navigator(
+                  key: Get.nestedKey(1), // create a key by index
+                  onGenerateRoute: onGenerateRoute,
+                  initialRoute: "/",
+                  observers: [BVDNavigatorObserver()],
                 ),
                 Obx(() => SlidingUpPanel(
                       controller: _panelController,
                       onPanelSlide: (double position) {
-                        setState(() {
-                          _panelPosition = position;
-                        });
+                        if (_controller.showBottomNav.value) {
+                          _controller.panelPosition.value = position;
+                        }
                       },
                       minHeight:
                           _biliAudioService.playerIndex.value != null ? 50 : 0,
@@ -302,7 +307,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                         height: MediaQuery.of(context).size.height,
                         color: Colors.white,
                         child: Opacity(
-                          opacity: _panelPosition,
+                          opacity: _controller.panelPosition.value,
                           child: PlayerPage(
                             panelController: _panelController,
                           ),
@@ -320,42 +325,40 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   Widget buildMainAppBottomNavigationBar() {
     return LayoutBuilder(builder: (context, constraints) {
-      return SizedBox(
-        // _panelPosition 是底部对话框的高度变化
-        height: (_bottomNavBarKey.currentContext
-                    ?.findRenderObject()
-                    ?.let((it) => (it as RenderBox).size.height) ??
-                0) *
-            (1 - _panelPosition),
-        child: Stack(
-          children: [
-            if (getWindowsWidth(context) <= ScreenSize.Normal)
-              // AnimatedPositioned 当底部对话框出现时，NavigationBar需要缓慢下降
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 0),
-                curve: Curves.easeInOut,
-                bottom: -((_bottomNavBarKey.currentContext
-                            ?.findRenderObject()
-                            ?.let((it) => (it as RenderBox).size.height) ??
-                        0) *
-                    (_panelPosition)),
-                left: 0,
-                right: 0,
-                child: NavigationBar(
-                  key: _bottomNavBarKey,
-                  destinations: navigationItem,
-                  selectedIndex: _currentPage,
-                  onDestinationSelected: (int index) {
-                    setState(() {
-                      _currentPage = index;
-                      _pageController.jumpToPage(index);
-                    });
-                  },
-                ),
-              )
-          ],
-        ),
-      );
+      return Obx(() => SizedBox(
+            // _panelPosition 是底部对话框的高度变化
+            height: (_bottomNavBarKey.currentContext
+                        ?.findRenderObject()
+                        ?.let((it) => (it as RenderBox).size.height) ??
+                    0) *
+                (1 - _controller.panelPosition.value),
+            child: Stack(
+              children: [
+                if (getWindowsWidth(context) <= ScreenSize.Normal)
+                  // AnimatedPositioned 当底部对话框出现时，NavigationBar需要缓慢下降
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 0),
+                    curve: Curves.easeInOut,
+                    bottom: -((_bottomNavBarKey.currentContext
+                                ?.findRenderObject()
+                                ?.let((it) => (it as RenderBox).size.height) ??
+                            0) *
+                        (_controller.panelPosition.value)),
+                    left: 0,
+                    right: 0,
+                    child: NavigationBar(
+                      key: _bottomNavBarKey,
+                      destinations: navigationItem,
+                      selectedIndex: _controller.currentPage.value,
+                      onDestinationSelected: (int index) {
+                        _controller.currentPage.value = index;
+                        pageController.jumpToPage(index);
+                      },
+                    ),
+                  )
+              ],
+            ),
+          ));
     });
   }
 
@@ -425,7 +428,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   Future<void> _initBottomNavBar() async {
     Future.delayed(const Duration(milliseconds: 1000), () {
       setState(() {
-        _panelPosition = 0;
+        _controller.panelPosition.value = 0;
       });
     });
   }

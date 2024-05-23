@@ -96,7 +96,9 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   // The most common callbacks:
   @override
   Future<void> play() async {
-    _biliAudioService.singleLyricAnimationController.value?.forward();
+    if(_biliAudioService.singleLyricAnimationController.value?.value != 0){
+      _biliAudioService.singleLyricAnimationController.value?.forward();
+    }
     await _audioPlayer.play();
   }
 
