@@ -6,4 +6,5 @@ class MainController extends GetxController {
   RxInt currentPage = 0.obs;
 
   RxBool showBottomNav = true.obs;
+
 }

@@ -99,9 +99,53 @@ class MyApp extends StatelessWidget {
 
   // This widget is the root of your application.
 
+  /// 临时调整：https://github.com/material-foundation/flutter-packages/issues/582
+  (ColorScheme light, ColorScheme dark) _generateDynamicColourSchemes(ColorScheme lightDynamic, ColorScheme darkDynamic) {
+    var lightBase = ColorScheme.fromSeed(seedColor: lightDynamic.primary);
+    var darkBase = ColorScheme.fromSeed(seedColor: darkDynamic.primary, brightness: Brightness.dark);
+
+    var lightAdditionalColours = _extractAdditionalColours(lightBase);
+    var darkAdditionalColours = _extractAdditionalColours(darkBase);
+
+    var lightScheme = _insertAdditionalColours(lightBase, lightAdditionalColours);
+    var darkScheme = _insertAdditionalColours(darkBase, darkAdditionalColours);
+
+    return (lightScheme.harmonized(), darkScheme.harmonized());
+  }
+
+  List<Color> _extractAdditionalColours(ColorScheme scheme) => [
+    scheme.surface,
+    scheme.surfaceDim,
+    scheme.surfaceBright,
+    scheme.surfaceContainerLowest,
+    scheme.surfaceContainerLow,
+    scheme.surfaceContainer,
+    scheme.surfaceContainerHigh,
+    scheme.surfaceContainerHighest,
+  ];
+
+  ColorScheme _insertAdditionalColours(ColorScheme scheme, List<Color> additionalColours) => scheme.copyWith(
+    surface: additionalColours[0],
+    surfaceDim: additionalColours[1],
+    surfaceBright: additionalColours[2],
+    surfaceContainerLowest: additionalColours[3],
+    surfaceContainerLow: additionalColours[4],
+    surfaceContainer: additionalColours[5],
+    surfaceContainerHigh: additionalColours[6],
+    surfaceContainerHighest: additionalColours[7],
+  );
+
   @override
   Widget build(BuildContext context) {
     return DynamicColorBuilder(builder: (lightColorScheme, darkColorScheme) {
+
+      if (lightColorScheme != null && darkColorScheme != null) {
+        (lightColorScheme, darkColorScheme) = _generateDynamicColourSchemes(lightColorScheme, darkColorScheme);
+      } else {
+        // logic to set standard static themes here
+      }
+
+
       return GetMaterialApp(
         title: 'BiliVideoTunes',
         debugShowCheckedModeBanner: false,
@@ -292,9 +336,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 Obx(() => SlidingUpPanel(
                       controller: _panelController,
                       onPanelSlide: (double position) {
-                        if (_controller.showBottomNav.value) {
-                          _controller.panelPosition.value = position;
-                        }
+                        _controller.panelPosition.value = position;
                       },
                       minHeight:
                           _biliAudioService.playerIndex.value != null ? 50 : 0,
@@ -325,35 +367,42 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   Widget buildMainAppBottomNavigationBar() {
     return LayoutBuilder(builder: (context, constraints) {
-      return Obx(() => SizedBox(
-            // _panelPosition 是底部对话框的高度变化
-            height: (_bottomNavBarKey.currentContext
-                        ?.findRenderObject()
-                        ?.let((it) => (it as RenderBox).size.height) ??
-                    0) *
-                (1 - _controller.panelPosition.value),
+      double bottomNavBarHeight = _bottomNavBarKey.currentContext
+              ?.findRenderObject()
+              ?.let((it) => (it as RenderBox).size.height) ??
+          0;
+      return Obx(() => AnimatedContainer(
+            duration: Duration(
+                milliseconds: _controller.showBottomNav.value ? 0 : 300),
+            height: _controller.showBottomNav.value
+                ? (bottomNavBarHeight) * (1 - _controller.panelPosition.value)
+                : 0,
+            width: _controller.showBottomNav.value
+                ? MediaQuery.of(context).size.width
+                : 0,
             child: Stack(
               children: [
                 if (getWindowsWidth(context) <= ScreenSize.Normal)
-                  // AnimatedPositioned 当底部对话框出现时，NavigationBar需要缓慢下降
+                // AnimatedPositioned 当底部对话框出现时，NavigationBar需要缓慢下降
                   AnimatedPositioned(
                     duration: const Duration(milliseconds: 0),
                     curve: Curves.easeInOut,
-                    bottom: -((_bottomNavBarKey.currentContext
-                                ?.findRenderObject()
-                                ?.let((it) => (it as RenderBox).size.height) ??
-                            0) *
+                    bottom: -(bottomNavBarHeight *
                         (_controller.panelPosition.value)),
                     left: 0,
                     right: 0,
-                    child: NavigationBar(
+                    child: Column(
                       key: _bottomNavBarKey,
-                      destinations: navigationItem,
-                      selectedIndex: _controller.currentPage.value,
-                      onDestinationSelected: (int index) {
-                        _controller.currentPage.value = index;
-                        pageController.jumpToPage(index);
-                      },
+                      children: [
+                        NavigationBar(
+                          destinations: navigationItem,
+                          selectedIndex: 0,
+                          onDestinationSelected: (int index) {
+                            _controller.currentPage.value = index;
+                            pageController.jumpToPage(index);
+                          },
+                        )
+                      ],
                     ),
                   )
               ],

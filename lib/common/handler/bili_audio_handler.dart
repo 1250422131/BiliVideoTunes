@@ -375,7 +375,7 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     final networkImage = NetworkImage(imageUrl);
 
     _audioLightColorScheme.value =
-        await ColorScheme.fromImageProvider(provider: networkImage);
+        await ColorScheme.fromImageProvider(provider: networkImage,);
 
     _audioDarkColorScheme.value = await ColorScheme.fromImageProvider(
         provider: networkImage, brightness: Brightness.dark);
