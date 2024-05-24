@@ -396,7 +396,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                       children: [
                         NavigationBar(
                           destinations: navigationItem,
-                          selectedIndex: 0,
+                          selectedIndex:  _controller.currentPage.value,
                           onDestinationSelected: (int index) {
                             _controller.currentPage.value = index;
                             pageController.jumpToPage(index);
