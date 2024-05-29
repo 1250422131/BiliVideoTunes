@@ -17,29 +17,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // // 全局支持音乐播放器和对应控制器
-    // Get.put(UserController());
-    // Get.put(BiliAudioService());
-    // Get.put<BiliAudioHandler>(await initAudioService());
-    // Get.put(AudioController());
-    //
-    // await tester.pumpWidget(const UserPageShimmer());
-    // await Future.delayed(const Duration(seconds: 5));
-
-    //
-    // expect(find.text('0'), findsOneWidget);
-    // expect(find.text('1'), findsNothing);
-    //
-    // await Future.delayed(const Duration(seconds: 5));
-    //
-    // // Tap the '+' icon and trigger a frame.
-    // await tester.tap(find.byIcon(Icons.add));
-    // await tester.pump();
-    //
-    // // Verify that our counter has incremented.
-    // expect(find.text('0'), findsNothing);
-    // expect(find.text('1'), findsOneWidget);
-
-  });
+  // testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  //   // 全局支持音乐播放器和对应控制器
+  //   Get.put(UserController());
+  //   Get.put(BiliAudioService());
+  //   Get.put<BiliAudioHandler>(await initAudioService());
+  //   Get.put(AudioController());
+  //
+  //   await tester.pumpWidget(const UserPageShimmer());
+  //   await Future.delayed(const Duration(seconds: 5));
+  //
+  //
+  //   expect(find.text('0'), findsOneWidget);
+  //   expect(find.text('1'), findsNothing);
+  //
+  //   await Future.delayed(const Duration(seconds: 5));
+  //
+  //   // Tap the '+' icon and trigger a frame.
+  //   await tester.tap(find.byIcon(Icons.add));
+  //   await tester.pump();
+  //
+  //   // Verify that our counter has incremented.
+  //   expect(find.text('0'), findsNothing);
+  //   expect(find.text('1'), findsOneWidget);
+  //
+  // });
 }
