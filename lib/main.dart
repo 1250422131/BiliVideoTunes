@@ -17,6 +17,7 @@ import 'package:bili_video_tunes/pages/user/fav_list/view.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:bili_video_tunes/services/service_locator.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,11 +26,11 @@ import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:window_manager/window_manager.dart';
-
 import 'common/controller/audio_controller.dart';
 import 'common/di/database_model.dart';
 import 'common/router/b_v_t_page.dart';
 import 'firebase_options.dart';
+import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
 
 void main() async {
   if (!GetPlatform.isMobile && !kIsWeb) {
@@ -61,12 +62,12 @@ void main() async {
   // AudioController是对BiliAudioHandler的封装
   Get.put(AudioController());
 
-  if (!GetPlatform.isDesktop) {
-    // 这个是谷歌的数据分析，目前不支持桌面
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+  // 这个是谷歌的数据分析，目前不支持桌面
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
+  if (!GetPlatform.isDesktop) {
     //状态栏、导航栏沉浸
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -92,59 +93,64 @@ class MyApp extends StatelessWidget {
   static final _defaultDarkColorScheme = ColorScheme.fromSeed(
       seedColor: Colors.deepPurple, brightness: Brightness.dark);
 
-  // static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-  //
-  // static FirebaseAnalyticsObserver observer =
-  //     FirebaseAnalyticsObserver(analytics: analytics);
+  static FirebaseInAppMessaging firebaseInAppMessaging = FirebaseInAppMessaging.instance;
+
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
+  static FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(analytics: analytics);
 
   // This widget is the root of your application.
 
   /// 临时调整：https://github.com/material-foundation/flutter-packages/issues/582
-  (ColorScheme light, ColorScheme dark) _generateDynamicColourSchemes(ColorScheme lightDynamic, ColorScheme darkDynamic) {
+  (ColorScheme light, ColorScheme dark) _generateDynamicColourSchemes(
+      ColorScheme lightDynamic, ColorScheme darkDynamic) {
     var lightBase = ColorScheme.fromSeed(seedColor: lightDynamic.primary);
-    var darkBase = ColorScheme.fromSeed(seedColor: darkDynamic.primary, brightness: Brightness.dark);
+    var darkBase = ColorScheme.fromSeed(
+        seedColor: darkDynamic.primary, brightness: Brightness.dark);
 
     var lightAdditionalColours = _extractAdditionalColours(lightBase);
     var darkAdditionalColours = _extractAdditionalColours(darkBase);
 
-    var lightScheme = _insertAdditionalColours(lightBase, lightAdditionalColours);
+    var lightScheme =
+        _insertAdditionalColours(lightBase, lightAdditionalColours);
     var darkScheme = _insertAdditionalColours(darkBase, darkAdditionalColours);
 
     return (lightScheme.harmonized(), darkScheme.harmonized());
   }
 
   List<Color> _extractAdditionalColours(ColorScheme scheme) => [
-    scheme.surface,
-    scheme.surfaceDim,
-    scheme.surfaceBright,
-    scheme.surfaceContainerLowest,
-    scheme.surfaceContainerLow,
-    scheme.surfaceContainer,
-    scheme.surfaceContainerHigh,
-    scheme.surfaceContainerHighest,
-  ];
+        scheme.surface,
+        scheme.surfaceDim,
+        scheme.surfaceBright,
+        scheme.surfaceContainerLowest,
+        scheme.surfaceContainerLow,
+        scheme.surfaceContainer,
+        scheme.surfaceContainerHigh,
+        scheme.surfaceContainerHighest,
+      ];
 
-  ColorScheme _insertAdditionalColours(ColorScheme scheme, List<Color> additionalColours) => scheme.copyWith(
-    surface: additionalColours[0],
-    surfaceDim: additionalColours[1],
-    surfaceBright: additionalColours[2],
-    surfaceContainerLowest: additionalColours[3],
-    surfaceContainerLow: additionalColours[4],
-    surfaceContainer: additionalColours[5],
-    surfaceContainerHigh: additionalColours[6],
-    surfaceContainerHighest: additionalColours[7],
-  );
+  ColorScheme _insertAdditionalColours(
+          ColorScheme scheme, List<Color> additionalColours) =>
+      scheme.copyWith(
+        surface: additionalColours[0],
+        surfaceDim: additionalColours[1],
+        surfaceBright: additionalColours[2],
+        surfaceContainerLowest: additionalColours[3],
+        surfaceContainerLow: additionalColours[4],
+        surfaceContainer: additionalColours[5],
+        surfaceContainerHigh: additionalColours[6],
+        surfaceContainerHighest: additionalColours[7],
+      );
 
   @override
   Widget build(BuildContext context) {
     return DynamicColorBuilder(builder: (lightColorScheme, darkColorScheme) {
-
       if (lightColorScheme != null && darkColorScheme != null) {
-        (lightColorScheme, darkColorScheme) = _generateDynamicColourSchemes(lightColorScheme, darkColorScheme);
+        (lightColorScheme, darkColorScheme) =
+            _generateDynamicColourSchemes(lightColorScheme, darkColorScheme);
       } else {
         // logic to set standard static themes here
       }
-
 
       return GetMaterialApp(
         title: 'BiliVideoTunes',
@@ -158,10 +164,10 @@ class MyApp extends StatelessWidget {
           colorScheme: darkColorScheme ?? _defaultDarkColorScheme,
           useMaterial3: true,
         ),
-        home: const MyHomePage(
+        home: MyHomePage(
           title: 'BVT YES',
-          // analytics: analytics,
-          // observer: observer,
+          analytics: analytics,
+          observer: observer,
         ),
       );
     });
@@ -172,14 +178,14 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({
     Key? key,
     required this.title,
-    // required this.analytics,
-    // required this.observer,
+    required this.analytics,
+    required this.observer,
   }) : super(key: key);
 
   final String title;
 
-  // final FirebaseAnalytics analytics;
-  // final FirebaseAnalyticsObserver observer;
+  final FirebaseAnalytics analytics;
+  final FirebaseAnalyticsObserver observer;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -383,7 +389,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
             child: Stack(
               children: [
                 if (getWindowsWidth(context) <= ScreenSize.Normal)
-                // AnimatedPositioned 当底部对话框出现时，NavigationBar需要缓慢下降
+                  // AnimatedPositioned 当底部对话框出现时，NavigationBar需要缓慢下降
                   AnimatedPositioned(
                     duration: const Duration(milliseconds: 0),
                     curve: Curves.easeInOut,
@@ -396,7 +402,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                       children: [
                         NavigationBar(
                           destinations: navigationItem,
-                          selectedIndex:  _controller.currentPage.value,
+                          selectedIndex: _controller.currentPage.value,
                           onDestinationSelected: (int index) {
                             _controller.currentPage.value = index;
                             pageController.jumpToPage(index);

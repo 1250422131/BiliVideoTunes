@@ -27,10 +27,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -72,10 +69,21 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAnVzFsqaX6IMbsuC_z3eVuOIGHZh1B468',
-    appId: '1:1095515545580:ios:aef0ba89c8a11c2e472ac9',
+    appId: '1:1095515545580:ios:dd7abea4ba9216cb472ac9',
     messagingSenderId: '1095515545580',
     projectId: 'bilivideotunes',
     storageBucket: 'bilivideotunes.appspot.com',
-    iosBundleId: 'com.imcys.bilivideotunes.biliVideoTunes.RunnerTests',
+    iosBundleId: 'com.imcys.bilivideotunes.biliVideoTunes',
   );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyBqtAld7iT8GGzltNmiTtxuttdPXgIt7uk',
+    appId: '1:1095515545580:web:cad2f28e694fb59f472ac9',
+    messagingSenderId: '1095515545580',
+    projectId: 'bilivideotunes',
+    authDomain: 'bilivideotunes.firebaseapp.com',
+    storageBucket: 'bilivideotunes.appspot.com',
+    measurementId: 'G-3D9RHYQFNP',
+  );
+
 }
