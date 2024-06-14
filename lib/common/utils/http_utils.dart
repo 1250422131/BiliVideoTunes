@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bili_video_tunes/common/api/api_path.dart';
+import 'package:bili_video_tunes/common/api/interceptor/dio_firebase_performance.dart';
 import 'package:bili_video_tunes/common/api/interceptor/login_api_interceptor.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
@@ -18,6 +19,7 @@ final Dio dioClient = Dio(BaseOptions(
 ))
   ..transformer = BackgroundTransformer()
   ..interceptors.add(LoginApiInterceptor())
+  ..interceptors.add(DioFirebasePerformanceInterceptor())
   ..interceptors.add(PrettyDioLogger(
       requestHeader: true,
       requestBody: true,

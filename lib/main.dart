@@ -19,6 +19,7 @@ import 'package:bili_video_tunes/services/service_locator.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -67,6 +68,15 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Pass all uncaught "fatal" errors from the framework to Crashlytics
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+  await FirebaseAnalytics.instance.logEvent(
+    name: "demo_test",
+    parameters: {
+      "event_name:":"demo_test"
+    }
+  );
   if (!GetPlatform.isDesktop) {
     //状态栏、导航栏沉浸
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

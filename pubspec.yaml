@@ -104,6 +104,8 @@ dependencies:
   marquee: ^2.2.3
   # 徽章
   badges: ^3.1.2
+  firebase_crashlytics: ^3.5.7
+  firebase_performance: ^0.9.4+7
   # 权限管理
   #  permission_handler: ^11.3.1
 

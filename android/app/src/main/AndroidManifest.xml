@@ -33,6 +33,7 @@
             android:networkSecurityConfig="@xml/network_security_config"
             android:theme="@style/LaunchTheme"
             android:usesCleartextTraffic="true"
+            android:enableOnBackInvokedCallback="true"
             android:windowSoftInputMode="adjustResize">
 
             <!--
