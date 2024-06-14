@@ -80,7 +80,7 @@ class _PlayerHistoryCardState extends State<PlayerHistoryCard> {
               if (!_biliAudioService.playerList
                   .containsByToString(audioMediaItem)) {
                 playerAddVideoAnimate(_item.cover ?? "", context, mContext);
-                await _audioController.addPlayerAudio(audioMediaItem,autoPlay: _biliAudioService.playerList.isEmpty);
+                await _audioController.addPlayerAudio(audioMediaItem);
               }
             },
             child: Column(

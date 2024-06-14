@@ -89,7 +89,7 @@ class _VideoMusicCardState extends State<VideoMusicCard> {
                     .containsByToString(audioMediaItem)) {
 
                   playerAddVideoAnimate(_item.pic ?? "", context, mContext);
-                  await _audioController.addPlayerAudio(audioMediaItem,autoPlay: _biliAudioService.playerList.isEmpty);
+                  await _audioController.addPlayerAudio(audioMediaItem);
                 }
 
               },

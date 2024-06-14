@@ -204,8 +204,7 @@ class _FavListPageState extends State<FavListPage> {
                     .containsByToString(audioMediaItem)) {
                   playerAddVideoAnimate(item.cover ?? "", context, mContext);
                   _audioController.addPlayerAudio(
-                      audioMediaItem, autoPlay: _biliAudioService.playerList
-                      .isEmpty);
+                      audioMediaItem);
                 }
               },
             );

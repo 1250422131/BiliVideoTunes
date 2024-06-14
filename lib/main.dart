@@ -9,10 +9,7 @@ import 'package:bili_video_tunes/common/utils/screen_utils.dart';
 import 'package:bili_video_tunes/common/weight/music_player.dart';
 import 'package:bili_video_tunes/common/weight/player_page.dart';
 import 'package:bili_video_tunes/main_controller.dart';
-import 'package:bili_video_tunes/pages/main/bili_music/index.dart';
 import 'package:bili_video_tunes/pages/main/home/view.dart';
-import 'package:bili_video_tunes/pages/main/user_info/index.dart';
-import 'package:bili_video_tunes/pages/main/video_music/index.dart';
 import 'package:bili_video_tunes/pages/user/fav_list/view.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:bili_video_tunes/services/service_locator.dart';
@@ -20,6 +17,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,11 +25,11 @@ import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:window_manager/window_manager.dart';
+
 import 'common/controller/audio_controller.dart';
 import 'common/di/database_model.dart';
 import 'common/router/b_v_t_page.dart';
 import 'firebase_options.dart';
-import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
 
 void main() async {
   if (!GetPlatform.isMobile && !kIsWeb) {
@@ -71,12 +69,6 @@ void main() async {
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-  await FirebaseAnalytics.instance.logEvent(
-    name: "demo_test",
-    parameters: {
-      "event_name:":"demo_test"
-    }
-  );
   if (!GetPlatform.isDesktop) {
     //状态栏、导航栏沉浸
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
