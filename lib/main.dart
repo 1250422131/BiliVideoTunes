@@ -95,11 +95,13 @@ class MyApp extends StatelessWidget {
   static final _defaultDarkColorScheme = ColorScheme.fromSeed(
       seedColor: Colors.deepPurple, brightness: Brightness.dark);
 
-  static FirebaseInAppMessaging firebaseInAppMessaging = FirebaseInAppMessaging.instance;
+  static FirebaseInAppMessaging firebaseInAppMessaging =
+      FirebaseInAppMessaging.instance;
 
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
-  static FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(analytics: analytics);
+  static FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: analytics);
 
   // This widget is the root of your application.
 
@@ -223,6 +225,8 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   final GlobalKey _bottomNavBarKey = GlobalKey();
 
+  final _navigatorKey = GlobalKey<NavigatorState>();
+
 // 在 initState 方法中，将一些初始化逻辑提取为单独的函数
   @override
   void initState() {
@@ -284,93 +288,83 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         .toList();
   }
 
-  Route onGenerateRoute(RouteSettings settings) {
-    late Widget page;
-    switch (settings.name) {
-      case rootPagePath:
-        page = const HomePage();
-        break;
-      case favPagePath:
-        page = FavListPage(
-          oid: (settings.arguments as Map<String, int>)["oid"]!,
-        );
-        break;
-    }
-    return MaterialPageRoute(
-        settings: settings,
-        builder: (BuildContext context) {
-          return page;
-        });
-  }
+
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: !Platform.isAndroid && !Platform.isIOS && !kIsWeb
-          ? buildMainAppBar() //
-          : null,
-      body: PopScope(
-        onPopInvoked: (bool didPop) {
-          if (_panelController.isPanelOpen) {
-            _panelController.close();
+    return PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) {
+          // 判定是否要关闭播放界面
+          if (!_panelController.isPanelClosed) {
+            setState(() {
+              _panelController.close();
+            });
+          } else if (_navigatorKey.currentState?.canPop() ?? false) {
+            _navigatorKey.currentState!.pop(); // 直接弹出页面
+          } else {
+            // 如果子导航栈为空，则不做任何操作（或执行其他逻辑）
+            SystemNavigator.pop(); // 子导航为空时返回桌面
           }
         },
-        canPop: _panelController.isAttached
-            ? _panelController.isPanelClosed
-            : false,
-        child: Row(
-          children: [
-            Visibility(
-              maintainState: true,
-              visible: getWindowsWidth(context) > ScreenSize.Normal,
-              child: Obx(() => NavigationRail(
-                    destinations: navRailItem,
-                    selectedIndex: _controller.currentPage.value,
-                    onDestinationSelected: (int index) {
-                      _controller.currentPage.value = index;
-                      pageController.jumpToPage(index);
-                    },
-                  )),
-            ),
-            Expanded(
-                child: Stack(
-              children: [
-                Navigator(
-                  key: Get.nestedKey(1), // create a key by index
-                  onGenerateRoute: onGenerateRoute,
-                  initialRoute: "/",
-                  observers: [BVDNavigatorObserver()],
-                ),
-                Obx(() => SlidingUpPanel(
-                      controller: _panelController,
-                      onPanelSlide: (double position) {
-                        _controller.panelPosition.value = position;
+        child: Scaffold(
+          appBar: !Platform.isAndroid && !Platform.isIOS && !kIsWeb
+              ? buildMainAppBar() //
+              : null,
+          body: Row(
+            children: [
+              Visibility(
+                maintainState: true,
+                visible: getWindowsWidth(context) > ScreenSize.Normal,
+                child: Obx(() => NavigationRail(
+                      destinations: navRailItem,
+                      selectedIndex: _controller.currentPage.value,
+                      onDestinationSelected: (int index) {
+                        _controller.currentPage.value = index;
+                        pageController.jumpToPage(index);
                       },
-                      minHeight:
-                          _biliAudioService.playerIndex.value != null ? 50 : 0,
-                      collapsed: _biliAudioService.playerIndex.value
-                          ?.let((it) => MusicPlayer(
-                                panelController: _panelController,
-                              )),
-                      maxHeight: MediaQuery.of(context).size.height,
-                      panel: Container(
-                        height: MediaQuery.of(context).size.height,
-                        color: Colors.white,
-                        child: Opacity(
-                          opacity: _controller.panelPosition.value,
-                          child: PlayerPage(
-                            panelController: _panelController,
+                    )),
+              ),
+              Expanded(
+                  child: Stack(
+                children: [
+                  Navigator(
+                    key: _navigatorKey,
+                    // create a key by index
+                    onGenerateRoute: onGenerateRoute,
+                    initialRoute: "/",
+                    observers: [BVDNavigatorObserver()],
+                  ),
+                  Obx(() => SlidingUpPanel(
+                        controller: _panelController,
+                        onPanelSlide: (double position) {
+                          _controller.panelPosition.value = position;
+                        },
+                        minHeight: _biliAudioService.playerIndex.value != null
+                            ? 50
+                            : 0,
+                        collapsed: _biliAudioService.playerIndex.value
+                            ?.let((it) => MusicPlayer(
+                                  panelController: _panelController,
+                                )),
+                        maxHeight: MediaQuery.of(context).size.height,
+                        panel: Container(
+                          height: MediaQuery.of(context).size.height,
+                          color: Colors.white,
+                          child: Opacity(
+                            opacity: _controller.panelPosition.value,
+                            child: PlayerPage(
+                              panelController: _panelController,
+                            ),
                           ),
                         ),
-                      ),
-                    )),
-              ],
-            ))
-          ],
-        ),
-      ),
-      bottomNavigationBar: buildMainAppBottomNavigationBar(),
-    );
+                      )),
+                ],
+              ))
+            ],
+          ),
+          bottomNavigationBar: buildMainAppBottomNavigationBar(),
+        ));
   }
 
   Widget buildMainAppBottomNavigationBar() {

@@ -26,19 +26,24 @@ class NavInfo {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return PageView(
-      controller: pageController,
-      // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
-      onPageChanged: (int index) {},
-      physics: const NeverScrollableScrollPhysics(),
-      scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
-          ? Axis.vertical
-          : Axis.horizontal,
-      children: const [
-        VideoMusicPage(),
-        // BiLiMusicPage(),
-        UserInfoPage()
-      ],
-    );
+    return PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) async {
+          print("看看这个");
+        },
+        child: PageView(
+          controller: pageController,
+          // 添加页面滑动改变后，去改变索引变量刷新页面来更新底部导航
+          onPageChanged: (int index) {},
+          physics: const NeverScrollableScrollPhysics(),
+          scrollDirection: getWindowsWidth(context) > ScreenSize.Normal
+              ? Axis.vertical
+              : Axis.horizontal,
+          children: const [
+            VideoMusicPage(),
+            // BiLiMusicPage(),
+            UserInfoPage()
+          ],
+        ));
   }
 }

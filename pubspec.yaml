@@ -90,6 +90,10 @@ dependencies:
   firebase_analytics: ^10.8.10
   # 云消息
   firebase_in_app_messaging: ^0.7.5+7
+  # 奔溃分析
+  firebase_crashlytics: ^3.5.7
+  # 其他
+  firebase_performance: ^0.9.4+7
 
   # 图片缓存
   cached_network_image: ^3.3.1
@@ -104,8 +108,7 @@ dependencies:
   marquee: ^2.2.3
   # 徽章
   badges: ^3.1.2
-  firebase_crashlytics: ^3.5.7
-  firebase_performance: ^0.9.4+7
+
   # 权限管理
   #  permission_handler: ^11.3.1
 

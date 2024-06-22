@@ -1,8 +1,9 @@
-import 'package:bili_video_tunes/pages/main/home/view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../main_controller.dart';
+import '../../pages/main/home/view.dart';
+import '../../pages/user/fav_list/view.dart';
 
 
 class BVDNavigatorObserver extends NavigatorObserver {
@@ -23,6 +24,24 @@ class BVDNavigatorObserver extends NavigatorObserver {
 }
 
 
+Route onGenerateRoute(RouteSettings settings) {
+  late Widget page;
+  switch (settings.name) {
+    case rootPagePath:
+      page = const HomePage();
+      break;
+    case favPagePath:
+      page = FavListPage(
+        oid: (settings.arguments as Map<String, int>)["oid"]!,
+      );
+      break;
+  }
+  return MaterialPageRoute(
+      settings: settings,
+      builder: (BuildContext context) {
+        return page;
+      });
+}
 
 
 const rootPagePath = "/";
