@@ -401,7 +401,7 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         systemActions: const {
           MediaAction.seek,
         },
-        androidCompactActionIndices: const [0, 1, 3],
+        androidCompactActionIndices: const [0, 1, 2],
         processingState: const {
           ProcessingState.idle: AudioProcessingState.idle,
           ProcessingState.loading: AudioProcessingState.loading,
@@ -420,6 +420,7 @@ class BiliAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   Future<void> postPlayerHeartbeat({int? playType}) async {
     _playerIndex.value?.also((it) {
+
       final playerData = _playerList.elementAt(it);
       // 必须是BV视频才能这样做
       if (playerData.bvId != null) {

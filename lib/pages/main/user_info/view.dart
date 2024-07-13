@@ -6,14 +6,13 @@ import 'package:bili_video_tunes/common/weight/player_history_card.dart';
 import 'package:bili_video_tunes/common/weight/shimmer/user_page_shimmer.dart';
 import 'package:bili_video_tunes/common/weight/song_sheet_card.dart';
 import 'package:bili_video_tunes/pages/main/user_info/controller.dart';
-import 'package:bili_video_tunes/pages/user/fav_list/view.dart';
 import 'package:bili_video_tunes/services/bili_audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import '../../../common/router/b_v_t_page.dart';
+import '../../../common/controller/user_controller.dart';
 import '../../../common/weight/qr_login_dialog/view.dart';
 
 class UserInfoPage extends StatefulWidget {
@@ -31,14 +30,30 @@ class _UserInfoPageState extends State<UserInfoPage>
   final BiliAudioService _biliAudioService = Get.find();
   late Future<void> _initMyUserPageDataFuture;
   late Future<void> _initUserVideoFolder;
+  final UserController _userController = Get.find();
   final _methodChannel = const MethodChannel('openAppChannel');
 
   @override
   void initState() {
+    // 默认登录请求
     _initMyUserPageDataFuture = initMyUserPageData();
-    // initMyUserPageData();
-
+    // 设置全局事件总线监听
+    listenGlobalValue();
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  void listenGlobalValue() {
+    // 监听登录状态
+    _userController.loginUserData.listen((value) async {
+      setState(() {
+        _initMyUserPageDataFuture = initMyUserPageData();
+      });
+    });
   }
 
   Future<void> initMyUserPageData() async {

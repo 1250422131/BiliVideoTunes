@@ -8,7 +8,6 @@ import 'package:bili_video_tunes/common/model/network/user/login_poll_info.dart'
 import 'package:bili_video_tunes/common/model/network/user/login_qrcode_info.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/utils/http_utils.dart';
-import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 
 class QrLoginDialogController extends GetxController {
@@ -23,7 +22,6 @@ class QrLoginDialogController extends GetxController {
 
   Future<LoginPollInfo> loadLoginPollInfo({required String qrcodeKey}) async {
     final data = await UserLoginApi.getLoginPollInfo(qrcodeKey: qrcodeKey);
-
     return data;
   }
 
@@ -66,6 +64,7 @@ class QrLoginDialogController extends GetxController {
     dioClient.get(bliUrl);
     if(result.code == 0){
       userController.loginUserData.value = result.data;
+      userController.update();
     }
   }
 
