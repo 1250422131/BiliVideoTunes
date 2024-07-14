@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:path/path.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -73,7 +74,6 @@ void main() async {
     //状态栏、导航栏沉浸
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarIconBrightness: Brightness.dark,
       systemNavigationBarColor: Colors.transparent,
@@ -317,36 +317,38 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 maintainState: true,
                 visible: getWindowsWidth(context) > ScreenSize.Normal,
                 child: Obx(() => NavigationRail(
-                      destinations: navRailItem,
-                      selectedIndex: _controller.currentPage.value,
-                      onDestinationSelected: (int index) {
-                        _controller.currentPage.value = index;
-                        pageController.jumpToPage(index);
-                      },
-                    )),
+                  destinations: navRailItem,
+                  selectedIndex: _controller.currentPage.value,
+                  onDestinationSelected: (int index) {
+                    _controller.currentPage.value = index;
+                    pageController.jumpToPage(index);
+                  },
+                )),
               ),
               Expanded(
                   child: Stack(
-                children: [
-                  Navigator(
-                    key: _navigatorKey,
-                    // create a key by index
-                    onGenerateRoute: onGenerateRoute,
-                    initialRoute: "/",
-                    observers: [BVDNavigatorObserver()],
-                  ),
-                  Obx(() => SlidingUpPanel(
+                    children: [
+                      Navigator(
+                        key: _navigatorKey,
+                        // create a key by index
+                        onGenerateRoute: onGenerateRoute,
+                        initialRoute: "/",
+                        observers: [BVDNavigatorObserver()],
+                      ),
+                      Obx(() =>SlidingUpPanel(
                         controller: _panelController,
                         onPanelSlide: (double position) {
                           _controller.panelPosition.value = position;
                         },
                         minHeight: _biliAudioService.playerIndex.value != null
-                            ? 50
+                            ? 50 + (_controller.showBottomNav.value ? 0 : MediaQuery.of(context).padding.bottom)
                             : 0,
                         collapsed: _biliAudioService.playerIndex.value
-                            ?.let((it) => MusicPlayer(
-                                  panelController: _panelController,
-                                )),
+                            ?.let((it) =>        MusicPlayer(
+                          panelController: _panelController,
+                          placeholderHeight: MediaQuery.of(context).padding.bottom,
+                          showPlaceholder: !_controller.showBottomNav.value,
+                        ),),
                         maxHeight: MediaQuery.of(context).size.height,
                         panel: Container(
                           height: MediaQuery.of(context).size.height,
@@ -359,8 +361,8 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                           ),
                         ),
                       )),
-                ],
-              ))
+                    ],
+                  ))
             ],
           ),
           bottomNavigationBar: buildMainAppBottomNavigationBar(),
@@ -374,42 +376,42 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
               ?.let((it) => (it as RenderBox).size.height) ??
           0;
       return Obx(() => AnimatedContainer(
-            duration: Duration(
-                milliseconds: _controller.showBottomNav.value ? 0 : 300),
-            height: _controller.showBottomNav.value
-                ? (bottomNavBarHeight) * (1 - _controller.panelPosition.value)
-                : 0,
-            width: _controller.showBottomNav.value
-                ? MediaQuery.of(context).size.width
-                : 0,
-            child: Stack(
-              children: [
-                if (getWindowsWidth(context) <= ScreenSize.Normal)
-                  // AnimatedPositioned 当底部对话框出现时，NavigationBar需要缓慢下降
-                  AnimatedPositioned(
-                    duration: const Duration(milliseconds: 0),
-                    curve: Curves.easeInOut,
-                    bottom: -(bottomNavBarHeight *
-                        (_controller.panelPosition.value)),
-                    left: 0,
-                    right: 0,
-                    child: Column(
-                      key: _bottomNavBarKey,
-                      children: [
-                        NavigationBar(
-                          destinations: navigationItem,
-                          selectedIndex: _controller.currentPage.value,
-                          onDestinationSelected: (int index) {
-                            _controller.currentPage.value = index;
-                            pageController.jumpToPage(index);
-                          },
-                        )
-                      ],
-                    ),
-                  )
-              ],
-            ),
-          ));
+        duration: Duration(
+            milliseconds: _controller.showBottomNav.value ? 0 : 300),
+        height: _controller.showBottomNav.value
+            ? (bottomNavBarHeight) * (1 - _controller.panelPosition.value)
+            : 0,
+        width: _controller.showBottomNav.value
+            ? MediaQuery.of(context).size.width
+            : 0,
+        child: Stack(
+          children: [
+            if (getWindowsWidth(context) <= ScreenSize.Normal)
+            // AnimatedPositioned 当底部对话框出现时，NavigationBar需要缓慢下降
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 0),
+                curve: Curves.easeInOut,
+                bottom: -(bottomNavBarHeight *
+                    (_controller.panelPosition.value)),
+                left: 0,
+                right: 0,
+                child: Column(
+                  key: _bottomNavBarKey,
+                  children: [
+                    NavigationBar(
+                      destinations: navigationItem,
+                      selectedIndex: _controller.currentPage.value,
+                      onDestinationSelected: (int index) {
+                        _controller.currentPage.value = index;
+                        pageController.jumpToPage(index);
+                      },
+                    )
+                  ],
+                ),
+              )
+          ],
+        ),
+      ));
     });
   }
 

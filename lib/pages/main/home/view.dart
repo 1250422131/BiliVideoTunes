@@ -29,7 +29,6 @@ class _HomePageState extends State<HomePage> {
     return PopScope(
         canPop: false,
         onPopInvoked: (didPop) async {
-          print("看看这个");
         },
         child: PageView(
           controller: pageController,

@@ -39,7 +39,7 @@ Route onGenerateRoute(RouteSettings settings) {
   return MaterialPageRoute(
       settings: settings,
       builder: (BuildContext context) {
-        return page;
+        return SafeArea(top: false,child: page,);
       });
 }
 

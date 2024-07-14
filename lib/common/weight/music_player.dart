@@ -10,8 +10,11 @@ import '../controller/audio_controller.dart';
 
 class MusicPlayer extends StatefulWidget {
   final PanelController panelController;
+  final bool showPlaceholder;
+  final double placeholderHeight;
 
-  const MusicPlayer({Key? key, required this.panelController})
+  const MusicPlayer(
+      {Key? key, required this.panelController, required this.showPlaceholder, required this.placeholderHeight})
       : super(key: key);
 
   @override
@@ -35,102 +38,102 @@ class _MusicPlayerState extends State<MusicPlayer> {
     return AssembleAutoAnimatedOpacity(duration: const Duration(milliseconds: 300),child: SizedBox(
       width: double.infinity,
       height: MediaQuery.of(context).size.height,
-      child: Column(
-        children: [
-          Expanded(
-            child: Align(
-              alignment: Alignment.bottomLeft,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Card(
-                      margin: EdgeInsets.zero,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
-                      child: InkWell(
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            left: 8, right: 8, ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              ClipRRect(
-                                borderRadius:
-                                const BorderRadius.all(Radius.circular(5)),
-                                child: Obx(() => CachedNetworkImage(
-                                  imageUrl: _biliAudioService.playerIndex.value
-                                      ?.let((it) {
-                                    return _biliAudioService
-                                        .playerList[it].coverImageUrl;
-                                  }) ??
-                                      "https://picx.zhimg.com/70/v2-53504944558fe60816f2633fd7543f72_1440w.png",
-                                  width: 35,
-                                  height: 35,
-                                  fit: BoxFit.cover,
-                                )),
-                              ),
-                              Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 10),
-                                    child: Obx(() => Text(
-                                      _biliAudioService.playerIndex.value
-                                          ?.let((it) {
-                                        return _biliAudioService.playerList
-                                            .elementAt(it)
-                                            .title;
-                                      }) ??
-                                          "暂无播放",
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      softWrap: false,
-                                    )),
-                                  )),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: Obx(() =>
-                                _biliAudioService.playerState.value.playing
-                                    ? IconButton(
-                                    onPressed: () {
-                                      controller.pause();
-                                    },
-                                    icon: const Icon(Icons.pause))
-                                    : IconButton(
-                                    onPressed: () {
-                                      controller.play();
-                                    },
-                                    icon: const Icon(
-                                        Icons.play_arrow_rounded))),
-                              ),
-                            ],
-                          ),
+        child: Card(
+          margin: EdgeInsets.zero,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: InkWell(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 8,
+                      right: 8,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.all(
+                              Radius.circular(5)),
+                          child: Obx(() => CachedNetworkImage(
+                            imageUrl: _biliAudioService
+                                .playerIndex.value
+                                ?.let((it) {
+                              return _biliAudioService
+                                  .playerList[it].coverImageUrl;
+                            }) ??
+                                "https://picx.zhimg.com/70/v2-53504944558fe60816f2633fd7543f72_1440w.png",
+                            width: 35,
+                            height: 35,
+                            fit: BoxFit.cover,
+                          )),
                         ),
-                        onTap: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) =>  const PlayerPage(),
-                          //   ),
-                          // );
-                          _panelController.open();
-                        },
-                      ),
+                        Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: Obx(() => Text(
+                                _biliAudioService.playerIndex.value
+                                    ?.let((it) {
+                                  return _biliAudioService
+                                      .playerList
+                                      .elementAt(it)
+                                      .title;
+                                }) ??
+                                    "暂无播放",
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                softWrap: false,
+                              )),
+                            )),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: Obx(() => _biliAudioService
+                              .playerState.value.playing
+                              ? IconButton(
+                              onPressed: () {
+                                controller.pause();
+                              },
+                              icon: const Icon(Icons.pause))
+                              : IconButton(
+                              onPressed: () {
+                                controller.play();
+                              },
+                              icon: const Icon(
+                                  Icons.play_arrow_rounded))),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                  onTap: () {
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) =>  const PlayerPage(),
+                    //   ),
+                    // );
+                    _panelController.open();
+                  },
+                ),
               ),
-            ),
-          ),
-          Obx(
+              Obx(
                 () => LinearProgressIndicator(
-              value: _biliAudioService.totalDuration.value != null
-                  ? (_biliAudioService.currentPosition.value.inSeconds /
-                  _biliAudioService.totalDuration.value!.inSeconds)
-                  : 0,
-            ),
-          )
-        ],
+                  value: _biliAudioService.totalDuration.value != null
+                      ? (_biliAudioService.currentPosition.value.inSeconds /
+                          _biliAudioService.totalDuration.value!.inSeconds)
+                      : 0,
+                ),
+              ),
+              if (widget.showPlaceholder)
+                SizedBox(
+                  height: widget.placeholderHeight,
+                )
+            ],
+          ),
+        ),
       ),
-    ),);
+    );
   }
 }
