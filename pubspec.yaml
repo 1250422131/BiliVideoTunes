@@ -109,6 +109,8 @@ dependencies:
   # 徽章
   badges: ^3.1.2
 
+  # url处理
+  url_launcher: ^6.3.0
   # 权限管理
   #  permission_handler: ^11.3.1
 

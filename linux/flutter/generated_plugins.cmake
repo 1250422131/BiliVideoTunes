@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
   isar_flutter_libs
   screen_retriever
+  url_launcher_linux
   window_manager
 )
 

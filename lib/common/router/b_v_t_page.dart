@@ -1,3 +1,4 @@
+import 'package:bili_video_tunes/pages/setting/setting.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -35,11 +36,13 @@ Route onGenerateRoute(RouteSettings settings) {
         oid: (settings.arguments as Map<String, int>)["oid"]!,
       );
       break;
+    case settingPath:
+      page = const Setting();
   }
   return MaterialPageRoute(
       settings: settings,
       builder: (BuildContext context) {
-        return SafeArea(top: false,child: page,);
+        return page;
       });
 }
 
@@ -47,3 +50,5 @@ Route onGenerateRoute(RouteSettings settings) {
 const rootPagePath = "/";
 
 const favPagePath = "/fav";
+
+const settingPath = "/setting";

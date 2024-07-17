@@ -1,4 +1,5 @@
 import 'package:bili_video_tunes/common/controller/audio_controller.dart';
+import 'package:bili_video_tunes/common/router/b_v_t_page.dart';
 import 'package:bili_video_tunes/common/utils/extends.dart';
 import 'package:bili_video_tunes/common/weight/assemble_animated_opacity.dart';
 import 'package:bili_video_tunes/common/weight/common_error.dart';
@@ -69,7 +70,11 @@ class _UserInfoPageState extends State<UserInfoPage>
     // 顶部栏
     AppBar appBar = AppBar(
       actions: [
-        IconButton(onPressed: () {}, icon: const Icon(Icons.settings_rounded))
+        IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, settingPath);
+            },
+            icon: const Icon(Icons.settings_rounded))
       ],
     );
 
@@ -412,7 +417,7 @@ class _UserInfoPageState extends State<UserInfoPage>
                                               ),
                                               onTap: () {
                                                 Navigator.pushNamed(
-                                                    context, '/fav',
+                                                    context, favPagePath,
                                                     arguments: {
                                                       "oid": _controller
                                                               .favorites[index]
