@@ -21,17 +21,17 @@ class _Setting extends State<Setting> {
       ),
       body: ListView(
         children: [
-          ListTile(
-            title: Text("title"),
-            subtitle: Text("subTitle"),
-            trailing: StatefulBuilder(builder: (context, setState) {
-              return Switch(
-                value: true,
-                onChanged: (value) async {
-                },
-              );
-            }),
-          ),
+          // ListTile(
+          //   title: Text("title"),
+          //   subtitle: Text("subTitle"),
+          //   trailing: StatefulBuilder(builder: (context, setState) {
+          //     return Switch(
+          //       value: true,
+          //       onChanged: (value) async {
+          //       },
+          //     );
+          //   }),
+          // ),
           const ListTile(title:Text("关于项目")),
           ListTile(
             leading: const Icon(Icons.code_rounded),
